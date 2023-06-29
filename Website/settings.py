@@ -49,8 +49,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'drf_yasg',
     'channels',
-    'django_extensions',
-    'django_filters'
+    'django_extensions'
     
 ]
 

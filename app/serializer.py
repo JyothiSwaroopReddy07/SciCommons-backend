@@ -39,7 +39,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = self.Meta.model.objects.filter(email=validated_data['email']).first()
         if user:
-            raise serializers.ValidationError(detail={"error":"user with email already exist"})
+            raise serializers.ValidationError("User with mail already exists.Please use another email or Login using this mail")
+        user = self.Meta.model.objects.filter(username=validated_data['username']).first()
+        if user:
+            raise serializers.ValidationError("Username already exists.Please use another username!!!")
+        
         instance = self.Meta.model.objects.create(**validated_data)
         instance.set_password(password)
         instance.save()
@@ -70,6 +74,11 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, data):
         username = data.get("username", None)
         password = data.get("password", None)
+        member = User.objects.filter(username=username).first()
+        if member is None:
+            raise serializers.ValidationError(
+                "Account does not exist. \nPlease try registering to scicommons first."
+            )
         user = authenticate(username=username, password=password)
 
         if user and not user.is_active:
