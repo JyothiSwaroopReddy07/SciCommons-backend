@@ -1,0 +1,15 @@
+channels
+Django
+dj-database-url
+daphne
+django-cors-headers
+django-rest-swagger
+djangorestframework
+djangorestframework-simplejwt
+drf-yasg
+Faker
+gunicorn
+psycopg2
+psycopg2-binary
+python-decouple
+django-extensions
