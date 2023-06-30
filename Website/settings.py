@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-$$n^0_i1iuqd91m+dc_=)kj8o)q$o#)3m5#hl+h3n=vt-#mkz)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["scicommonsserver.onrender.com","127.0.0.1"]
+ALLOWED_HOSTS = ["scicommons-backend.onrender.com","127.0.0.1"]
 
 
 # Application definition
@@ -165,6 +165,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = '/static/'
+# STATIC_ROOT = str(BASE_DIR / "static")
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
