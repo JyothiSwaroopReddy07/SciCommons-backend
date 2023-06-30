@@ -184,11 +184,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/') 
 
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'https://sci-commons-frontend.vercel.app'
-]
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:3000',
+#     'http://127.0.0.1:3000',
+#     'https://sci-commons-frontend.vercel.app'
+# ]
+CORS_ORIGIN_ALLOW_ALL=True
 
 
 
