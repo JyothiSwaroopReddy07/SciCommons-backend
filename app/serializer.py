@@ -436,7 +436,7 @@ class ArticlelistSerializer(serializers.ModelSerializer):
 
     rating = serializers.SerializerMethodField()
     isFavourite = serializers.SerializerMethodField()
-    favourites = serializers.SerailizerMethodField()
+    favourites = serializers.SerializerMethodField()
     authors = serializers.SerializerMethodField()
 
     class Meta:
