@@ -440,7 +440,7 @@ class ArticlelistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ['id', 'article_name', 'Public_date','views', 'authors','rating', 'isFavourite']
+        fields = ['id', 'article_name', 'Public_date','views', 'authors','rating', 'isFavourite', 'keywords']
     
     def get_rating(self, obj):
         rating = ArticleRating.objects.filter(article_id=obj.id).aggregate(Avg('rating'))['rating__avg']
