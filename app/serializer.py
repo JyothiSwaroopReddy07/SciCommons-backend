@@ -436,20 +436,20 @@ class ArticlelistSerializer(serializers.ModelSerializer):
 
     rating = serializers.SerializerMethodField()
     isFavourite = serializers.SerializerMethodField()
-    favourite = serializers.SerailizerMethodField()
+    favourites = serializers.SerailizerMethodField()
     authors = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
-        fields = ['id', 'article_name', 'Public_date','views', 'authors','rating', 'isFavourite', 'keywords']
+        fields = ['id', 'article_name', 'Public_date','views', 'authors','rating', 'isFavourite', 'keywords', 'favourites']
     
     def get_rating(self, obj):
         rating = ArticleRating.objects.filter(article_id=obj.id).aggregate(Avg('rating'))['rating__avg']
         return rating
     
-    def get_favourite(self, obj):
-        favourite = Favourite.objects.filter(article_id=obj.id).count()
-        return favourite
+    def get_favourites(self, obj):
+        favourites = Favourite.objects.filter(article_id=obj.id).count()
+        return favourites
     
     def get_isFavourite(self, obj):
         if (Favourite.objects.filter(article=obj.id,user=self.context['request'].user).count() > 0):
