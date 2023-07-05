@@ -276,7 +276,7 @@ class CommunityViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        return Response(data={"success": "subscribed successfully"})
+        return Response(data={"success": "UnSubscribed successfully"})
     
     @action(methods=['POST'],detail=False, url_path='(?P<Community_name>.+)/promote_member',permission_classes=[CommunityPermission]) 
     def promote_member(self, request, Community_name):
