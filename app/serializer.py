@@ -312,6 +312,16 @@ class SubscribeSerializer(serializers.ModelSerializer):
         UserActivity.objects.create(user=self.context['request'].user, action=f"you subscribed to {instance.title} ")
         return instance
 
+    def destroy(self, validated_data):
+        user = User.objects.filter(id=validated_data['user'])
+        community = Community.objects.filter(Community_name=validated_data['community'])
+        subscribe = self.Meta.model.objects.filter(user=user,
+                                                   community=community).first()
+        if subscribe is None:
+            raise serializers.ValidationError('not subscribed')
+        subscribe.delete()
+        return subscribe
+
 class PromoteSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(write_only = True)
     role = serializers.CharField(write_only = True)
