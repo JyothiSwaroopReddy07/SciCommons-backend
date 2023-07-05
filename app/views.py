@@ -173,6 +173,7 @@ class CommunityViewset(viewsets.ModelViewSet):
         "create":CommunityCreateSerializer,
         "update":CommunityUpdateSerializer,
         "subscribe":SubscribeSerializer,
+        'unsubscribe': SubscribeSerializer,
         "promote_member":PromoteSerializer,
         "addPublishedInfo":ArticlePostPublishSerializer,
         "getMembers":CommunityMemberSerializer,
@@ -265,6 +266,13 @@ class CommunityViewset(viewsets.ModelViewSet):
     
     @action(methods=['POST'], detail=False, url_path='subscribe',permission_classes=[CommunityPermission])
     def subscribe(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        return Response(data={"success": "subscribed successfully"})
+
+    @action(methods=['DELETE'], detail=False, url_path='subscribe',permission_classes=[CommunityPermission])
+    def unsubscribe(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
