@@ -272,7 +272,7 @@ class CommunityViewset(viewsets.ModelViewSet):
         return Response(data={"success": "subscribed successfully"})
     
     @action(methods=['DELETE'], detail=False, url_path='unsubscribe',permission_classes=[CommunityPermission])
-    def subscribe(self, request):
+    def unsubscribe(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
