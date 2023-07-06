@@ -58,7 +58,7 @@ class CommunityPermission(permissions.BasePermission):
             else:
                 return False
         
-        elif view.action in ['create', 'subscribe', 'join_request']:
+        elif view.action in ['create', 'subscribe','unsubscribe', 'join_request']:
             return request.user.is_authenticated
         
         return obj.user == request.user

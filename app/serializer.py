@@ -298,8 +298,9 @@ class SubscribeSerializer(serializers.ModelSerializer):
         fields = ['user', 'community_name']
         
     def create(self, validated_data):
+        print(self.context['request'].user, validated_data)
         user = User.objects.filter(id=validated_data['user'])
-        community = Community.objects.filter(Community_name=validated_data['community'])
+        community = Community.objects.filter(Community_name=validated_data['community_name'])
         subscribe = self.Meta.model.objects.filter(user=user,
                                                    community=community).first()
         if subscribe is not None:
@@ -312,15 +313,23 @@ class SubscribeSerializer(serializers.ModelSerializer):
         UserActivity.objects.create(user=self.context['request'].user, action=f"you subscribed to {instance.title} ")
         return instance
 
+class UnsubscribeSerializer(serializers.ModelSerializer):
+    community_name = serializers.CharField(write_only=True)
+    class Meta:
+        model = Subscribe
+        fields = ['user', 'community_name']
+
     def destroy(self, validated_data):
+        print(self.context['request'].user, validated_data)
         user = User.objects.filter(id=validated_data['user'])
-        community = Community.objects.filter(Community_name=validated_data['community'])
+        community = Community.objects.filter(Community_name=validated_data['community_name'])
         subscribe = self.Meta.model.objects.filter(user=user,
                                                    community=community).first()
         if subscribe is None:
             raise serializers.ValidationError('not subscribed')
         subscribe.delete()
         return subscribe
+        
 
 class PromoteSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(write_only = True)
