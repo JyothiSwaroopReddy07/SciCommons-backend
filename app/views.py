@@ -160,6 +160,7 @@ class CommunityViewset(viewsets.ModelViewSet):
     queryset = Community.objects.all()
     queryset2 = CommunityMeta.objects.all()
     queryset3 = CommunityMember.objects.all()
+    queryset4 = Subscribe.objects.all()
     permission_classes = [CommunityPermission]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = CommunitySerializer
