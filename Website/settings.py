@@ -177,11 +177,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Base url to serve media files  
 MEDIA_URL = '/media/'  
-
+STATIC_URL = '/static/'
 # Path where media is stored  
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/') 
-STATIC_URL = '/static/'
+
 
 
 # CORS_ORIGIN_WHITELIST = [
