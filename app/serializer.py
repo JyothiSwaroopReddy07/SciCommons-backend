@@ -213,8 +213,10 @@ class CommunityGetSerializer(serializers.ModelSerializer):
         return count
     
     def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).count()
-        return count
+        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).first()
+        if count is not None:
+            return True
+        return False 
 
 
 class CommunityCreateSerializer(serializers.ModelSerializer):
