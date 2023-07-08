@@ -298,7 +298,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
         fields = ['user', 'community_name']
         
     def create(self, validated_data):
-        print(self.context['request'].user, validated_data)
         user = User.objects.filter(id=validated_data['user'])
         community = Community.objects.filter(Community_name=validated_data['community_name'])
         subscribe = self.Meta.model.objects.filter(user=user,

@@ -70,7 +70,7 @@ class ArticlePermission(permissions.BasePermission):
         if view.action in ['retrieve', 'list', 'getPublisherDetails','updateViews']:
             return True
         
-        elif view.action in ['create', 'submitted_articles']:
+        elif view.action in ['create', 'submit_article']:
             return request.user.is_authenticated
         
         elif view.action in ['approve_article']:
@@ -84,7 +84,7 @@ class ArticlePermission(permissions.BasePermission):
             admin = CommunityMember.objects.filter(user=request.user, community=request.data['community']).first()
             return admin.is_admin
 
-        elif view.action in [ 'destroy', 'submit_article', 'update','getPublished', 'getIsapproved','status']:
+        elif view.action in [ 'destroy', 'update','getPublished', 'getIsapproved','status']:
             if Author.objects.filter(User=request.user, article=obj).first():
                 return True
             else:
