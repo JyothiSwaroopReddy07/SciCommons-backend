@@ -556,31 +556,71 @@ class ArticleUpdateSerializer(serializers.ModelSerializer):
 
 class ArticleCreateSerializer(serializers.ModelSerializer):
     authors = serializers.ListField(child=serializers.IntegerField(), write_only=True)
+    communities = serializers.ListField(child=serializers.IntegerField(), write_only=True)
     class Meta:
         model = Article
-        fields = ['id', 'article_name','keywords', 'article_file', 'Code', 'Abstract', 'authors','video','link', 'parent_article']
+        fields = ['id', 'article_name','keywords', 'article_file', 'Code', 'Abstract', 'authors','video','link', 'parent_article', 'communities']
         read_only_fields = ['id']
     def create(self, validated_data):
-        authors = validated_data.pop("authors", [])
-        name = validated_data.pop('article_name')
-        keywords = validated_data.pop('keywords')
-        keywords.replace(' ','_')
-        validated_data['article_name'] = name.replace(' ','_')
-        validated_data['keywords'] = keywords
-        instance = self.Meta.model.objects.create(**validated_data,id=uuid.uuid4().hex)
-        instance.save()
-        Author.objects.create(User=self.context['request'].user, article=instance)
-        authorstr = ""
-        if len(authors)!=0:
+        if validated_data['parent_article'] is None:
+            authors = validated_data.pop("authors", [])
+            name = validated_data.pop('article_name')
+            keywords = validated_data.pop('keywords')
+            keywords.replace(' ','_')
+            validated_data['article_name'] = name.replace(' ','_')
+            validated_data['keywords'] = keywords
+            instance = self.Meta.model.objects.create(**validated_data,id=uuid.uuid4().hex)
+            Author.objects.create(User=self.context['request'].user, article=instance)
+            authorstr = ""
+            if len(authors)!=0:
+                with transaction.atomic():
+                    for author in authors:
+                        author = Author.objects.create(User_id=author, article=instance)
+                        authorstr += author.User.first_name + '_' + author.User.last_name + "||"
+                        send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.User.email], fail_silently=False)
+                        UserActivity.objects.create(user=self.context['request'].user, action=f'you added article {instance.article_name}')
+            instance.authorstring = authorstr
+            communities = validated_data.get('communities', [])
+            if len(communities) > 0 and instance.link is not None:
+                raise serializers.ValidationError(detail={"error": "you can not submit external article"})
+        
             with transaction.atomic():
-                for author in authors:
-                    author = Author.objects.create(User_id=author, article=instance)
-                    authorstr += author.User.first_name + '_' + author.User.last_name + "||"
-                    send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.User.email], fail_silently=False)
-                    UserActivity.objects.create(user=self.context['request'].user, action=f'you added article {instance.article_name}')
-        instance.authorstring = authorstr
-        instance.save()
-        return instance
+                for community in communities:
+                    community_meta = CommunityMeta.objects.create(community_id=community, article=instance, status='submitted')
+                    community_meta.save()
+                    
+                    community = Community.objects.get(id=community)
+
+                    emails = [member.user.email for member in CommunityMember.objects.filter(community=community)]
+                    send_mail("New Article Alerts", f'New Article {instance.article_name} added on {community}', settings.EMAIL_HOST_USER, emails, fail_silently=False) 
+            instance.save()
+            return instance
+        else:
+            parent_article = validated_data.pop('parent_article')
+            parentinstance = Article.objects.get(id=parent_article)
+            authors = validated_data.pop("authors", [])
+            name = validated_data.pop('article_name')
+            keywords = validated_data.pop('keywords')
+            keywords.replace(' ','_')
+            validated_data['article_name'] = name.replace(' ','_')
+            validated_data['keywords'] = keywords
+            instance = self.Meta.model.objects.create(**validated_data,id=uuid.uuid4().hex)
+            communities = [community for community in parentinstance.communities]
+            instance.communities.set(communities)
+            instance.parent_article = parent_article
+            
+            with transaction.atomic():
+                for community in communities:
+                    community_meta = CommunityMeta.objects.create(community_id=community, article=instance, status='submitted')
+                    community_meta.save()
+                    
+                    community = Community.objects.get(id=community)
+
+                    emails = [member.user.email for member in CommunityMember.objects.filter(community=community)]
+                    send_mail("New Article Alerts", f'New Article {instance.article_name} added on {community}', settings.EMAIL_HOST_USER, emails, fail_silently=False) 
+            instance.save()
+            return instance
+            
     
 class SubmitArticleSerializer(serializers.Serializer):
     communities = serializers.ListField(child=serializers.CharField(), write_only=True)

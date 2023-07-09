@@ -40,6 +40,14 @@ class UserViewset(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, user)
         return user
 
+    def get_queryset(self):
+        user = self.request.user
+        username = self.request.query_params.get('username', None)
+        if username is not None:
+            return self.queryset.filter(username=username)
+        
+        return self.queryset
+
     def list(self, request):
 
         response = super(UserViewset, self).list(request)
@@ -186,6 +194,12 @@ class CommunityViewset(viewsets.ModelViewSet):
     
     def get_serializer_class(self):
         return self.action_serializers.get(self.action, self.serializer_class)
+
+    def get_queryset(self):
+        community = self.request.query_params.get('community', None)
+        if community is not None:
+            self.queryset.filter(Community_name=community)
+        return self.queryset
     
     def list(self, request):
 
