@@ -12,7 +12,7 @@ fake = Faker()
 
 
 class UserActivity(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     action = models.TextField(null=False)
     
     class Meta:
@@ -23,7 +23,7 @@ class UserActivity(models.Model):
     
 class ForgetPassword(models.Model):
     id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     otp = models.IntegerField(blank=True,null=True)
     
     class Meta:
@@ -36,7 +36,7 @@ class UserMeta(models.Model):
     pubmed = models.CharField(max_length=255,null=True,blank=True)
     google_scholar = models.CharField(max_length=255,null=True,blank=True)
     institute = models.CharField(max_length=255,null=True,blank=True)
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
     email_notify = models.BooleanField(default=True)
 
     class Meta:
@@ -51,8 +51,8 @@ class Community(models.Model):
     github = models.URLField(max_length=200, null=True, blank=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
     website = models.CharField(max_length=300, null=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    members = models.ManyToManyField(User, through="CommunityMember", related_name='members')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, through="CommunityMember", related_name='members')
     
     class Meta:
         db_table = 'community'
@@ -62,7 +62,7 @@ class Community(models.Model):
     
 class CommunityMember(models.Model):
     community = models.ForeignKey("app.Community", on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     is_reviewer = models.BooleanField(default=False)
     is_moderator = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
@@ -74,7 +74,7 @@ class CommunityMember(models.Model):
         return f"{self.user} - {self.community}"
 
 class OfficialReviewer(models.Model):
-    User = models.ForeignKey(User, on_delete=models.CASCADE)
+    User = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     Official_Reviewer_name = models.CharField(max_length=100)
     community = models.ForeignKey(Community, on_delete=models.CASCADE, null=True, blank=True)
     
@@ -105,13 +105,13 @@ class Article(models.Model):
     published = models.CharField(max_length=255, null=True)
     Code = models.CharField(max_length=100, null=True, blank=True)
     Abstract = models.TextField(null=True, max_length=5000)
-    authors = models.ManyToManyField(User,through="Author",related_name="article_authors")
+    authors = models.ManyToManyField(settings.AUTH_USER_MODEL,through="Author",related_name="article_authors")
     community = models.ManyToManyField(Community, through="CommunityMeta")
     views = models.IntegerField(default=0)
     
     reviewer = models.ManyToManyField("app.OfficialReviewer", through='ArticleReviewer', related_name='article_reviewers')
     moderator = models.ManyToManyField("app.Moderator", through='ArticleModerator', related_name='article_moderators')
-    blocked_users = models.ManyToManyField(User, through='ArticleBlockedUser')
+    blocked_users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='ArticleBlockedUser')
     
     parent_article = models.ForeignKey('self', related_name='versions',null=True ,on_delete=models.CASCADE)
     
@@ -126,7 +126,7 @@ class Article(models.Model):
     #     super(Article, self).save()
 
 class ArticleRating(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     rating = models.IntegerField(default=0, validators=[MinValueValidator(0),MaxValueValidator(5)])
 
@@ -147,7 +147,7 @@ class ArticleReviewer(models.Model):
 
 class ArticleBlockedUser(models.Model):
     article = models.ForeignKey(Article,on_delete=models.CASCADE,related_name='Article')
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
     class Meta:
         db_table = 'article_blocked_user'
     
@@ -163,7 +163,7 @@ class ArticleModerator(models.Model):
 
 class Author(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
-    User = models.ForeignKey(User, on_delete=models.CASCADE)
+    User = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'author'
@@ -172,7 +172,7 @@ class Author(models.Model):
         return self.User.username
 
 class CommentBase(models.Model):
-    User = models.ForeignKey(User, on_delete=models.CASCADE)
+    User = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     article = models.ForeignKey(Article,on_delete=models.CASCADE)
     Comment = models.TextField(max_length=5000)
     Title = models.CharField(max_length=200,null=False)
@@ -196,7 +196,7 @@ class CommentBase(models.Model):
         db_table = "comment_base"
         
 class HandlersBase(models.Model):
-    User = models.ForeignKey(User, on_delete=models.CASCADE)
+    User = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     handle_name = models.CharField(max_length=255, null=False, unique=True)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
 
@@ -205,7 +205,7 @@ class HandlersBase(models.Model):
         unique_together = ['User', 'handle_name', 'article']
 
 class Message(models.Model):
-    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE, null=False)
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -218,7 +218,7 @@ class Message(models.Model):
     
     
 class LikeBase(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     post = models.ForeignKey(CommentBase, on_delete=models.CASCADE, related_name="posts")
     value = models.CharField(max_length=10, choices=(('Like', 'Like'), ('Unlike', 'Unlike')))
     
@@ -226,14 +226,14 @@ class LikeBase(models.Model):
         db_table = 'like_base'
 
 class Rank(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     rank = models.IntegerField(default=0)
     
     class Meta:
         db_table ='rank'
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     message = models.CharField(max_length=100)
     date = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
@@ -246,7 +246,7 @@ class Notification(models.Model):
         return self.message
 
 class Subscribe(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    User = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     community = models.ForeignKey(Community, on_delete=models.CASCADE)
 
     class Meta:
@@ -257,7 +257,7 @@ class Subscribe(models.Model):
     
 class Favourite(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'favourite'
@@ -267,7 +267,7 @@ class Favourite(models.Model):
     
 class Moderator(models.Model):
     community = models.ForeignKey(Community, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     
     class Meta:
         db_table= 'moderator'
@@ -298,7 +298,7 @@ class CommunityMeta(models.Model):
 class CommunityRequests(models.Model):
     about = models.CharField(max_length=255, null=True)
     summary = models.CharField(max_length=255, null=True)
-    user = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='requests', on_delete=models.CASCADE)
     community = models.ForeignKey(Community, related_name='requests', on_delete=models.CASCADE)
     REQUEST_STATUS = {
         ('pending','pending'),
@@ -315,7 +315,7 @@ class CommunityRequests(models.Model):
     
 
 class SocialPost(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     body = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -326,7 +326,7 @@ class SocialPost(models.Model):
         return self.post
 
 class SocialPostComment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     post = models.ForeignKey(SocialPost, on_delete=models.CASCADE, related_name='comments')
     comment = models.TextField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -339,7 +339,7 @@ class SocialPostComment(models.Model):
         return self.comment
 
 class SocialPostLike(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     post = models.ForeignKey(SocialPost, on_delete=models.CASCADE, related_name='likes')
     
     class Meta:
@@ -349,7 +349,7 @@ class SocialPostLike(models.Model):
         return self.value
 
 class SocialPostCommentLike(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     comment = models.ForeignKey(SocialPostComment, on_delete=models.CASCADE, related_name='likes')
     
     class Meta:
@@ -359,8 +359,8 @@ class SocialPostCommentLike(models.Model):
         return self.value
 
 class Follow(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
-    followed_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='following')
+    followed_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='followers')
     
     class Meta:
         db_table = 'follow'
@@ -369,8 +369,8 @@ class Follow(models.Model):
         return self.followed_user
     
 class PersonalMessage(models.Model):
-    sender = models.ForeignKey(User, related_name='sender', on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sender', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)

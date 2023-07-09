@@ -348,7 +348,7 @@ class SubscribeViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
 
     def get_queryset(self):
-        qs = self.queryset.filter(user=self.request.user)
+        qs = self.queryset.filter(User=self.request.user)
         return qs
     
     def create(self, request):
