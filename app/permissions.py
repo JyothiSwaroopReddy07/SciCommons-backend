@@ -146,3 +146,51 @@ class FavouritePermission(permissions.BasePermission):
         
         elif view.action == 'destroy':
             return obj.User == request.user
+        
+class SocialPostPermission(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+
+        if view.action in ['retrieve', 'list']:
+            return True
+        
+        elif view.action in ['create', 'like']:
+            return request.user.is_authenticated
+        
+        elif view.action in ['destroy', 'update']:
+            return obj.User == request.user
+
+class SocialPostCommentPermission(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+
+        if view.action in ['retrieve', 'list']:
+            return True
+        
+        elif view.action in ['create', 'like']:
+            return request.user.is_authenticated
+        
+        elif view.action in [ 'destroy', 'update']:
+            return obj.User == request.user
+
+class FollowPermission(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+
+        if view.action in ['retrieve', 'list']:
+            return True
+        
+        elif view.action in ['create', 'like']:
+            return request.user.is_authenticated
+        
+        elif view.action in ['destroy']:
+            return obj.User == request.user
+
+class SubscribePermission(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if view.action in ['create']:
+            return request.user.is_authenticated
+        
+        elif view.action in ['destroy']:
+            return obj.User == request.user

@@ -8,6 +8,7 @@ from django.contrib import messages
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Q
 # from app.filters import ArticleFilter, ReviewFilter, DecisionFilter
 from app.models import *
 from app.serializer import *
@@ -333,27 +334,35 @@ class CommunityViewset(viewsets.ModelViewSet):
 
 class SubscribeViewset(viewsets.ModelViewSet):
     queryset = Subscribe.objects.all()
-    permission_classes = [CommunityPermission]
+    permission_classes = [SubscribePermission]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = SubscribeSerializer
     http_method_names = ['post', 'delete']
     
     action_serializers = {
-        "create":SubscribeSerializer,
-        "destroy": UnsubscribeSerializer,
+        "create":SubscribeCreateSerializer
     }
+
+    def get_serializer_class(self):
+        return self.action_serializers.get(self.action, self.serializer_class)
+
+    def get_queryset(self):
+        qs = self.queryset.filter(user=self.request.user)
+        return qs
     
     def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        
+        super(SubscribeViewset, self).create(request)
         
         return Response(data={"success": "subscribed successfully"})
     
     def destroy(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         
+        super(SubscribeViewset, self).destroy(request)
+
         return Response(data={"success": "unsubscribed successfully"})
+
+
     
 class ArticleViewset(viewsets.ModelViewSet):
     queryset = Article.objects.all()
@@ -380,7 +389,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         "getPublished": ArticlePublishSelectionSerializer,
         "status": StatusSerializer,
         "updateViews": ArticleViewsSerializer
-        # "blockUser": ArticleGetSerializer,
+        # "block_user": ArticleBlockUserSerializer,
     }
     
     def get_serializer_class(self):
@@ -439,27 +448,6 @@ class ArticleViewset(viewsets.ModelViewSet):
         super(ArticleViewset, self).destroy(request,pk=pk)
 
         return Response(data={"success": "Article successfully deleted"})
-
-    # @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/block/(?P<handle>.+)', permission_classes=[ArticlePermission])
-    # def blockUser(self, request, pk, handle):
-    #     obj = self.get_object()
-    #     self.check_object_permissions(request, obj)
-    #     handle = HandlersBase.objects.filter(article=pk,handle=handle).first()
-    #     article = Article.objects.get(id=pk)
-    #     article.blocked.append(handle)
-    #     article.save()
-    #     return Response(data={"success": "User blocked Successfully!!!"})
-    
-    # @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/unblock/(?P<handle>.+)', permission_classes=[ArticlePermission])
-    # def unblockUser(self, request, pk, handle):
-    #     obj = self.get_object()
-    #     self.check_object_permissions(request, obj)
-    #     handle = HandlersBase.objects.filter(article=pk,handle=handle).first()
-    #     article = Article.objects.get(id=pk)
-    #     article.blocked.remove(handle)
-    #     article.save()
-    #     return Response(data={"success": "User unblocked Successfully!!!"})
-    
 
     @action(methods=['get'], detail=False, url_path='(?P<pk>.+)/isapproved', permission_classes=[ArticlePermission])
     def getIsapproved(self, request, pk):
@@ -599,6 +587,15 @@ class ArticleViewset(viewsets.ModelViewSet):
         
         except Exception as e:
             return Response(data={"error":e}, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/block_user', permission_classes=[ArticlePermission])
+    def block_user(self, request, pk):
+        obj = self.get_object()
+
+        serialzer = self.get_serializer(obj, data=request.data, partial=True)
+        serialzer.is_valid(raise_execption=True)
+        serialzer.save()
+        return Response(data={"success":f"user blocked successfully"})
       
 class CommentViewset(viewsets.ModelViewSet):
     queryset = CommentBase.objects.all()
@@ -804,7 +801,7 @@ class ChatViewset(viewsets.ModelViewSet):
     permission_classes = [GeneralPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = ChatSerializer
-    http_method_names = ['post', 'get']
+    http_method_names = ['post', 'get', 'put', 'delete']
     
     action_serializer = {
         "create":ChatCreateSerializer
@@ -856,6 +853,23 @@ class ChatViewset(viewsets.ModelViewSet):
             }
         )
         return Response(data={"success":response.data})
+    
+    def update(self, request, pk):
+
+        obj = self.get_object()
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(data={"success":serializer.data})
+
+
+    def destroy(self, request, pk ):
+
+        super(CommentViewset, self).destroy(request,pk=pk)
+
+        return Response(data={"success":"chat successfully deleted"})
 
     
 
@@ -999,3 +1013,238 @@ class ArticleRatingViewset(viewsets.ModelViewSet):
         serializer = ArticleRatingSerializer(data=response)
         serializer.is_valid()
         return Response(data={"success": serializer.data})
+    
+
+class SocialPostViewset(viewsets.ModelViewSet):
+    queryset = SocialPost.objects.all()
+    permission_classes = [SocialPostPermission]    
+    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
+    serializer_class = SocialPostSerializer
+    http_method_names = ['get', 'post', 'delete', 'put']
+    
+    action_serializers = {
+        "create": SocialPostCreateSerializer,
+        "destroy": SocialPostSerializer,
+        "retrieve": SocialPostSerializer,
+        "list": SocialPostSerializer,
+        "update": SocialPostSerializer
+    }
+        
+    def get_serializer_class(self):
+        return self.action_serializers.get(self.action, self.serializer_class)
+    
+    def get_queryset(self):
+        qs = self.queryset.filter(user=self.request.user)
+        return qs
+    
+    def list(self, request):
+        response = super(SocialPostViewset , self).list(request)
+    
+        return Response(data={"success":response.data})
+    
+    def retrieve(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(SocialPostViewset, self).retrieve(request,pk=pk)
+    
+        return Response(data={"success":response.data})
+    
+    
+    def create(self, request):
+        response = super(SocialPostViewset, self).create(request)
+    
+        return Response(data={"success":"Post Successfully added!!!"})
+    
+    def update(self, request, pk):
+
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(data={"success":serializer.data})
+    
+    def destroy(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(SocialPostViewset, self).destroy(request, pk)
+    
+        return Response(data={"success":"Post Successfuly removed!!!"})
+
+    @action(methods=['post'], detail=False, permission_classes=[SocialPostPermission])
+    def like(self, request):
+        post = SocialPost.objects.get(id=request.data["post"])
+        if SocialPostLike.objects.filter(post=post, user=request.user).first() is not None:
+            return Response(data={"error":"Already Liked!!!"})
+        SocialPostLike.objects.create(post=post, user=request.user)
+        return Response(data={"success":"Liked!!!"})
+
+
+
+class SocialPostCommentViewset(viewsets.ModelViewSet):
+    queryset = SocialPostComment.objects.all()
+    permission_classes = [SocialPostCommentPermission]    
+    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
+    serializer_class = SocialPostCommentSerializer
+    http_method_names = ['get', 'post', 'delete', 'put']
+    
+    action_serializers = {
+        "create": SocialPostCommentCreateSerializer,
+        "destroy": SocialPostCommentSerializer,
+        "retrieve": SocialPostCommentSerializer,
+        "list": SocialPostCommentSerializer,
+        "update": SocialPostCommentSerializer
+    }
+        
+    def get_serializer_class(self):
+        return self.action_serializers.get(self.action, self.serializer_class)
+    
+    def get_queryset(self):
+        qs = self.queryset.filter(user=self.request.user)
+        return qs
+    
+    def list(self, request):
+        response = super(SocialPostCommentViewset , self).list(request)
+    
+        return Response(data={"success":response.data})
+    
+    def retrieve(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(SocialPostCommentViewset, self).retrieve(request,pk=pk)
+    
+        return Response(data={"success":response.data})
+    
+    
+    def create(self, request):
+        response = super(SocialPostCommentViewset, self).create(request)
+    
+        return Response(data={"success":"Comment Successfully added!!!"})
+    
+    def update(self, request, pk):
+
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(data={"success":serializer.data})
+    
+    def destroy(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(SocialPostCommentViewset, self).destroy(request, pk)
+    
+        return Response(data={"success":"Comment Successfuly removed!!!"})
+
+    @action(methods=['post'], detail=False, permission_classes=[SocialPostCommentPermission])
+    def like(self, request):
+        comment = SocialPostComment.objects.get(id=request.data["comment"])
+        if SocialPostCommentLike.objects.filter(comment=comment, user=request.user).first() is not None:
+            return Response(data={"error":"Already Liked!!!"})
+        SocialPostCommentLike.objects.create(comment=comment, user=request.user)
+        return Response(data={"success":"Liked!!!"})
+    
+class FollowViewset(viewsets.ModelViewSet):
+    queryset = Follow.objects.all()
+    permission_classes = [FollowPermission]    
+    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
+    serializer_class = FollowSerializer
+    http_method_names = ['get', 'post', 'delete']
+    
+    action_serializers = {
+        "create": FollowCreateSerializer,
+        "destroy": FollowSerializer,
+        "retrieve": FollowSerializer,
+        "list": FollowSerializer
+    }
+        
+    def get_serializer_class(self):
+        return self.action_serializers.get(self.action, self.serializer_class)
+    
+    def get_queryset(self):
+        qs = self.queryset.filter(Q(sender=self.request.user) | Q(followed_user=self.request.user))
+        return qs
+    
+    def list(self, request):
+        response = super(FollowViewset , self).list(request)
+    
+        return Response(data={"success":response.data})
+    
+    def retrieve(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(FollowViewset, self).retrieve(request,pk=pk)
+    
+        return Response(data={"success":response.data})
+    
+    
+    def create(self, request):
+        response = super(FollowViewset, self).create(request)
+    
+        return Response(data={"success":"Following the user!!!"})
+    
+    def destroy(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(FollowViewset, self).destroy(request, pk)
+    
+        return Response(data={"success":"Unfollowed!!!"})
+        
+
+class PersonalMessageViewset(viewsets.ModelViewSet):
+    queryset = PersonalMessage.objects.all()
+    permission_classes = [GeneralPermission]    
+    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
+    serializer_class = PersonalMessageSerializer
+    http_method_names = ['get', 'post', 'delete', 'put']
+    
+    action_serializers = {
+        "create": PersonalMessageCreateSerializer,
+        "destroy": PersonalMessageSerializer,
+        "retrieve": PersonalMessageSerializer,
+        "list": PersonalMessageSerializer,
+        "update": PersonalMessageSerializer
+    }
+        
+    def get_serializer_class(self):
+        return self.action_serializers.get(self.action, self.serializer_class)
+    
+    def get_queryset(self):
+        qs = self.queryset.filter(Q(sender=self.request.user) | Q(receiver=self.request.user))
+        return qs
+    
+    def list(self, request):
+        response = super(PersonalMessageViewset , self).list(request)
+    
+        return Response(data={"success":response.data})
+    
+    def retrieve(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(PersonalMessageViewset, self).retrieve(request,pk=pk)
+    
+        return Response(data={"success":response.data})
+    
+    
+    def create(self, request):
+        response = super(PersonalMessageViewset, self).create(request)
+    
+        return Response(data={"success":"Message Successfully added!!!"})
+    
+    def update(self, request, pk):
+
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(data={"success":serializer.data})
+    
+    def destroy(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(PersonalMessageViewset, self).destroy(request, pk)
+    
+        return Response(data= { "success":"Message Successfuly removed!!!"})
+

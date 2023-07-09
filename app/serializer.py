@@ -165,8 +165,10 @@ class CommunitylistSerializer(serializers.ModelSerializer):
         return count
     
     def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).count()
-        return count 
+        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).first()
+        if count is not None:
+            return count.id
+        return 0
 
 class CommunityGetSerializer(serializers.ModelSerializer):
     isMember = serializers.SerializerMethodField()
@@ -213,9 +215,10 @@ class CommunityGetSerializer(serializers.ModelSerializer):
         return count
     
     def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).count()
-        return count
-
+        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).first()
+        if count is not None:
+            return count.id
+        return 0
 
 class CommunityCreateSerializer(serializers.ModelSerializer):
     members = serializers.ListField(
@@ -292,40 +295,17 @@ class CommunityUpdateSerializer(serializers.ModelSerializer):
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
-    community_name = serializers.CharField(write_only=True)
+    
     class Meta:
         model = Subscribe
-        fields = ['user', 'community_name']
-        
-    def create(self, validated_data):
-        user = User.objects.filter(id=validated_data['user'])
-        community = Community.objects.filter(Community_name=validated_data['community_name'])
-        subscribe = Subscribe.objects.filter(user=user,community=community).first()
-        if subscribe is not None:
-            raise serializers.ValidationError('already subscribed')
-        
-        instance = Subscribe.objects.create(user=user, community=community)
-        instance.save()
-        send_mail("you subscribe to community", f"You have subscribed to {community.title}", settings.EMAIL_HOST_USER, [instance.user.email], fail_silently=False)
-        UserActivity.objects.create(user=self.context['request'].user, action=f"you subscribed to {instance.title} ")
-        return instance
+        fields = ['id', 'user', 'community']
+    
+class SubscribeCreateSerializer(serializers.ModelSerializer):
 
-class UnsubscribeSerializer(serializers.ModelSerializer):
-    community_name = serializers.CharField(write_only=True)
     class Meta:
         model = Subscribe
-        fields = ['user', 'community_name']
+        fields = ['user', 'community']
 
-    def destroy(self, validated_data):
-        print(self.context['request'].user, validated_data)
-        user = User.objects.filter(id=validated_data['user'])
-        community = Community.objects.filter(Community_name=validated_data['community_name'])
-        subscribe = Subscribe.objects.filter(user=user,
-                                                   community=community).first()
-        if subscribe is None:
-            raise serializers.ValidationError('not subscribed')
-        subscribe.delete()
-        return subscribe
         
 
 class PromoteSerializer(serializers.ModelSerializer):
@@ -547,6 +527,19 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     def get_authors(self, obj):
         authors = [user.username for user in obj.authors.all()]
         return authors
+
+# class ArticleBlockUserSerializer(serializers.ModelSerializer):
+#     user_id = serializers.IntegerField(read_only=True)
+#     class Meta:
+#         model = Article
+#         field = ["id", "article_name", "blocked_users", 'user_id']
+#         read_only_field = ["id", "article_name", "blocked_users"]
+
+#     def update(self, instance, validated_data):
+#         instance.blocked_users.add(validated_data["user"])
+#         instance.save()
+
+#         return instance
         
 
 class ArticleViewsSerializer(serializers.ModelSerializer):
@@ -852,16 +845,10 @@ class ChatSerializer(serializers.ModelSerializer):
 
         
 class ChatCreateSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Message
-        fields = ['article', 'body']
-        
-    def create(self, validated_data):
-        instance = self.Meta.model.objects.create(**validated_data, sender=self.context['request'].user)
-        instance.save()
-        
-        return instance
+        fields = ['body']
 
 '''
 notification serializer
@@ -982,3 +969,69 @@ class ModeratorSerializer(serializers.ModelSerializer):
         fields = ['user','community']
         depth = 1
 
+
+class SocialPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPost
+        fields = ['id', 'user', 'body', 'created_at']
+        read_only_fields = ['user','id','created_at']
+
+class SocialPostCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPost
+        fields = ['user','body']
+
+class SocialPostCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostComment
+        fields = ['id', 'user', 'post', 'comment', 'created_at']
+        read_only_fields = ['user','id','created_at']
+
+class SocialPostCommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostComment
+        fields = ['user','post','comment']
+
+class SocialPostLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostLike
+        fields = ['id', 'user', 'post']
+        read_only_fields = ['user','id']
+
+class SocialPostLikeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostLike
+        fields = ['user','post']
+
+class SocialPostCommentLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostCommentLike
+        fields = ['id', 'user', 'comment']
+        read_only_fields = ['user','id']
+
+class SocialPostCommentLikeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostCommentLike
+        fields = ['user','comment','value']
+
+class PersonalMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PersonalMessage
+        fields = ['id', 'sender', 'receiver', 'body', 'created_at']
+        read_only_fields = ['sender','id','created_at']
+
+class PersonalMessageCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PersonalMessage
+        fields = ['sender','receiver','body']
+
+class FollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follow
+        fields = ['id', 'user', 'followed_user']
+        read_only_fields = ['user','id']
+
+class FollowCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follow
+        fields = ['user','followed_user']

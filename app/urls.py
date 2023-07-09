@@ -13,6 +13,10 @@ router.register(r'notification',NotificationViewset)
 router.register(r'favourite',FavouriteViewset)
 router.register(r'rating',ArticleRatingViewset)
 router.register(r'subscribe',SubscribeViewset)
+router.register(r'feed',SocialPostViewset)
+router.register(r'feedcomment',SocialPostCommentViewset)
+router.register(r'follow',FollowViewset)
+router.register(r'message',PersonalMessageViewset)
 
 urlpatterns = [
         path("",include(router.urls)),

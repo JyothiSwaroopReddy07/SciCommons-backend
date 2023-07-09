@@ -111,6 +111,7 @@ class Article(models.Model):
     
     reviewer = models.ManyToManyField("app.OfficialReviewer", through='ArticleReviewer', related_name='article_reviewers')
     moderator = models.ManyToManyField("app.Moderator", through='ArticleModerator', related_name='article_moderators')
+    blocked_users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='ArticleBlockedUser')
     
     parent_article = models.ForeignKey('self', related_name='versions',null=True ,on_delete=models.CASCADE)
     
@@ -311,3 +312,71 @@ class CommunityRequests(models.Model):
 
     def __str__(self):
         return f"{self.community.Community_name}-{self.user.username}"
+    
+
+class SocialPost(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    body = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'social_post'
+        
+    def __str__(self):
+        return self.post
+
+class SocialPostComment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    post = models.ForeignKey(SocialPost, on_delete=models.CASCADE, related_name='comments')
+    comment = models.TextField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    
+    class Meta:
+        db_table = 'social_comment'
+        
+    def __str__(self):
+        return self.comment
+
+class SocialPostLike(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    post = models.ForeignKey(SocialPost, on_delete=models.CASCADE, related_name='likes')
+    
+    class Meta:
+        db_table = 'social_like'
+        
+    def __str__(self):
+        return self.value
+
+class SocialPostCommentLike(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    comment = models.ForeignKey(SocialPostComment, on_delete=models.CASCADE, related_name='likes')
+    
+    class Meta:
+        db_table = 'social_comment_like'
+        
+    def __str__(self):
+        return self.value
+
+class Follow(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='following')
+    followed_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='followers')
+    
+    class Meta:
+        db_table = 'follow'
+        
+    def __str__(self):
+        return self.followed_user
+    
+class PersonalMessage(models.Model):
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sender', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = 'personal_message'
+        
+    def __str__(self):
+        return self.body
