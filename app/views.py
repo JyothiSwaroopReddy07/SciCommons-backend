@@ -340,7 +340,7 @@ class SubscribeViewset(viewsets.ModelViewSet):
     http_method_names = ['post', 'delete']
     
     action_serializers = {
-        "create": SubscribeCreateSerializer,
+        "create": SubscribeSerializer,
         "destroy": SubscribeSerializer
     }
 
@@ -353,10 +353,8 @@ class SubscribeViewset(viewsets.ModelViewSet):
     
     def create(self, request):
         
-        super(SubscribeViewset, self).create(request)
-
-        member = Subscribe.objects.filter(User=request.user, community=request.data["community"]).first()
-        created_object_id = member.id
+        response = super(SubscribeViewset, self).create(request)
+        created_object_id = response.data["id"]
         
         return Response(data={"success": "subscribed successfully","id": created_object_id })
     
@@ -945,7 +943,7 @@ class FavouriteViewset(viewsets.ModelViewSet):
         if self.queryset.filter(user=request.user,article=request.data["article"]).first() is not None:
             return  Response(data={"error":"added Already to Favourites"})
         response = super(FavouriteViewset, self).create(request)
-        return  Response(data={"success":"added to Favourites"})
+        return  Response(data={"success":"added to Favourites", "id":response.data["id"]})
     
     def destroy(self, request, pk):
         obj = self.get_object()
@@ -978,6 +976,7 @@ class ArticleRatingViewset(viewsets.ModelViewSet):
     
     def list(self, request):
         response = super(ArticleRatingViewset , self).list(request)
+        
     
         return Response(data={"success":response.data})
     
@@ -994,7 +993,7 @@ class ArticleRatingViewset(viewsets.ModelViewSet):
             return Response(data={"error":"Rating Already added!!!"})
         response = super(ArticleRatingViewset, self).create(request)
     
-        return Response(data={"success":"Rating Successfully added!!!"})
+        return Response(data={"success":"Rating Successfully added!!!", "id": response.data["id"]})
     
     def update(self, request, pk):
 
@@ -1030,12 +1029,12 @@ class SocialPostViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
-        "create": SocialPostCreateSerializer,
+        "create": SocialPostSerializer,
         "destroy": SocialPostSerializer,
         "retrieve": SocialPostSerializer,
         "list": SocialPostSerializer,
         "update": SocialPostSerializer,
-        "like": SocialPostLikeCreateSerializer
+        "like": SocialPostLikeSerializer
     }
         
     def get_serializer_class(self):
@@ -1097,12 +1096,12 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
-        "create": SocialPostCommentCreateSerializer,
+        "create": SocialPostCommentSerializer,
         "destroy": SocialPostCommentSerializer,
         "retrieve": SocialPostCommentSerializer,
         "list": SocialPostCommentSerializer,
         "update": SocialPostCommentSerializer,
-        "like": SocialPostCommentLikeCreateSerializer
+        "like": SocialPostCommentLikeSerializer
     }
         
     def get_serializer_class(self):
@@ -1162,7 +1161,7 @@ class FollowViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
     
     action_serializers = {
-        "create": FollowCreateSerializer,
+        "create": FollowSerializer,
         "destroy": FollowSerializer,
         "retrieve": FollowSerializer,
         "list": FollowSerializer
@@ -1209,7 +1208,7 @@ class PersonalMessageViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
-        "create": PersonalMessageCreateSerializer,
+        "create": PersonalMessageSerializer,
         "destroy": PersonalMessageSerializer,
         "retrieve": PersonalMessageSerializer,
         "list": PersonalMessageSerializer,

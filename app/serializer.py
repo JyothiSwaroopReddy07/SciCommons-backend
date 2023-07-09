@@ -299,12 +299,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscribe
         fields = ['id', 'User', 'community']
-    
-class SubscribeCreateSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Subscribe
-        fields = ['User', 'community']
+        read_only_fields = ['id']
 
         
 
@@ -874,19 +869,23 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
 class FavouriteCreateSerializer(serializers.Serializer):
     article_name = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Favourite
+        fields = ['id', 'article', 'user']
+        read_only_fields = ['id']
         
     def create(self, validated_data):
-        article = Article.objects.filter(article_name=validated_data['article_name']).first()
         
-        favourite = Favourite.objects.filter(article=article,
+        favourite = Favourite.objects.filter(article=validated_data['article'],
                                            user=self.context['request'].user).first()
         if favourite:
             raise serializers.ValidationError({"error":"already in favourites"})
         
-        instance = Favourite.objects.create(article=article,
+        instance = Favourite.objects.create(article=validated_data['article'],
                                            user=self.context['request'].user)
         instance.save()
-        UserActivity.objects.create(user=self.context['request'].user, action=f"You added {article.article_name} in favourite")
+        UserActivity.objects.create(user=self.context['request'].user, action=f"You added {instance.article.article_name} in favourite")
 
         return instance
                
@@ -942,6 +941,11 @@ class RatingCreateSerializer(serializers.Serializer):
 
     article = serializers.CharField(write_only=True)
     rating = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = ArticleRating
+        fields = ['id', 'user','article','rating']
+        read_only_fields = ['id']
         
     def create(self, validated_data):
         instance = ArticleRating.objects.create(article_id=validated_data["article"],
@@ -976,10 +980,6 @@ class SocialPostSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'body', 'created_at']
         read_only_fields = ['user','id','created_at']
 
-class SocialPostCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SocialPost
-        fields = ['user','body']
 
 class SocialPostCommentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -987,10 +987,6 @@ class SocialPostCommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'post', 'comment', 'created_at']
         read_only_fields = ['user','id','created_at']
 
-class SocialPostCommentCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SocialPostComment
-        fields = ['user','post','comment']
 
 class SocialPostLikeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -998,10 +994,6 @@ class SocialPostLikeSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'post']
         read_only_fields = ['user','id']
 
-class SocialPostLikeCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SocialPostLike
-        fields = ['user','post']
 
 class SocialPostCommentLikeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1009,29 +1001,16 @@ class SocialPostCommentLikeSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'comment']
         read_only_fields = ['user','id']
 
-class SocialPostCommentLikeCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SocialPostCommentLike
-        fields = ['user','comment','value']
 
 class PersonalMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonalMessage
         fields = ['id', 'sender', 'receiver', 'body', 'created_at']
-        read_only_fields = ['sender','id','created_at']
+        read_only_fields = ['sender','id','created_at', 'receiver']
 
-class PersonalMessageCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PersonalMessage
-        fields = ['sender','receiver','body']
 
 class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ['id', 'user', 'followed_user']
         read_only_fields = ['user','id']
-
-class FollowCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Follow
-        fields = ['user','followed_user']
