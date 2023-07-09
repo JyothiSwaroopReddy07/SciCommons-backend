@@ -12,6 +12,8 @@ router.register(r'chat',ChatViewset)
 router.register(r'notification',NotificationViewset)
 router.register(r'favourite',FavouriteViewset)
 router.register(r'rating',ArticleRatingViewset)
+router.register(r'subscribe',SubscribeViewset)
+
 urlpatterns = [
         path("",include(router.urls)),
     #path('', index, name='index'),

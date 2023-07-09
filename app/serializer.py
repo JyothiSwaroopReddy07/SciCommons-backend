@@ -165,10 +165,8 @@ class CommunitylistSerializer(serializers.ModelSerializer):
         return count
     
     def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).first()
-        if count is not None:
-            return True
-        return False
+        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).count()
+        return count 
 
 class CommunityGetSerializer(serializers.ModelSerializer):
     isMember = serializers.SerializerMethodField()
@@ -215,10 +213,8 @@ class CommunityGetSerializer(serializers.ModelSerializer):
         return count
     
     def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).first()
-        if count is not None:
-            return True
-        return False 
+        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).count()
+        return count
 
 
 class CommunityCreateSerializer(serializers.ModelSerializer):
@@ -304,13 +300,11 @@ class SubscribeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.filter(id=validated_data['user'])
         community = Community.objects.filter(Community_name=validated_data['community_name'])
-        subscribe = self.Meta.model.objects.filter(user=user,
-                                                   community=community).first()
+        subscribe = Subscribe.objects.filter(user=user,community=community).first()
         if subscribe is not None:
             raise serializers.ValidationError('already subscribed')
         
-        instance = self.Meta.model.objects.create(user=user,
-                                                  community=community)
+        instance = Subscribe.objects.create(user=user, community=community)
         instance.save()
         send_mail("you subscribe to community", f"You have subscribed to {community.title}", settings.EMAIL_HOST_USER, [instance.user.email], fail_silently=False)
         UserActivity.objects.create(user=self.context['request'].user, action=f"you subscribed to {instance.title} ")
@@ -326,7 +320,7 @@ class UnsubscribeSerializer(serializers.ModelSerializer):
         print(self.context['request'].user, validated_data)
         user = User.objects.filter(id=validated_data['user'])
         community = Community.objects.filter(Community_name=validated_data['community_name'])
-        subscribe = self.Meta.model.objects.filter(user=user,
+        subscribe = Subscribe.objects.filter(user=user,
                                                    community=community).first()
         if subscribe is None:
             raise serializers.ValidationError('not subscribed')

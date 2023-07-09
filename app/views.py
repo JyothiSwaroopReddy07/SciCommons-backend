@@ -160,7 +160,6 @@ class CommunityViewset(viewsets.ModelViewSet):
     queryset = Community.objects.all()
     queryset2 = CommunityMeta.objects.all()
     queryset3 = CommunityMember.objects.all()
-    queryset4 = Subscribe.objects.all()
     permission_classes = [CommunityPermission]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = CommunitySerializer
@@ -173,8 +172,6 @@ class CommunityViewset(viewsets.ModelViewSet):
     action_serializers = {
         "create":CommunityCreateSerializer,
         "update":CommunityUpdateSerializer,
-        "subscribe":SubscribeSerializer,
-        'unsubscribe':  UnsubscribeSerializer,
         "promote_member":PromoteSerializer,
         "addPublishedInfo":ArticlePostPublishSerializer,
         "getMembers":CommunityMemberSerializer,
@@ -263,21 +260,6 @@ class CommunityViewset(viewsets.ModelViewSet):
         serializer.is_valid()
         users = serializer.data
         return Response(data={"success": users})
-
-    
-    @action(methods=['POST'], detail=False, url_path='subscribe',permission_classes=[CommunityPermission])
-    def subscribe(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        return Response(data={"success": "subscribed successfully"})
-    
-    @action(methods=['DELETE'], detail=False, url_path='unsubscribe',permission_classes=[CommunityPermission])
-    def unsubscribe(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        return Response(data={"success": "unsubscribed successfully"})
     
     @action(methods=['POST'],detail=False, url_path='(?P<Community_name>.+)/promote_member',permission_classes=[CommunityPermission]) 
     def promote_member(self, request, Community_name):
@@ -349,8 +331,29 @@ class CommunityViewset(viewsets.ModelViewSet):
 
         return Response(data={"success":serializer.data})
 
-
-              
+class SubscribeViewset(viewsets.ModelViewSet):
+    queryset = Subscribe.objects.all()
+    permission_classes = [CommunityPermission]
+    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
+    serializer_class = SubscribeSerializer
+    http_method_names = ['post', 'delete']
+    
+    action_serializers = {
+        "create":SubscribeSerializer,
+        "destroy": UnsubscribeSerializer,
+    }
+    
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        return Response(data={"success": "subscribed successfully"})
+    
+    def destroy(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        return Response(data={"success": "unsubscribed successfully"})
     
 class ArticleViewset(viewsets.ModelViewSet):
     queryset = Article.objects.all()
