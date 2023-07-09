@@ -340,7 +340,8 @@ class SubscribeViewset(viewsets.ModelViewSet):
     http_method_names = ['post', 'delete']
     
     action_serializers = {
-        "create":SubscribeCreateSerializer
+        "create": SubscribeCreateSerializer,
+        "destroy": SubscribeSerializer
     }
 
     def get_serializer_class(self):
@@ -356,11 +357,11 @@ class SubscribeViewset(viewsets.ModelViewSet):
         
         return Response(data={"success": "subscribed successfully"})
     
-    def destroy(self, request):
-        
-        super(SubscribeViewset, self).destroy(request)
+    def destroy(self, request, pk ):
 
-        return Response(data={"success": "unsubscribed successfully"})
+        super(SubscribeViewset, self).destroy(request,pk=pk)
+
+        return Response(data={"success": "Unsubscribed successfully"})
 
 
     
@@ -912,7 +913,10 @@ class FavouriteViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
     
     action_serializers = {
-        "create":FavouriteCreateSerializer
+        "create":FavouriteCreateSerializer,
+        "destroy":FavouriteSerializer,
+        "list":FavouriteSerializer,
+        "retrieve":FavouriteSerializer
     }
         
     def get_serializer_class(self):
@@ -1027,7 +1031,8 @@ class SocialPostViewset(viewsets.ModelViewSet):
         "destroy": SocialPostSerializer,
         "retrieve": SocialPostSerializer,
         "list": SocialPostSerializer,
-        "update": SocialPostSerializer
+        "update": SocialPostSerializer,
+        "like": SocialPostLikeCreateSerializer
     }
         
     def get_serializer_class(self):
@@ -1093,7 +1098,8 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
         "destroy": SocialPostCommentSerializer,
         "retrieve": SocialPostCommentSerializer,
         "list": SocialPostCommentSerializer,
-        "update": SocialPostCommentSerializer
+        "update": SocialPostCommentSerializer,
+        "like": SocialPostCommentLikeCreateSerializer
     }
         
     def get_serializer_class(self):
