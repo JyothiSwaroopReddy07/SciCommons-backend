@@ -165,7 +165,7 @@ class CommunitylistSerializer(serializers.ModelSerializer):
         return count
     
     def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).first()
+        count = Subscribe.objects.filter(User=self.context['request'].user,community=obj.id).first()
         if count is not None:
             return count.id
         return 0
@@ -215,7 +215,7 @@ class CommunityGetSerializer(serializers.ModelSerializer):
         return count
     
     def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).first()
+        count = Subscribe.objects.filter(User=self.context['request'].user,community=obj.id).first()
         if count is not None:
             return count.id
         return 0
@@ -298,13 +298,13 @@ class SubscribeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Subscribe
-        fields = ['id', 'user', 'community']
+        fields = ['id', 'User', 'community']
     
 class SubscribeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscribe
-        fields = ['user', 'community']
+        fields = ['User', 'community']
 
         
 
