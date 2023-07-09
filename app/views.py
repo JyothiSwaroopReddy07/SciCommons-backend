@@ -1236,9 +1236,28 @@ class PersonalMessageViewset(viewsets.ModelViewSet):
     
     
     def create(self, request):
-        response = super(PersonalMessageViewset, self).create(request)
-    
-        return Response(data={"success":"Message Successfully added!!!"})
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        # Get the sender and receiver users
+        sender = self.request.user
+        receiver = serializer.validated_data['receiver']
+
+        # Send the message through the WebSocket
+        channel_layer = get_channel_layer()
+        room_name = f'personal_message_{sender.username}_{receiver.username}'
+        async_to_sync(channel_layer.group_send)(
+            room_name,
+            {
+                'type': 'new_message',
+                'message': str(serializer.instance),
+                'sender': sender.username
+            }
+        )
+
+        return Response(data={"success":"Message Successfully sent", "message":serializer.data}, status=status.HTTP_201_CREATED)
     
     def update(self, request, pk):
 
