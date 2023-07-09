@@ -354,8 +354,11 @@ class SubscribeViewset(viewsets.ModelViewSet):
     def create(self, request):
         
         super(SubscribeViewset, self).create(request)
+
+        member = Subscribe.objects.filter(User=request.user, community=request.data["community"]).first()
+        created_object_id = member.id
         
-        return Response(data={"success": "subscribed successfully"})
+        return Response(data={"success": "subscribed successfully","id": created_object_id })
     
     def destroy(self, request, pk ):
 
