@@ -204,7 +204,7 @@ class CommunityViewset(viewsets.ModelViewSet):
         
         member = self.queryset.filter(user=request.user).first()
         if member is not None:
-            return Response(data={"error": "You already created a community.You can't create another community!!!"})
+            return Response(data={"error": "You already created a community.You can't create another community!!!"}, status=status.HTTP_400_BAD_REQUEST)
         super(CommunityViewset, self).create(request)
 
         return Response(data={"success": "Community successfully added"})
@@ -426,7 +426,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         name = name.replace(' ','_')
         article = self.queryset.filter(article_name=name).first()
         if article is not None:
-            return Response(data={"error": "Article with same name already exists!!!"})
+            return Response(data={"error": "Article with same name already exists!!!"}, status=status.HTTP_400_BAD_REQUEST)
         print(request.data)
         response = super(ArticleViewset, self).create(request)
     
@@ -672,18 +672,18 @@ class CommentViewset(viewsets.ModelViewSet):
             moderators_arr = [moderator for moderator in ArticleModerator.objects.filter(article=request.data["article"],moderator__user = request.user)]
             if len(moderators_arr)>0:
                 if self.queryset.filter(article=request.data["article"],User=request.user,Type="decision").first():
-                    return Response(data={"error": "You have already made decision!!!"})
+                    return Response(data={"error": "You have already made decision!!!"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     super(CommentViewset, self).create(request)
                     return Response(data={"success":"Decision successfully added"})
             
             else: 
-                return Response(data={"error": "You can't write a decision on the article!!!"})
+                return Response(data={"error": "You can't write a decision on the article!!!"}, status=status.HTTP_400_BAD_REQUEST)
         
         elif request.data['Type'] == 'review':
             c = ArticleModerator.objects.filter(article=request.data["article"],moderator__user = request.user).count()
             if c > 0:
-                return Response(data={"error": "You can't make a review over article"})
+                return Response(data={"error": "You can't make a review over article"}, status=status.HTTP_400_BAD_REQUEST)
             
             count = CommentBase.objects.filter(article=request.data["article"],User=request.user,tag=request.data['tag'],Type='review').count()
             if count == 0:
@@ -692,11 +692,11 @@ class CommentViewset(viewsets.ModelViewSet):
                 return Response(data={"success":"Review successfully added"})
             
             else: 
-                return Response(data={"error":"Review already added by you!!!"})
+                return Response(data={"error":"Review already added by you!!!"}, status=status.HTTP_400_BAD_REQUEST)
                 
         else:
             if request.data['Type'] == 'comment' and request.data['parent_comment'] is None:
-                return Response(data={"error":"Comment must have a parent instance"})
+                return Response(data={"error":"Comment must have a parent instance"}, status=status.HTTP_400_BAD_REQUEST)
             
             super(CommentViewset, self).create(request)
 
@@ -941,7 +941,7 @@ class FavouriteViewset(viewsets.ModelViewSet):
     
     def create(self, request):
         if self.queryset.filter(user=request.user,article=request.data["article"]).first() is not None:
-            return  Response(data={"error":"added Already to Favourites"})
+            return  Response(data={"error":"added Already to Favourites"}, status=status.HTTP_400_BAD_REQUEST)
         response = super(FavouriteViewset, self).create(request)
         return  Response(data={"success":"added to Favourites", "id":response.data["id"]})
     
