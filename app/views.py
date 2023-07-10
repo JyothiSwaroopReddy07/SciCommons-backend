@@ -43,7 +43,7 @@ class UserViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         username = self.request.query_params.get('username', None)
         if username is not None:
-            return self.queryset.get(username=username)
+            return self.queryset.filter(username=username).first()
         
         return self.queryset
 
@@ -197,7 +197,7 @@ class CommunityViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         community = self.request.query_params.get('community', None)
         if community is not None:
-            self.queryset.get(Community_name=community)
+            self.queryset.filter(Community_name=community).first()
         return self.queryset
     
     def list(self, request):
