@@ -427,7 +427,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         article = self.queryset.filter(article_name=name).first()
         if article is not None:
             return Response(data={"error": "Article with same name already exists!!!"})
-        
+        print(request.data)
         response = super(ArticleViewset, self).create(request)
     
         return Response(data={"success": "Article successfully submitted"})

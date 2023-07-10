@@ -562,8 +562,10 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'article_name','keywords', 'article_file', 'Code', 'Abstract', 'authors','video','link', 'parent_article', 'communities']
         read_only_fields = ['id']
     def create(self, validated_data):
-        if validated_data['parent_article'] is None:
+        parent_article = validated_data.pop('parent_article', None)
+        if parent_article is None:
             authors = validated_data.pop("authors", [])
+            communities = validated_data.pop("communities", [])
             name = validated_data.pop('article_name')
             keywords = validated_data.pop('keywords')
             keywords.replace(' ','_')
@@ -596,7 +598,6 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             instance.save()
             return instance
         else:
-            parent_article = validated_data.pop('parent_article')
             parentinstance = Article.objects.get(id=parent_article)
             authors = validated_data.pop("authors", [])
             name = validated_data.pop('article_name')

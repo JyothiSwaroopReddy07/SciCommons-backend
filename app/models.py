@@ -113,7 +113,7 @@ class Article(models.Model):
     moderator = models.ManyToManyField("app.Moderator", through='ArticleModerator', related_name='article_moderators')
     blocked_users = models.ManyToManyField(User, through='ArticleBlockedUser')
     
-    parent_article = models.ForeignKey('self', related_name='versions',null=True ,on_delete=models.CASCADE)
+    parent_article = models.ForeignKey('self', related_name='versions',null=True, blank=True ,on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'article'    
