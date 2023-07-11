@@ -566,6 +566,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         if parent_article is None:
             authors = validated_data.pop("authors", [])
             communities = validated_data.pop("communities", [])
+            communities.pop(len(communities)-1)
             name = validated_data.pop('article_name')
             keywords = validated_data.pop('keywords')
             keywords.replace(' ','_')
@@ -585,16 +586,17 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             communities = validated_data.get('communities', [])
             if len(communities) > 0 and instance.link is not None:
                 raise serializers.ValidationError(detail={"error": "you can not submit external article"})
-        
-            with transaction.atomic():
-                for community in communities:
-                    community_meta = CommunityMeta.objects.create(community_id=community, article=instance, status='submitted')
-                    community_meta.save()
-                    
-                    community = Community.objects.get(id=community)
 
-                    emails = [member.user.email for member in CommunityMember.objects.filter(community=community)]
-                    send_mail("New Article Alerts", f'New Article {instance.article_name} added on {community}', settings.EMAIL_HOST_USER, emails, fail_silently=False) 
+            if len(communities) > 0:
+                with transaction.atomic():
+                    for community in communities:
+                        community_meta = CommunityMeta.objects.create(community_id=community, article=instance, status='submitted')
+                        community_meta.save()
+                        
+                        community = Community.objects.get(id=community)
+
+                        emails = [member.user.email for member in CommunityMember.objects.filter(community=community)]
+                        send_mail("New Article Alerts", f'New Article {instance.article_name} added on {community}', settings.EMAIL_HOST_USER, emails, fail_silently=False) 
             instance.save()
             return instance
         else:
