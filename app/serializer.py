@@ -221,24 +221,16 @@ class CommunityGetSerializer(serializers.ModelSerializer):
         return 0
 
 class CommunityCreateSerializer(serializers.ModelSerializer):
-    members = serializers.ListField(
-        child = serializers.IntegerField(),
-        write_only=True,
-        allow_empty= True
-    )
-    
+
     class Meta:
         model = Community
-        fields = ['Community_name', 'subtitle', 'description', 'location', 'date', 'github', 'email', 'website', 'members']
+        fields = ['Community_name', 'subtitle', 'description', 'location', 'date', 'github', 'email', 'website']
         
     def create(self, validated_data):
         community_name = validated_data.pop('Community_name', None)
-        members = validated_data.pop('members', None)
         validated_data['Community_name'] = community_name.replace(' ','_')
         instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
         instance.members.add(self.context['request'].user, through_defaults={"is_admin":True})
-        if members is not None:
-            instance.members.add(*members)
         instance.save()
         
         send_mail("you added new commnity", f"You have created a {instance.Community_name} community", settings.EMAIL_HOST_USER, [self.context['request'].user.email], fail_silently=False)        
