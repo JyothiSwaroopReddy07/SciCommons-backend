@@ -567,6 +567,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             authors = validated_data.pop("authors", [])
             communities = validated_data.pop("communities", [])
             communities.pop(0)
+            authors.pop(0)
             name = validated_data.pop('article_name')
             keywords = validated_data.pop('keywords')
             keywords.replace(' ','_')
@@ -602,6 +603,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         else:
             parentinstance = Article.objects.get(id=parent_article)
             authors = validated_data.pop("authors", [])
+            authors.pop(0)
             name = validated_data.pop('article_name')
             keywords = validated_data.pop('keywords')
             keywords.replace(' ','_')
