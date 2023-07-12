@@ -390,8 +390,8 @@ class ArticleViewset(viewsets.ModelViewSet):
         "getPublisherDetails": ArticlePublisherSerializer,
         "getPublished": ArticlePublishSelectionSerializer,
         "status": StatusSerializer,
-        "updateViews": ArticleViewsSerializer,
-        "block_user": ArticleBlockUserSerializer
+        "updateViews": ArticleViewsSerializer
+        # "block_user": ArticleBlockUserSerializer
     }
     
     def get_serializer_class(self):
@@ -590,14 +590,14 @@ class ArticleViewset(viewsets.ModelViewSet):
         except Exception as e:
             return Response(data={"error":e}, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/block_user', permission_classes=[ArticlePermission])
-    def block_user(self, request, pk):
-        obj = self.get_object()
+    # @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/block_user', permission_classes=[ArticlePermission])
+    # def block_user(self, request, pk):
+    #     obj = self.get_object()
 
-        serialzer = self.get_serializer(obj, data=request.data, partial=True)
-        serialzer.is_valid(raise_execption=True)
-        serialzer.save()
-        return Response(data={"success":f"user blocked successfully"})
+    #     serialzer = self.get_serializer(obj, data=request.data, partial=True)
+    #     serialzer.is_valid(raise_execption=True)
+    #     serialzer.save()
+    #     return Response(data={"success":f"user blocked successfully"})
       
 class CommentViewset(viewsets.ModelViewSet):
     queryset = CommentBase.objects.all()
