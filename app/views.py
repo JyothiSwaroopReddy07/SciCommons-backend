@@ -390,8 +390,8 @@ class ArticleViewset(viewsets.ModelViewSet):
         "getPublisherDetails": ArticlePublisherSerializer,
         "getPublished": ArticlePublishSelectionSerializer,
         "status": StatusSerializer,
-        "updateViews": ArticleViewsSerializer
-        # "block_user": ArticleBlockUserSerializer,
+        "updateViews": ArticleViewsSerializer,
+        "block_user": ArticleBlockUserSerializer
     }
     
     def get_serializer_class(self):
