@@ -1017,6 +1017,51 @@ class SocialPostSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'body', 'created_at']
         read_only_fields = ['user','id','created_at']
 
+class SocialPostListSerializer(serializers.ModelSerializer):
+    comments = serializers.SerializerMethodField(read_only=True)
+    likes = serializers.SerializerMethodField(read_only=True)
+    liked = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = SocialPost
+        fields = ['id', 'user', 'body', 'created_at', 'comments_count', 'likes', 'liked']
+
+    def get_comments_count(self, obj):
+        comments_count = SocialPostComment.objects.filter(post_id=obj.id).count()
+        return comments_count
+    
+    def get_likes(self, obj):
+        likes = SocialPostLike.objects.filter(post_id=obj.id).count()
+        return likes
+
+    def get_liked(self, obj):
+        liked = SocialPostLike.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
+        return liked
+
+class SocialPostGetSerializer(serializers.ModelSerializer):
+    comments = serializers.SerializerMethodField(read_only=True)
+    likes = serializers.SerializerMethodField(read_only=True)
+    liked = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = SocialPost
+        fields = ['id', 'user', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments']
+
+    def get_comments(self, obj):
+        comments = SocialPostComment.objects.filter(post_id=obj.id)
+        serializer = SocialPostCommentListSerializer(comments, many=True)
+        return serializer.data
+
+    def get_comments_count(self, obj):
+        comments_count = SocialPostComment.objects.filter(post_id=obj.id).count()
+        return comments_count
+    
+    def get_likes(self, obj):
+        likes = SocialPostLike.objects.filter(post_id=obj.id).count()
+        return likes
+
+    def get_liked(self, obj):
+        liked = SocialPostLike.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
+        return liked
+
 
 class SocialPostCommentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1024,6 +1069,44 @@ class SocialPostCommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'post', 'comment', 'created_at']
         read_only_fields = ['user','id','created_at']
 
+class SocialPostCommentListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostComment
+        fields = ['id', 'user', 'post', 'comment', 'created_at', 'likes', 'liked', 'replies_count']
+
+    def get_likes(self, obj):
+        likes = SocialPostCommentLike.objects.filter(comment_id=obj.id).count()
+        return likes
+    
+    def get_liked(self, obj):
+        liked = SocialPostCommentLike.objects.filter(comment_id=obj.id, user=self.context['request'].user).count()
+        return liked
+
+    def get_replies_count(self, obj):
+        replies_count = SocialPostComment.objects.filter(parent_comment=obj.id).count()
+        return replies_count
+    
+class SocialPostCommentGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostComment
+        fields = ['id', 'user', 'post', 'comment', 'created_at', 'likes', 'liked', 'replies_count', 'replies']
+
+    def get_likes(self, obj):
+        likes = SocialPostCommentLike.objects.filter(comment_id=obj.id).count()
+        return likes
+    
+    def get_liked(self, obj):
+        liked = SocialPostCommentLike.objects.filter(comment_id=obj.id, user=self.context['request'].user).count()
+        return liked
+    
+    def get_replies_count(self, obj):
+        replies_count = SocialPostComment.objects.filter(parent_comment=obj.id).count()
+        return replies_count
+
+    def get_replies(self, obj):
+        replies = SocialPostComment.objects.filter(parent_comment=obj.id)
+        serializer = SocialPostCommentListSerializer(replies, many=True)
+        return serializer.data
 
 class SocialPostLikeSerializer(serializers.ModelSerializer):
     class Meta:

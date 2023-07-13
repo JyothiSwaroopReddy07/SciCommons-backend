@@ -1031,8 +1031,8 @@ class SocialPostViewset(viewsets.ModelViewSet):
     action_serializers = {
         "create": SocialPostSerializer,
         "destroy": SocialPostSerializer,
-        "retrieve": SocialPostSerializer,
-        "list": SocialPostSerializer,
+        "retrieve": SocialPostGetSerializer,
+        "list": SocialPostListSerializer,
         "update": SocialPostSerializer,
         "like": SocialPostLikeSerializer
     }
@@ -1041,7 +1041,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
     
     def get_queryset(self):
-        qs = self.queryset.filter(user=self.request.user)
+        qs = self.queryset
         return qs
     
     def list(self, request):
@@ -1098,8 +1098,8 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     action_serializers = {
         "create": SocialPostCommentSerializer,
         "destroy": SocialPostCommentSerializer,
-        "retrieve": SocialPostCommentSerializer,
-        "list": SocialPostCommentSerializer,
+        "retrieve": SocialPostCommentGetSerializer,
+        "list": SocialPostCommentListSerializer,
         "update": SocialPostCommentSerializer,
         "like": SocialPostCommentLikeSerializer
     }
