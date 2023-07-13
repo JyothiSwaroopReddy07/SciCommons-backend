@@ -781,8 +781,7 @@ class CommentSerializer(serializers.ModelSerializer):
     Unliked = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = CommentBase
-        fields = ['id', 'article', 'Comment', 'Title', 'summary', 'recommendations','Type', 'border_impacts',
-                    'strength_weakness', 'tag','comment_type', 'user','likes', 'dislikes','Comment_date',
+        fields = ['id', 'article', 'Comment', 'Title', 'Type', 'tag','comment_type', 'user','likes', 'dislikes','Comment_date',
                     'parent_comment','rank','personal','Liked','Unliked', 'replies']
         
     def get_user(self, obj):
@@ -823,7 +822,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CommentBase
-        fields = ['article', 'Comment', 'Title', 'summary', 'recommendations','Type','border_impacts','strength_weakness', 'tag',"comment_type","parent_comment"]
+        fields = ['article', 'Comment', 'Title', 'Type', 'tag','comment_type','parent_comment']
 
     def create(self, validated_data):
         authors = [author for author in Author.objects.filter(article=validated_data["article"],User=self.context["request"].user)]
@@ -852,7 +851,7 @@ class CommentUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CommentBase
-        fields = ['Comment', 'Title', 'summary', 'recommendations','border_impacts','strength_weakness']
+        fields = ['Comment', 'Title']
         
 class LikeSerializer(serializers.ModelSerializer):
     

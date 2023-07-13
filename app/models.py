@@ -176,14 +176,10 @@ class CommentBase(models.Model):
     article = models.ForeignKey(Article,on_delete=models.CASCADE)
     Comment = models.TextField(max_length=5000)
     Title = models.CharField(max_length=200,null=False)
-    summary = models.TextField(max_length=5000,null=True)
-    strength_weakness = models.TextField(max_length=5000,null=True)
-    border_impacts = models.TextField(max_length=5000,null=True)
     Comment_date = models.DateTimeField(auto_now_add=True)
     parent_comment = models.ForeignKey('self', related_name='replies',on_delete=models.CASCADE, null=True, blank=True)
     tag = models.CharField(max_length=255, null=False, default='public')
     comment_type = models.CharField(max_length=255,null=False, default='publiccomment')
-    recommendations = models.TextField(max_length=5000,null=True)
     types = models.options = (
         ('review', 'Review'),
         ('decision', 'Decision'),
