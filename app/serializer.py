@@ -394,7 +394,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = ['id', 'article_name', 'Public_date', 'rating', 'authors']
     
     def get_rating(self, obj):
-        rating = CommentBase.objects.filter(article_id=obj.id,types='review').aggregate(Avg('rating'))['rating__avg']
+        rating = CommentBase.objects.filter(article_id=obj.id,Type='review').aggregate(Avg('rating'))['rating__avg']
         return rating
 
 
@@ -427,7 +427,7 @@ class ArticlelistSerializer(serializers.ModelSerializer):
         fields = ['id', 'article_name', 'Public_date','views', 'authors','rating', 'isFavourite', 'keywords', 'favourites']
     
     def get_rating(self, obj):
-        rating = CommentBase.objects.filter(article_id=obj.id,types='review').aggregate(Avg('rating'))['rating__avg']
+        rating = CommentBase.objects.filter(article_id=obj.id,Type='review').aggregate(Avg('rating'))['rating__avg']
         return rating
     
     def get_favourites(self, obj):
@@ -479,7 +479,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
         return count
     
     def get_rating(self, obj):
-        rating = CommentBase.objects.filter(article_id=obj.id,types='review').aggregate(Avg('rating'))['rating__avg']
+        rating = CommentBase.objects.filter(article_id=obj.id,Type='review').aggregate(Avg('rating'))['rating__avg']
         return rating
     
     def get_isArticleReviewer(self, obj):
@@ -507,7 +507,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
             return False
     
     def get_userrating(self, obj):
-        rating = CommentBase.objects.filter(article_id=obj.id,types='review',user=self.context['request'].user).first()
+        rating = CommentBase.objects.filter(article_id=obj.id,Type='review',user=self.context['request'].user).first()
         if rating is None:
             return "null"
         return f'{rating.rating}'
