@@ -991,7 +991,7 @@ class SocialPostSerializer(serializers.ModelSerializer):
         read_only_fields = ['user','id','created_at']
 
 class SocialPostListSerializer(serializers.ModelSerializer):
-    comments = serializers.SerializerMethodField(read_only=True)
+    comments_count = serializers.SerializerMethodField(read_only=True)
     likes = serializers.SerializerMethodField(read_only=True)
     liked = serializers.SerializerMethodField(read_only=True)
     class Meta:
@@ -1012,8 +1012,10 @@ class SocialPostListSerializer(serializers.ModelSerializer):
 
 class SocialPostGetSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField(read_only=True)
+    comments_count = serializers.SerializerMethodField(read_only=True)
     likes = serializers.SerializerMethodField(read_only=True)
     liked = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = SocialPost
         fields = ['id', 'user', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments']
@@ -1043,6 +1045,11 @@ class SocialPostCommentSerializer(serializers.ModelSerializer):
         read_only_fields = ['user','id','created_at']
 
 class SocialPostCommentListSerializer(serializers.ModelSerializer):
+
+    likes = serializers.SerializerMethodField(read_only=True)
+    liked = serializers.SerializerMethodField(read_only=True)
+    replies_count = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = SocialPostComment
         fields = ['id', 'user', 'post', 'comment', 'created_at', 'likes', 'liked', 'replies_count']
@@ -1060,6 +1067,11 @@ class SocialPostCommentListSerializer(serializers.ModelSerializer):
         return replies_count
     
 class SocialPostCommentGetSerializer(serializers.ModelSerializer):
+    liked = serializers.SerializerMethodField(read_only=True)
+    likes = serializers.SerializerMethodField(read_only=True)
+    replies_count = serializers.SerializerMethodField(read_only=True)
+    replies = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = SocialPostComment
         fields = ['id', 'user', 'post', 'comment', 'created_at', 'likes', 'liked', 'replies_count', 'replies']
