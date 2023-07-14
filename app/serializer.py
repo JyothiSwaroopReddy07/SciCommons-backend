@@ -394,7 +394,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = ['id', 'article_name', 'Public_date', 'rating', 'authors']
     
     def get_rating(self, obj):
-        rating = ArticleRating.objects.filter(article_id=obj.id).aggregate(Avg('rating'))['rating__avg']
+        rating = CommentBase.objects.filter(article_id=obj.id,types='review').aggregate(Avg('rating'))['rating__avg']
         return rating
 
 
@@ -427,7 +427,7 @@ class ArticlelistSerializer(serializers.ModelSerializer):
         fields = ['id', 'article_name', 'Public_date','views', 'authors','rating', 'isFavourite', 'keywords', 'favourites']
     
     def get_rating(self, obj):
-        rating = ArticleRating.objects.filter(article_id=obj.id).aggregate(Avg('rating'))['rating__avg']
+        rating = CommentBase.objects.filter(article_id=obj.id,types='review').aggregate(Avg('rating'))['rating__avg']
         return rating
     
     def get_favourites(self, obj):
@@ -478,7 +478,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
         count = CommentBase.objects.filter(article_id=obj.id).count()
     
     def get_rating(self, obj):
-        rating = ArticleRating.objects.filter(article_id=obj.id).aggregate(Avg('rating'))['rating__avg']
+        rating = CommentBase.objects.filter(article_id=obj.id,types='review').aggregate(Avg('rating'))['rating__avg']
         return rating
     
     def get_isArticleReviewer(self, obj):
@@ -506,7 +506,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
             return False
     
     def get_userrating(self, obj):
-        rating = ArticleRating.objects.filter(article=obj.id, user=self.context['request'].user).first()
+        rating = CommentBase.objects.filter(article_id=obj.id,types='review').aggregate(Avg('rating'))['rating__avg']
         if rating is None:
             return "null"
         return f'{rating.rating}'
@@ -749,7 +749,7 @@ class CommentlistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CommentBase
-        fields = ['id', 'article', 'Comment', 'Title','Type', 
+        fields = ['id', 'article', 'Comment', 'Title','Type','rating','confidence',
                         'tag','comment_type', 'user','Comment_date',
                     'parent_comment','rank','personal']
         
@@ -782,7 +782,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentBase
         fields = ['id', 'article', 'Comment', 'Title', 'Type', 'tag','comment_type', 'user','likes', 'dislikes','Comment_date',
-                    'parent_comment','rank','personal','Liked','Unliked', 'replies']
+                    'parent_comment','rank','personal','Liked','Unliked', 'replies', 'rating','confidence']
         
     def get_user(self, obj):
         handle = HandlersBase.objects.filter(User=obj.User,article=obj.article).first()
@@ -822,7 +822,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CommentBase
-        fields = ['article', 'Comment', 'Title', 'Type', 'tag','comment_type','parent_comment']
+        fields = ['article', 'Comment', 'Title', 'Type', 'tag','comment_type','parent_comment','rating','confidence']
 
     def create(self, validated_data):
         authors = [author for author in Author.objects.filter(article=validated_data["article"],User=self.context["request"].user)]
@@ -964,32 +964,6 @@ class AuthorSerializer(serializers.ModelSerializer):
         model = Author
         fields = ['article']
         depth = 1
-
-'''
-ArticleRating Serializer
-'''
-class ArticleRatingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ArticleRating
-        fields = ['id', 'user','article','rating']
-
-class RatingCreateSerializer(serializers.Serializer):
-
-    article = serializers.CharField(write_only=True)
-    rating = serializers.IntegerField(write_only=True)
-
-    class Meta:
-        model = ArticleRating
-        fields = ['id', 'user','article','rating']
-        read_only_fields = ['id']
-        
-    def create(self, validated_data):
-        instance = ArticleRating.objects.create(article_id=validated_data["article"],
-                                           user=self.context['request'].user, rating=validated_data["rating"])
-        instance.save()
-        UserActivity.objects.create(user=self.context['request'].user, action=f"You rated {instance.article.article_name}")
-
-        return instance
 
 '''
 OfficialReviewerSerializer

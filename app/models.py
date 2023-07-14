@@ -125,14 +125,6 @@ class Article(models.Model):
     #     self.id = uuid.uuid4().hex
     #     super(Article, self).save()
 
-class ArticleRating(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
-    rating = models.IntegerField(default=0, validators=[MinValueValidator(0),MaxValueValidator(5)])
-
-    class Meta:
-        db_table = 'article_rating'
-        unique_together = ['user', 'article']
     
                 
 class ArticleReviewer(models.Model):
@@ -174,7 +166,9 @@ class Author(models.Model):
 class CommentBase(models.Model):
     User = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article,on_delete=models.CASCADE)
-    Comment = models.TextField(max_length=5000)
+    Comment = models.TextField(max_length=20000)
+    rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)], null=True, blank=True)
+    confidence = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], null=True, blank=True)
     Title = models.CharField(max_length=200,null=False)
     Comment_date = models.DateTimeField(auto_now_add=True)
     parent_comment = models.ForeignKey('self', related_name='replies',on_delete=models.CASCADE, null=True, blank=True)

@@ -97,20 +97,6 @@ class ArticlePermission(permissions.BasePermission):
             else:
                 return False
 
-class ArticleRatingPermission(permissions.BasePermission):
-    
-    def has_object_permission(self, request, view, obj):
-
-        if view.action in ['create']:
-            return request.user.is_authenticated
-        
-        elif view.action in ['destroy', 'update','getArticleRatings']:
-            return request.user == obj.user
-
-        elif view.action in ['retrieve', 'list']:
-            return False
-
-        return False
 
 
 class CommentPermission(permissions.BasePermission):
