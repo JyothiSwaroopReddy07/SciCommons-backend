@@ -1,20 +1,19 @@
 import datetime
 import random
+import uuid
 from rest_framework import serializers
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError, transaction
-from rest_framework.filters import SearchFilter
 from faker import Faker
 from django.core.mail import send_mail
 from django.db.models import Avg
+from django.conf import settings
 
 
 fake = Faker()
 
 from app.models import *
-
-
 
 '''
 user serializers
@@ -866,12 +865,12 @@ chat serializer
 '''
 
 class ChatSerializer(serializers.ModelSerializer):
-    username = serializers.SerializerMethodField(read_only=True)
+    sender = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Message
-        fields = ['id', 'sender','username', 'article', 'body', 'created_at']
+        fields = ['id', 'sender', 'body', 'article', 'created_at']
     
-    def get_username(self, obj):
+    def get_sender(self, obj):
         user = User.objects.filter(id=obj.sender.id).first()
         return f'{user.username}'
 
@@ -880,7 +879,43 @@ class ChatCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ['body']
+        fields = ['body', 'channel', 'article', 'receiver']
+    
+    def create(self, validated_data):
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        receiver = validated_data('receiver', None)
+        sender = validated_data('sender', None)
+        article = validated_data('article', None)
+
+        instance = self.Meta.model.objects.create(**validated_data, sender=self.context['request'].user)
+        instance.save()
+
+        if receiver:
+            channel = f"chat_{sender}_{receiver}"
+            message = {
+            "sender":instance.sender,
+            "receiver":instance.receiver,
+            "body":instance.body
+        }
+        elif article:
+            channel = f"chat_{article}"
+            message = {
+            "article":instance.article,
+            "body":instance.body
+        }
+
+        # Send the message via websockets
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            channel,
+            {
+                'type': 'chat_message',
+                'message': message
+            }
+        )
+
+        return instance
 
 '''
 notification serializer
@@ -1106,13 +1141,6 @@ class SocialPostCommentLikeSerializer(serializers.ModelSerializer):
         model = SocialPostCommentLike
         fields = ['id', 'user', 'comment']
         read_only_fields = ['user','id']
-
-
-class PersonalMessageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PersonalMessage
-        fields = ['id', 'sender', 'receiver', 'body', 'created_at']
-        read_only_fields = ['sender','id','created_at', 'receiver']
 
 
 class FollowSerializer(serializers.ModelSerializer):

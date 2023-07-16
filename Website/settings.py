@@ -100,6 +100,9 @@ TEMPLATES = [
     },
 ]
 
+AUTH_USER_MODEL = 'app.User'
+
+
 GRAPH_MODELS = {
   'all_applications': True,
   'group_models': True,
@@ -108,7 +111,7 @@ GRAPH_MODELS = {
 
 
 WSGI_APPLICATION = 'Website.wsgi.application'
-ASGI_APPLICATION = 'Website.asgi.application'
+ASGI_APPLICATION = 'app.routing.application'
 
 
 # Database

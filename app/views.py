@@ -8,6 +8,7 @@ from django.contrib import messages
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 from django.db.models import Q
 # from app.filters import ArticleFilter, ReviewFilter, DecisionFilter
 from app.models import *
@@ -836,24 +837,6 @@ class ChatViewset(viewsets.ModelViewSet):
     def create(self, request):
         
         response = super(ChatViewset, self).create(request)
-        
-        message_data = response.data
-        message_data['sender'] = request.user.username
-        
-        article = Article.objects.filter(id=message_data["article"]).first()
-        
-        channel_layer = get_channel_layer()
-        
-        channel_name = article.article_name
-        group_name = f"chat_{channel_name.split('_')[0]}"
-        
-        async_to_sync(channel_layer.group_send)(
-            group_name,
-            {
-                'type': 'chat_message',
-                'message': message_data['body']
-            }
-        )
         return Response(data={"success":response.data})
     
     def update(self, request, pk):
@@ -1131,79 +1114,3 @@ class FollowViewset(viewsets.ModelViewSet):
     
         return Response(data={"success":"Unfollowed!!!"})
         
-
-class PersonalMessageViewset(viewsets.ModelViewSet):
-    queryset = PersonalMessage.objects.all()
-    permission_classes = [GeneralPermission]    
-    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
-    serializer_class = PersonalMessageSerializer
-    http_method_names = ['get', 'post', 'delete', 'put']
-    
-    action_serializers = {
-        "create": PersonalMessageSerializer,
-        "destroy": PersonalMessageSerializer,
-        "retrieve": PersonalMessageSerializer,
-        "list": PersonalMessageSerializer,
-        "update": PersonalMessageSerializer
-    }
-        
-    def get_serializer_class(self):
-        return self.action_serializers.get(self.action, self.serializer_class)
-    
-    def get_queryset(self):
-        qs = self.queryset.filter(Q(sender=self.request.user) | Q(receiver=self.request.user))
-        return qs
-    
-    def list(self, request):
-        response = super(PersonalMessageViewset , self).list(request)
-    
-        return Response(data={"success":response.data})
-    
-    def retrieve(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(PersonalMessageViewset, self).retrieve(request,pk=pk)
-    
-        return Response(data={"success":response.data})
-    
-    
-    def create(self, request):
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-
-        # Get the sender and receiver users
-        sender = self.request.user
-        receiver = serializer.validated_data['receiver']
-
-        # Send the message through the WebSocket
-        channel_layer = get_channel_layer()
-        room_name = f'personal_message_{sender.username}_{receiver.username}'
-        async_to_sync(channel_layer.group_send)(
-            room_name,
-            {
-                'type': 'new_message',
-                'message': str(serializer.instance),
-                'sender': sender.username
-            }
-        )
-
-        return Response(data={"success":"Message Successfully sent", "message":serializer.data}, status=status.HTTP_201_CREATED)
-    
-    def update(self, request, pk):
-
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        return Response(data={"success":serializer.data})
-    
-    def destroy(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(PersonalMessageViewset, self).destroy(request, pk)
-    
-        return Response(data= { "success":"Message Successfuly removed!!!"})
-
