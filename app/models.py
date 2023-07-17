@@ -350,6 +350,7 @@ class CommunityRequests(models.Model):
 class SocialPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     body = models.TextField(max_length=500)
+    image = models.ImageField(upload_to='social_post_images/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
