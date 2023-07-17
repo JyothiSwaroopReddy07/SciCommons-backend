@@ -400,4 +400,11 @@ class Follow(models.Model):
         
     def __str__(self):
         return self.followed_user
-    
+
+class BookMark(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(SocialPost, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'bookmark'
+        unique_together = ['user','post']

@@ -1032,7 +1032,7 @@ class SocialPostListSerializer(serializers.ModelSerializer):
     liked = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = SocialPost
-        fields = ['id', 'user', 'body', 'created_at', 'comments_count', 'likes', 'liked']
+        fields = ['id', 'user', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'bookmarks', 'isbookmarked']
 
     def get_comments_count(self, obj):
         comments_count = SocialPostComment.objects.filter(post_id=obj.id).count()
@@ -1046,6 +1046,14 @@ class SocialPostListSerializer(serializers.ModelSerializer):
         liked = SocialPostLike.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
         return liked
 
+    def get_bookmarks(self,obj):
+        bookmarks = BookMark.objects.filter(post_id=obj.id).count()
+        return bookmarks
+
+    def get_isbookmarked(self,obj):
+        isbookmarked = BookMark.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
+        return isbookmarked
+
 class SocialPostGetSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField(read_only=True)
     comments_count = serializers.SerializerMethodField(read_only=True)
@@ -1054,7 +1062,7 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SocialPost
-        fields = ['id', 'user', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments']
+        fields = ['id', 'user', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments', 'bookmarks', 'isbookmarked']
 
     def get_comments(self, obj):
         comments = SocialPostComment.objects.filter(post_id=obj.id)
@@ -1072,6 +1080,14 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
     def get_liked(self, obj):
         liked = SocialPostLike.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
         return liked
+    
+    def get_bookmarks(self,obj):
+        bookmarks = BookMark.objects.filter(post_id=obj.id).count()
+        return bookmarks
+
+    def get_isbookmarked(self,obj):
+        isbookmarked = BookMark.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
+        return isbookmarked
 
 
 class SocialPostCommentSerializer(serializers.ModelSerializer):
@@ -1148,3 +1164,11 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
         fields = ['id', 'user', 'followed_user']
         read_only_fields = ['user','id']
+
+class BookMarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookMark
+        fields = ['id', 'user', 'article']
+        read_only_fields = ['user','id']
+
+

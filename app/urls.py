@@ -15,6 +15,7 @@ router.register(r'subscribe',SubscribeViewset)
 router.register(r'feed',SocialPostViewset)
 router.register(r'feedcomment',SocialPostCommentViewset)
 router.register(r'follow',FollowViewset)
+router.register(r'bookmark',BookMarkViewset)
 
 urlpatterns = [
     path("",include(router.urls)),

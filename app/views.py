@@ -1113,4 +1113,49 @@ class FollowViewset(viewsets.ModelViewSet):
         response = super(FollowViewset, self).destroy(request, pk)
     
         return Response(data={"success":"Unfollowed!!!"})
-        
+
+class BookMarkViewset(viewsets.ModelViewSet):
+    queryset = BookMark.objects.all()
+    permission_classes = [BookMarkPermission]
+    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
+    serializer_class = BookMarkSerializer
+    http_method_names = ['get', 'post', 'delete']
+
+    action_serializers = {
+        "create": BookMarkSerializer,
+        "destroy": BookMarkSerializer,
+        "retrieve": BookMarkSerializer,
+        "list": BookMarkSerializer
+    }
+
+    def get_serializer_class(self):
+        return self.action_serializers.get(self.action, self.serializer_class)
+    
+    def get_queryset(self):
+        qs = self.queryset.filter(user=self.request.user)
+        return qs
+    
+    def list(self, request):
+        response = super(BookMarkViewset , self).list(request)
+
+        return Response(data={"success":response.data})
+
+    def retrieve(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(BookMarkViewset, self).retrieve(request,pk=pk)
+
+        return Response(data={"success":response.data})
+    
+    def create(self, request):
+        response = super(BookMarkViewset, self).create(request)
+
+        return Response(data={"success":"BookMarked the article!!!"})
+    
+    def destroy(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        response = super(BookMarkViewset, self).destroy(request, pk)
+
+        return Response(data={"success":"Removed from BookMark!!!"})
+    

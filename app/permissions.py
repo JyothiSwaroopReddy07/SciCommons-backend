@@ -180,3 +180,12 @@ class SubscribePermission(permissions.BasePermission):
         
         elif view.action in ['destroy']:
             return obj.User == request.user
+
+class BookMarkPermission(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if view.action in ['create', 'list', 'retrieve']:
+            return request.user.is_authenticated
+        
+        elif view.action in ['destroy']:
+            return obj.User == request.user
