@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
     rank = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'rank']
+        fields = ['id', 'username','profile_picture', 'first_name', 'last_name', 'email', 'rank']
         
     def get_rank(self, obj):
         rank = Rank.objects.get(user_id=obj.id)
@@ -32,7 +32,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'password']
+        fields = ['username', 'profile_picture', 'first_name', 'last_name', 'email', 'password']
         
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -56,7 +56,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name']
+        fields = ['first_name', 'last_name', , 'profile_picture']
         
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255, write_only=True)
