@@ -56,7 +56,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', , 'profile_picture']
+        fields = ['first_name', 'last_name', 'profile_picture']
         
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255, write_only=True)
