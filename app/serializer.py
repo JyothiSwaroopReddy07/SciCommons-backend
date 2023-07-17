@@ -1030,6 +1030,9 @@ class SocialPostListSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField(read_only=True)
     likes = serializers.SerializerMethodField(read_only=True)
     liked = serializers.SerializerMethodField(read_only=True)
+    bookmarks = serializers.SerializerMethodField(read_only=True)
+    isbookmarked = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = SocialPost
         fields = ['id', 'user', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'bookmarks', 'isbookmarked','image']
@@ -1059,6 +1062,8 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField(read_only=True)
     likes = serializers.SerializerMethodField(read_only=True)
     liked = serializers.SerializerMethodField(read_only=True)
+    bookmarks = serializers.SerializerMethodField(read_only=True)
+    isbookmarked = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPost
@@ -1168,7 +1173,7 @@ class FollowSerializer(serializers.ModelSerializer):
 class BookMarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookMark
-        fields = ['id', 'user', 'article']
+        fields = ['id', 'user', 'post']
         read_only_fields = ['user','id']
 
 
