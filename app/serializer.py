@@ -515,18 +515,18 @@ class ArticleGetSerializer(serializers.ModelSerializer):
         authors = [user.username for user in obj.authors.all()]
         return authors
 
-# class ArticleBlockUserSerializer(serializers.ModelSerializer):
-#     user_id = serializers.IntegerField(read_only=True)
-#     class Meta:
-#         model = Article
-#         field = ["id", "article_name", "blocked_users", 'user_id']
-#         read_only_field = ["id", "article_name", "blocked_users"]
+class ArticleBlockUserSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = Article
+        fields = ["id", "article_name", "blocked_users", 'user_id']
+        read_only_field = ["id", "article_name", "blocked_users"]
 
-#     def update(self, instance, validated_data):
-#         instance.blocked_users.add(validated_data["user"])
-#         instance.save()
+    def update(self, instance, validated_data):
+        instance.blocked_users.add(validated_data["user"])
+        instance.save()
 
-#         return instance
+        return instance
         
 
 class ArticleViewsSerializer(serializers.ModelSerializer):
