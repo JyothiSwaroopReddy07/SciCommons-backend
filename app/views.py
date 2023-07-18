@@ -30,6 +30,10 @@ class UserViewset(viewsets.ModelViewSet):
         'update':UserUpdateSerializer,
         'forgot_password':ForgotPasswordSerializer,
         'reset_password':ResetPasswordSerializer,
+        'get_current_user':UserSerializer,
+        'getMyArticles':AuthorSerializer,
+        'getUserArticles':UserSerializer,
+        'getposts': SocialPostSerializer,
     }
 
 
@@ -88,6 +92,18 @@ class UserViewset(viewsets.ModelViewSet):
         serializer.is_valid()
         articles = serializer.data
         return Response(data={"success": articles})
+
+    @action(methods=['get'], detail=False, url_path="(?P<username>.+)/posts", permission_classes=[permissions.IsAuthenticated])
+    def getposts(self, request, username):
+        queryset = User.objects.filter(username=username)
+        serializer = UserSerializer(data=queryset, many=True)
+        serializer.is_valid()
+        user = serializer.data
+        queryset = SocialPost.objects.filter(User_id=user[0]["id"])
+        serializer = SocialPostSerializer(data=queryset, many=True)
+        serializer.is_valid()
+        posts = serializer.data
+        return Response(data={"success": posts})
     
     @action(methods=['get'], detail=False, url_path="(?P<username>.+)/articles", permission_classes=[permissions.IsAuthenticated])
     def getUserArticles(self, request, username):
