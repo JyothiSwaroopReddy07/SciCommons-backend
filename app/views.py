@@ -944,7 +944,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
-        "create": SocialPostSerializer,
+        "create": SocialPostCreateSerializer,
         "destroy": SocialPostSerializer,
         "retrieve": SocialPostGetSerializer,
         "list": SocialPostListSerializer,
@@ -973,6 +973,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
     
     
     def create(self, request):
+        print(request.data)
         response = super(SocialPostViewset, self).create(request)
         created = response.data
     
@@ -1012,7 +1013,7 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
-        "create": SocialPostCommentSerializer,
+        "create": SocialPostCommentCreateSerializer,
         "destroy": SocialPostCommentSerializer,
         "retrieve": SocialPostCommentGetSerializer,
         "list": SocialPostCommentListSerializer,
@@ -1078,7 +1079,7 @@ class FollowViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
     
     action_serializers = {
-        "create": FollowSerializer,
+        "create": FollowCreateSerializer,
         "destroy": FollowSerializer,
         "retrieve": FollowSerializer,
         "list": FollowSerializer
@@ -1088,7 +1089,7 @@ class FollowViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
     
     def get_queryset(self):
-        qs = self.queryset.filter(Q(sender=self.request.user) | Q(followed_user=self.request.user))
+        qs = self.queryset.filter(Q(user=self.request.user) | Q(followed_user=self.request.user))
         return qs
     
     def list(self, request):
@@ -1125,7 +1126,7 @@ class BookMarkViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
 
     action_serializers = {
-        "create": BookMarkSerializer,
+        "create": BookMarkCreateSerializer,
         "destroy": BookMarkSerializer,
         "retrieve": BookMarkSerializer,
         "list": BookMarkSerializer

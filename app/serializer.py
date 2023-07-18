@@ -33,21 +33,21 @@ class UserSerializer(serializers.ModelSerializer):
         return f'{int(rank.rank)}'
 
     def get_followers(self, obj):
-        followers = Follow.objects.filter(following=obj.id).count()
+        followers = Follow.objects.filter(followed_user=obj.id).count()
         return followers
     
     def get_following(self, obj):
-        following = Follow.objects.filter(follower=obj.id).count()
+        following = Follow.objects.filter(user=obj.id).count()
         return following
 
     def get_isFollowing(self, obj):
-        if (Follow.objects.filter(follower=self.context['request'].user, following=obj.id).count() > 0):
+        if (Follow.objects.filter(user=self.context['request'].user, followed_user=obj.id).count() > 0):
             return True 
         else:
             return False
 
     def get_posts(self, obj):
-        posts = SocialPost.objects.filter(User=obj.id).count()
+        posts = SocialPost.objects.filter(user=obj.id).count()
         return posts
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -1048,6 +1048,17 @@ class SocialPostSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'body', 'created_at', 'image']
         read_only_fields = ['user','id','created_at', 'image']
 
+class SocialPostCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPost
+        fields = ['id', 'user', 'body', 'created_at', 'image']
+        read_only_fields = ['user','id','created_at', 'image']
+
+    def create(self, validated_data):
+        instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
+        instance.save()
+        return instance
+
 class SocialPostListSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField(read_only=True)
     likes = serializers.SerializerMethodField(read_only=True)
@@ -1123,6 +1134,17 @@ class SocialPostCommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'post', 'comment', 'created_at']
         read_only_fields = ['user','id','created_at']
 
+class SocialPostCommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostComment
+        fields = ['id', 'user', 'post', 'comment', 'created_at']
+        read_only_fields = ['user','id','created_at']
+
+    def create(self, validated_data):
+        instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
+        instance.save()
+        return instance
+
 class SocialPostCommentListSerializer(serializers.ModelSerializer):
 
     likes = serializers.SerializerMethodField(read_only=True)
@@ -1192,10 +1214,32 @@ class FollowSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'followed_user']
         read_only_fields = ['user','id']
 
+class FollowCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follow
+        fields = ['id', 'user', 'followed_user']
+        read_only_fields = ['user','id']
+
+    def create(self, validated_data):
+        instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
+        instance.save()
+        return instance
+
 class BookMarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookMark
         fields = ['id', 'user', 'post']
         read_only_fields = ['user','id']
+
+class BookMarkCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookMark
+        fields = ['id', 'user', 'post']
+        read_only_fields = ['user','id']
+
+    def create(self, validated_data):
+        instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
+        instance.save()
+        return instance
 
 
