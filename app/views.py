@@ -1041,7 +1041,11 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
     
     def get_queryset(self):
-        qs = self.queryset.filter(user=self.request.user)
+        post = self.request.query_params.get("post", None)
+        if post is not None:
+            qs = self.queryset.filter(post_id=post)
+        else:
+            qs = []
         return qs
     
     def list(self, request):
@@ -1086,6 +1090,7 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
             return Response(data={"error":"Already Liked!!!"})
         SocialPostCommentLike.objects.create(comment=comment, user=request.user)
         return Response(data={"success":"Liked!!!"})
+
     
 class FollowViewset(viewsets.ModelViewSet):
     queryset = Follow.objects.all()
