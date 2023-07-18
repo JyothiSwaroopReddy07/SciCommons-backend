@@ -974,8 +974,9 @@ class SocialPostViewset(viewsets.ModelViewSet):
     
     def create(self, request):
         response = super(SocialPostViewset, self).create(request)
+        created = response.data
     
-        return Response(data={"success":"Post Successfully added!!!"})
+        return Response(data={"success":"Post Successfully added!!!","post": created})
     
     def update(self, request, pk):
 
@@ -1041,8 +1042,9 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     
     def create(self, request):
         response = super(SocialPostCommentViewset, self).create(request)
+        created = response.data
     
-        return Response(data={"success":"Comment Successfully added!!!"})
+        return Response(data={"success":"Comment Successfully added!!!","comment": created})
     
     def update(self, request, pk):
 
@@ -1104,8 +1106,9 @@ class FollowViewset(viewsets.ModelViewSet):
     
     def create(self, request):
         response = super(FollowViewset, self).create(request)
+        created = response.data["id"]
     
-        return Response(data={"success":"Following the user!!!"})
+        return Response(data={"success":"Following the user!!!","id": created})
     
     def destroy(self, request, pk):
         obj = self.get_object()
@@ -1149,8 +1152,9 @@ class BookMarkViewset(viewsets.ModelViewSet):
     
     def create(self, request):
         response = super(BookMarkViewset, self).create(request)
+        created = response.data
 
-        return Response(data={"success":"BookMarked the article!!!"})
+        return Response(data={"success":"BookMarked the article!!!","id": created})
     
     def destroy(self, request, pk):
         obj = self.get_object()
