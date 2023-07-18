@@ -131,7 +131,7 @@ class FavouritePermission(permissions.BasePermission):
             return request.user.is_authenticated
         
         elif view.action == 'destroy':
-            return obj.User == request.user
+            return obj.user == request.user
         
 class SocialPostPermission(permissions.BasePermission):
 
@@ -144,7 +144,7 @@ class SocialPostPermission(permissions.BasePermission):
             return request.user.is_authenticated
         
         elif view.action in ['destroy', 'update']:
-            return obj.User == request.user
+            return obj.user == request.user
 
 class SocialPostCommentPermission(permissions.BasePermission):
 
@@ -157,7 +157,7 @@ class SocialPostCommentPermission(permissions.BasePermission):
             return request.user.is_authenticated
         
         elif view.action in [ 'destroy', 'update']:
-            return obj.User == request.user
+            return obj.user == request.user
 
 class FollowPermission(permissions.BasePermission):
 
@@ -170,7 +170,7 @@ class FollowPermission(permissions.BasePermission):
             return request.user.is_authenticated
         
         elif view.action in ['destroy']:
-            return obj.User == request.user
+            return obj.user == request.user
 
 class SubscribePermission(permissions.BasePermission):
 
@@ -188,4 +188,4 @@ class BookMarkPermission(permissions.BasePermission):
             return request.user.is_authenticated
         
         elif view.action in ['destroy']:
-            return obj.User == request.user
+            return obj.user == request.user
