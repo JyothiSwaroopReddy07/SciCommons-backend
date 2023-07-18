@@ -965,7 +965,10 @@ class SocialPostViewset(viewsets.ModelViewSet):
         "retrieve": SocialPostGetSerializer,
         "list": SocialPostListSerializer,
         "update": SocialPostSerializer,
-        "like": SocialPostLikeSerializer
+        "like": SocialPostLikeSerializer,
+        "unlike": SocialPostLikeSerializer,
+        "bookmark": SocialPostBookmarkSerializer,
+        "unbookmark": SocialPostBookmarkSerializer
     }
         
     def get_serializer_class(self):
@@ -1011,13 +1014,40 @@ class SocialPostViewset(viewsets.ModelViewSet):
     
         return Response(data={"success":"Post Successfuly removed!!!"})
 
-    @action(methods=['post'], detail=False, permission_classes=[SocialPostPermission])
+    @action(methods=['post'], detail=False,url_path="like", permission_classes=[SocialPostPermission])
     def like(self, request):
-        post = SocialPost.objects.get(id=request.data["post"])
-        if SocialPostLike.objects.filter(post=post, user=request.user).first() is not None:
+        post = SocialPostLike.objects.filter(post_id=request.data["post"], user=request.user).first()
+        if post is not None:
             return Response(data={"error":"Already Liked!!!"})
-        SocialPostLike.objects.create(post=post, user=request.user)
+        SocialPostLike.objects.create(post_id=request.data["post"], user=request.user)
         return Response(data={"success":"Liked!!!"})
+
+    @action(methods=['post'], detail=False,url_path="unlike", permission_classes=[SocialPostCommentPermission])
+    def unlike(self, request):
+        print(request.data["post"])
+        member = SocialPostLike.objects.filter(post_id=request.data["post"],user=request.user).first()
+        if member is not None:
+            member.delete()
+            return Response(data={"success":"DisLiked!!!"})
+        else:
+            return Response(data={"error":"Post not found!!!"})
+    
+    @action(methods=['post'], detail=False,url_path="bookmark", permission_classes=[SocialPostPermission])
+    def bookmark(self, request):
+        post = BookMark.objects.filter(post_id=request.data["post"], user=request.user).first()
+        if post is not None:
+            return Response(data={"error":"Already Bookmarked!!!"})
+        BookMark.objects.create(post_id=request.data["post"], user=request.user)
+        return Response(data={"success":"Bookmarked!!!"})
+
+    @action(methods=['post'], detail=False,url_path="unbookmark", permission_classes=[SocialPostPermission])
+    def unbookmark(self, request):
+        member = BookMark.objects.filter(post_id=request.data["post"],user=request.user).first()
+        if member is not None:
+            member.delete()
+            return Response(data={"success":"UnBookmarked!!!"})
+        else:
+            return Response(data={"error":"BookMark not found!!!"})
 
 
 
@@ -1083,13 +1113,21 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     
         return Response(data={"success":"Comment Successfuly removed!!!"})
 
-    @action(methods=['post'], detail=False, permission_classes=[SocialPostCommentPermission])
+    @action(methods=['post'], detail=False,url_path="/like", permission_classes=[SocialPostCommentPermission])
     def like(self, request):
-        comment = SocialPostComment.objects.get(id=request.data["comment"])
-        if SocialPostCommentLike.objects.filter(comment=comment, user=request.user).first() is not None:
+        if SocialPostCommentLike.objects.filter(comment_id=request.data["comment"], user=request.user).first() is not None:
             return Response(data={"error":"Already Liked!!!"})
-        SocialPostCommentLike.objects.create(comment=comment, user=request.user)
+        SocialPostCommentLike.objects.create(comment_id=request.data["comment"], user=request.user)
         return Response(data={"success":"Liked!!!"})
+
+    @action(methods=['post'], detail=False,url_path="unlike", permission_classes=[SocialPostCommentPermission])
+    def unlike(self, request):
+        comment = SocialPostCommentLike.objects.filter(comment_id=request.data["comment"],user=request.user).first()
+        if comment is not None:
+            comment.delete()
+            return Response(data={"success":"DisLiked!!!"})
+        else:
+            return Response(data={"error":"Comment not found!!!"})
 
     
 class FollowViewset(viewsets.ModelViewSet):
@@ -1139,49 +1177,5 @@ class FollowViewset(viewsets.ModelViewSet):
     
         return Response(data={"success":"Unfollowed!!!"})
 
-class BookMarkViewset(viewsets.ModelViewSet):
-    queryset = BookMark.objects.all()
-    permission_classes = [BookMarkPermission]
-    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
-    serializer_class = BookMarkSerializer
-    http_method_names = ['get', 'post', 'delete']
 
-    action_serializers = {
-        "create": BookMarkCreateSerializer,
-        "destroy": BookMarkSerializer,
-        "retrieve": BookMarkSerializer,
-        "list": BookMarkSerializer
-    }
-
-    def get_serializer_class(self):
-        return self.action_serializers.get(self.action, self.serializer_class)
-    
-    def get_queryset(self):
-        qs = self.queryset.filter(user=self.request.user)
-        return qs
-    
-    def list(self, request):
-        response = super(BookMarkViewset , self).list(request)
-
-        return Response(data={"success":response.data})
-
-    def retrieve(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(BookMarkViewset, self).retrieve(request,pk=pk)
-
-        return Response(data={"success":response.data})
-    
-    def create(self, request):
-        response = super(BookMarkViewset, self).create(request)
-        created = response.data
-
-        return Response(data={"success":"BookMarked the article!!!","id": created})
-    
-    def destroy(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(BookMarkViewset, self).destroy(request, pk)
-
-        return Response(data={"success":"Removed from BookMark!!!"})
     

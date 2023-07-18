@@ -1225,13 +1225,13 @@ class FollowCreateSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class BookMarkSerializer(serializers.ModelSerializer):
+class SocialPostBookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookMark
         fields = ['id', 'user', 'post']
         read_only_fields = ['user','id']
 
-class BookMarkCreateSerializer(serializers.ModelSerializer):
+class SocialPostBookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookMark
         fields = ['id', 'user', 'post']

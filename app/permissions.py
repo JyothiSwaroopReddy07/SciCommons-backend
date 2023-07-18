@@ -140,10 +140,10 @@ class SocialPostPermission(permissions.BasePermission):
         if view.action in ['retrieve', 'list']:
             return True
         
-        elif view.action in ['create', 'like']:
+        elif view.action in ['create', 'like','unlike']:
             return request.user.is_authenticated
         
-        elif view.action in ['destroy', 'update']:
+        elif view.action in ['destroy', 'update','getMyPosts','bookmark','unbookmark']:
             return obj.user == request.user
 
 class SocialPostCommentPermission(permissions.BasePermission):
@@ -153,7 +153,7 @@ class SocialPostCommentPermission(permissions.BasePermission):
         if view.action in ['retrieve', 'list']:
             return True
         
-        elif view.action in ['create', 'like']:
+        elif view.action in ['create', 'like', 'unlike']:
             return request.user.is_authenticated
         
         elif view.action in [ 'destroy', 'update']:
@@ -180,12 +180,3 @@ class SubscribePermission(permissions.BasePermission):
         
         elif view.action in ['destroy']:
             return obj.User == request.user
-
-class BookMarkPermission(permissions.BasePermission):
-
-    def has_object_permission(self, request, view, obj):
-        if view.action in ['create', 'list', 'retrieve']:
-            return request.user.is_authenticated
-        
-        elif view.action in ['destroy']:
-            return obj.user == request.user
