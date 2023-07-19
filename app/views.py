@@ -14,6 +14,7 @@ from django.db.models import Q
 from app.models import *
 from app.serializer import *
 from app.permissions import *
+from PIL import Image
 
 class UserViewset(viewsets.ModelViewSet):
     queryset = User.objects.all()
