@@ -33,7 +33,7 @@ class UserViewset(viewsets.ModelViewSet):
         'get_current_user':UserSerializer,
         'getMyArticles':AuthorSerializer,
         'getUserArticles':UserSerializer,
-        'getposts': SocialPostSerializer,
+        'getposts': SocialPostSerializer
     }
 
 

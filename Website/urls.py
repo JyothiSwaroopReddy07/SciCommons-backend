@@ -19,6 +19,8 @@ redoc_schema_view = views.get_schema_view(
    public=True,
 )
 
+
+
 def myindex(request):
     return HttpResponse("backend server is running")
 

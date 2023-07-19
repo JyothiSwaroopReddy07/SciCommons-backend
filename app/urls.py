@@ -1,4 +1,6 @@
 from django.urls import include, path
+from django.conf.urls.static import static
+from django.conf import settings
 from rest_framework import routers
 
 from app.views import *
@@ -18,4 +20,4 @@ router.register(r'follow',FollowViewset)
 
 urlpatterns = [
     path("",include(router.urls)),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

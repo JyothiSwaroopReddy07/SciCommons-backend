@@ -528,7 +528,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
             return False
     
     def get_userrating(self, obj):
-        rating = CommentBase.objects.filter(article_id=obj.id,Type='review',user=self.context['request'].user).first()
+        rating = CommentBase.objects.filter(article_id=obj.id,Type='review',User=self.context['request'].user).first()
         if rating is None:
             return "null"
         return f'{rating.rating}'
