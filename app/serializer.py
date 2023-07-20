@@ -186,10 +186,11 @@ class CommunityGetSerializer(serializers.ModelSerializer):
     publishedcount = serializers.SerializerMethodField()
     evaluatedcount = serializers.SerializerMethodField()
     isSubscribed = serializers.SerializerMethodField()
+    admins = serializers.SerializerMethodField()
     
     class Meta:
         model = Community
-        fields = ['id', 'Community_name','subtitle', 'description','location','date','github','email', 'evaluatedcount', 'isSubscribed',
+        fields = ['id', 'Community_name','subtitle', 'description','location','date','github','email', 'evaluatedcount', 'isSubscribed', 'admins'
                     'website','user','membercount','publishedcount','isMember','isReviewer', 'isModerator', 'isAdmin','subscribed']
     
 
@@ -227,6 +228,10 @@ class CommunityGetSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+    
+    def get_admins(self, obj):
+        admins = [user.username for user in obj.CommunityMember.filter(community_id=obj.id, is_admin=True)]
+        return admins
         
     def get_subscribed(self, obj):
         count = Subscribe.objects.filter(community=obj.id)
