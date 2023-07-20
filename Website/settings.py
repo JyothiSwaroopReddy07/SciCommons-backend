@@ -164,7 +164,15 @@ USE_I18N = True
 USE_TZ = True
 
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
+cloudinary.config(
+    cloud_name='dapuxfgic',
+    api_key='571177832797497',
+    api_secret='50fRZscu51IWtIaUMGuqHLbNeFc'
+)
 
 
 

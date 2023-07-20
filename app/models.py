@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
+from cloudinary.models import CloudinaryField
 
 # Create your models here.
 
@@ -42,7 +43,7 @@ class UserManager(BaseUserManager):
         return self.create_user(username, email, password, **extra_fields)
 
 class User(AbstractUser):
-    profile_picture = models.ImageField(upload_to='profile_images/', null=True)
+    profile_picture = CloudinaryField('profile_images', null=True)
 
     objects = UserManager()
 
@@ -51,6 +52,11 @@ class User(AbstractUser):
 
     def __int__(self) -> int:
         return self.id
+    
+    def profile_pic_url(self):
+        return (
+            f"https://res.cloudinary.com/dapuxfgic/{self.profile_picture}"
+        )
 
 
 class UserActivity(models.Model):
@@ -131,7 +137,7 @@ class OfficialReviewer(models.Model):
 class Article(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     article_name = models.CharField(max_length=300, unique=True)
-    article_file = models.FileField(upload_to='articles/')
+    article_file = CloudinaryField('articles_file')
     Public_date = models.DateTimeField(auto_now_add=True, null=True)
     visibility = models.options = (
         ('public', 'Public'),
@@ -143,7 +149,7 @@ class Article(models.Model):
     video = models.CharField(max_length=255, blank=True, null=True)
     link = models.CharField(max_length=255, blank=True, null=True)
     license = models.CharField(max_length=255,null=True)
-    published_article_file = models.FileField(upload_to='published/',blank=True)
+    published_article_file = CloudinaryField('published_article_file',blank=True)
     published = models.CharField(max_length=255, null=True)
     Code = models.CharField(max_length=100, null=True, blank=True)
     Abstract = models.TextField(null=True, max_length=5000)
@@ -163,9 +169,17 @@ class Article(models.Model):
     def __str__(self) -> str:
         return self.article_name
     
-    # def save(self, *args, **kwargs):
-    #     self.id = uuid.uuid4().hex
-    #     super(Article, self).save()
+    @property
+    def article_file_url(self):
+        return (
+            f"https://res.cloudinary.com/dapuxfgic/{self.article_file}"
+        )
+
+    @property    
+    def published_article_file_url(self):
+        return (
+            f"https://res.cloudinary.com/dapuxfgic/{self.published_article_file}"
+        )
 
     
                 
@@ -351,7 +365,7 @@ class CommunityRequests(models.Model):
 class SocialPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     body = models.TextField(max_length=500)
-    image = models.ImageField(upload_to='social_post_images/', null=True, blank=True)
+    image = CloudinaryField('social_post_images', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -359,6 +373,11 @@ class SocialPost(models.Model):
         
     def __str__(self):
         return self.post
+    
+    def image_url(self):
+        return (
+            f"https://res.cloudinary.com/dapuxfgic/{self.image}"
+        )
 
 class SocialPostComment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -25,9 +25,11 @@ class UserSerializer(serializers.ModelSerializer):
     following = serializers.SerializerMethodField()
     isFollowing = serializers.SerializerMethodField()
     posts = serializers.SerializerMethodField()
+    profile_pic_url = serializers.ReadOnlyField()
+
     class Meta:
         model = User
-        fields = ['id', 'username','profile_picture', 'first_name', 'last_name', 'email', 'rank', 'followers', 'following', 'isFollowing', 'posts']
+        fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers', 'following', 'isFollowing', 'posts']
         
     def get_rank(self, obj):
         rank = Rank.objects.get(user_id=obj.id)
@@ -76,10 +78,17 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return instance
     
 class UserUpdateSerializer(serializers.ModelSerializer):
+    profile_pic_url = serializers.ReadOnlyField()
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'profile_picture']
+        fields = ['first_name', 'last_name', 'profile_picture','profile_pic_url']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop("profile_picture")
+
+        return representation
         
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255, write_only=True)
@@ -425,9 +434,11 @@ class ArticlePostPublishSerializer(serializers.ModelSerializer):
         fields = ["id","license","published_article_file"]
 
 class ArticlePublisherSerializer(serializers.ModelSerializer):
+    published_article_file_url = serializers.ReadOnlyField()
+
     class Meta:
         model = Article
-        fields = ["id", "license", "published_article_file", "published"]
+        fields = ["id", "license", "published_article_file", "published", "published_article_file_url"]
 
 class ArticlelistSerializer(serializers.ModelSerializer):
 
@@ -470,10 +481,11 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     userrating = serializers.SerializerMethodField()
     commentcount = serializers.SerializerMethodField()
     authors = serializers.SerializerMethodField()
+    article_file_url = serializers.ReadOnlyField()
 
     class Meta:
         model = Article
-        fields = ['id', 'article_name', 'article_file', 'Public_date', 'Code', 'Abstract','views','video',
+        fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video',
                     'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor',
                     'isFavourite', 'userrating','commentcount']
     
@@ -535,7 +547,7 @@ class ArticleBlockUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ["id", "article_name", "blocked_users", 'user_id']
-        read_only_field = ["id", "article_name", "blocked_users"]
+        read_only_fields = ["id", "article_name", "blocked_users"]
 
     def update(self, instance, validated_data):
         instance.blocked_users.add(validated_data["user"])
