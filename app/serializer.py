@@ -226,11 +226,12 @@ class CommunityGetSerializer(serializers.ModelSerializer):
             return False
     
     def get_admins(self, obj):
-        admins = [user.username for user in obj.CommunityMember.filter(community_id=obj.id, is_admin=True)]
+        members = CommunityMember.objects.filter(community=obj.id, is_admin=True)
+        admins = [member.user.username for member in members]
         return admins
         
     def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(community=obj.id)
+        count = Subscribe.objects.filter(community=obj.id).count()
         return count
 
 class CommunityCreateSerializer(serializers.ModelSerializer):
