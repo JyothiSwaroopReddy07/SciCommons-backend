@@ -143,10 +143,6 @@ class CommunitySerializer(serializers.ModelSerializer):
         fields = ['id', 'Community_name', 'subtitle', 'description', 'location', 'date', 'github', 'email', 'website', 'user', 'members']
 
 class CommunitylistSerializer(serializers.ModelSerializer):
-    isMember = serializers.SerializerMethodField()
-    isReviewer = serializers.SerializerMethodField()
-    isModerator = serializers.SerializerMethodField()
-    isAdmin = serializers.SerializerMethodField()
     membercount = serializers.SerializerMethodField()
     evaluatedcount = serializers.SerializerMethodField()
     publishedcount = serializers.SerializerMethodField()
@@ -154,7 +150,7 @@ class CommunitylistSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Community
-        fields = ['id', 'Community_name','subtitle', 'description', 'evaluatedcount', 'isSubscribed'
+        fields = ['id', 'Community_name','subtitle', 'description', 'evaluatedcount', 'isSubscribed',
                     'membercount','publishedcount']
     
     def get_membercount(self, obj):
@@ -190,7 +186,7 @@ class CommunityGetSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Community
-        fields = ['id', 'Community_name','subtitle', 'description','location','date','github','email', 'evaluatedcount', 'isSubscribed', 'admins'
+        fields = ['id', 'Community_name','subtitle', 'description','location','date','github','email', 'evaluatedcount', 'isSubscribed', 'admins',
                     'website','user','membercount','publishedcount','isMember','isReviewer', 'isModerator', 'isAdmin','subscribed']
     
 
