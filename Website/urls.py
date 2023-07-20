@@ -6,6 +6,7 @@ from rest_framework_swagger.views import get_swagger_view
 from rest_framework import permissions
 from drf_yasg import views, openapi
 from django.http import HttpResponse
+import django.views.static
 
 schema_view = get_swagger_view(title="APIs")
 
@@ -34,5 +35,7 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += [
+    path(r'^media/(?P<path>.*)$', django.views.static.serve, {
+    'document_root': settings.MEDIA_ROOT}),]
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
