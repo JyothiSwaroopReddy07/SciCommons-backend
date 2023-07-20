@@ -280,7 +280,7 @@ class Notification(models.Model):
         return self.message
 
 class Subscribe(models.Model):
-    User = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     community = models.ForeignKey(Community, on_delete=models.CASCADE)
 
     class Meta:

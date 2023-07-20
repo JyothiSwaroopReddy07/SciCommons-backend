@@ -303,7 +303,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Subscribe
-        fields = ['id', 'User', 'community']
+        fields = ['id', 'user', 'community']
         read_only_fields = ['id']
 
         
