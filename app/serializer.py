@@ -155,11 +155,11 @@ class CommunitylistSerializer(serializers.ModelSerializer):
     membercount = serializers.SerializerMethodField()
     evaluatedcount = serializers.SerializerMethodField()
     publishedcount = serializers.SerializerMethodField()
-    isSubscribed = serializers.SerializerMethodField()
+    subscribed = serializers.SerializerMethodField()
     
     class Meta:
         model = Community
-        fields = ['id', 'Community_name','subtitle', 'description', 'evaluatedcount', 'isSubscribed',
+        fields = ['id', 'Community_name','subtitle', 'description', 'evaluatedcount', 'subscribed',
                     'membercount','publishedcount']
     
     def get_membercount(self, obj):
@@ -174,12 +174,9 @@ class CommunitylistSerializer(serializers.ModelSerializer):
         count = CommunityMeta.objects.filter(community=obj.id, status__in=['accepted']).count()
         return count
 
-    def get_isSubscribed(self, obj):
-        count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).count()
-        if count > 0:
-            return True
-        else:
-            return False
+    def get_subscribed(self, obj):
+        count = Subscribe.objects.filter(community=obj.id).count()
+        return count
 
 class CommunityGetSerializer(serializers.ModelSerializer):
     isMember = serializers.SerializerMethodField()
