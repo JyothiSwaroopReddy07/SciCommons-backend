@@ -351,7 +351,7 @@ class CommunityViewset(viewsets.ModelViewSet):
 
         return Response(data={"success":serializer.data})
     
-    @action(methods=['post'], detail=False,url_path="(?P<Community_name.+)/like", permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['post'], detail=False,url_path='(?P<Community_name>.+)/like', permission_classes=[permissions.IsAuthenticated])
     def subscribe(self, request, Community_name):
         member = Subscribe.objects.filter(community__Community_name=Community_name, user=request.user).first()
         if member is not None:
@@ -359,7 +359,7 @@ class CommunityViewset(viewsets.ModelViewSet):
         Subscribe.objects.create(community__Community_name=Community_name, user=request.user)
         return Response(data={"success":"Subscribed!!!"})
 
-    @action(methods=['post'], detail=False,url_path="(?.P<Community_name>.+)/unlike", permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['post'], detail=False,url_path='(?P<Community_name>.+)/unlike', permission_classes=[permissions.IsAuthenticated])
     def unsubscribe(self, request,Community_name):
         member = Subscribe.objects.filter(community__Community_name=Community_name,user=request.user).first()
         if member is not None:
