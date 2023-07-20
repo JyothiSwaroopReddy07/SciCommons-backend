@@ -147,32 +147,15 @@ class CommunitylistSerializer(serializers.ModelSerializer):
     isReviewer = serializers.SerializerMethodField()
     isModerator = serializers.SerializerMethodField()
     isAdmin = serializers.SerializerMethodField()
-    subscribed = serializers.SerializerMethodField()
     membercount = serializers.SerializerMethodField()
     evaluatedcount = serializers.SerializerMethodField()
     publishedcount = serializers.SerializerMethodField()
+    isSubscribed = serializers.SerializerMethodField()
     
     class Meta:
         model = Community
-        fields = ['id', 'Community_name','subtitle', 'description', 'evaluatedcount',
-                    'membercount','publishedcount','isMember','isReviewer', 'isModerator', 'isAdmin','subscribed']
-    
-
-    def get_isMember(self, obj):
-        count = CommunityMember.objects.filter(community=obj.id,user = self.context["request"].user).count()
-        return count
-    
-    def get_isReviewer(self, obj):
-        count = CommunityMember.objects.filter(community=obj.id,user = self.context["request"].user, is_reviewer=True).count()
-        return count
-    
-    def get_isModerator(self, obj):
-        count = CommunityMember.objects.filter(community=obj.id,user = self.context["request"].user, is_moderator=True).count()
-        return count
-    
-    def get_isAdmin(self, obj):
-        count = CommunityMember.objects.filter(community=obj.id,user = self.context["request"].user, is_admin=True).count()
-        return count
+        fields = ['id', 'Community_name','subtitle', 'description', 'evaluatedcount', 'isSubscribed'
+                    'membercount','publishedcount']
     
     def get_membercount(self, obj):
         count = CommunityMember.objects.filter(community=obj.id).count()
@@ -185,12 +168,13 @@ class CommunitylistSerializer(serializers.ModelSerializer):
     def get_publishedcount(self, obj):
         count = CommunityMeta.objects.filter(community=obj.id, status__in=['accepted']).count()
         return count
-    
-    def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(User=self.context['request'].user,community=obj.id).first()
-        if count is not None:
-            return count.id
-        return 0
+
+    def get_isSubscribed(self, obj):
+        count = Subscribe.objects.filter(User=self.context['request'].user,community=obj.id).count()
+        if count > 0:
+            return True
+        else:
+            return False
 
 class CommunityGetSerializer(serializers.ModelSerializer):
     isMember = serializers.SerializerMethodField()
@@ -201,10 +185,11 @@ class CommunityGetSerializer(serializers.ModelSerializer):
     membercount = serializers.SerializerMethodField()
     publishedcount = serializers.SerializerMethodField()
     evaluatedcount = serializers.SerializerMethodField()
+    isSubscribed = serializers.SerializerMethodField()
     
     class Meta:
         model = Community
-        fields = ['id', 'Community_name','subtitle', 'description','location','date','github','email', 'evaluatedcount',
+        fields = ['id', 'Community_name','subtitle', 'description','location','date','github','email', 'evaluatedcount', 'isSubscribed',
                     'website','user','membercount','publishedcount','isMember','isReviewer', 'isModerator', 'isAdmin','subscribed']
     
 
@@ -236,11 +221,16 @@ class CommunityGetSerializer(serializers.ModelSerializer):
         count = CommunityMeta.objects.filter(community=obj.id, status__in=['accepted']).count()
         return count
     
+    def get_isSubscribed(self, obj):
+        count = Subscribe.objects.filter(User=self.context['request'].user,community=obj.id).count()
+        if count > 0:
+            return True
+        else:
+            return False
+        
     def get_subscribed(self, obj):
-        count = Subscribe.objects.filter(User=self.context['request'].user,community=obj.id).first()
-        if count is not None:
-            return count.id
-        return 0
+        count = Subscribe.objects.filter(community=obj.id)
+        return count
 
 class CommunityCreateSerializer(serializers.ModelSerializer):
 

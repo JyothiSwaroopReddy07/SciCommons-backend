@@ -198,7 +198,9 @@ class CommunityViewset(viewsets.ModelViewSet):
         "retrieve": CommunityGetSerializer,
         "join_request":JoinRequestSerializer,
         "get_requests":CommunityRequestSerializer,
-        "approve_request":ApproverequestSerializer
+        "approve_request":ApproverequestSerializer,
+        "subscribe": SubscribeSerializer,
+        "unsubscribe": SubscribeSerializer
     }
     
     def get_serializer_class(self):
@@ -348,39 +350,23 @@ class CommunityViewset(viewsets.ModelViewSet):
             obj.members.add(serializer.data['user'])
 
         return Response(data={"success":serializer.data})
-
-class SubscribeViewset(viewsets.ModelViewSet):
-    queryset = Subscribe.objects.all()
-    permission_classes = [SubscribePermission]
-    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
-    serializer_class = SubscribeSerializer
-    http_method_names = ['post', 'delete']
     
-    action_serializers = {
-        "create": SubscribeSerializer,
-        "destroy": SubscribeSerializer
-    }
+    @action(methods=['post'], detail=False,url_path="(?P<Community_name.+)/like", permission_classes=[permissions.IsAuthenticated])
+    def subscribe(self, request, Community_name):
+        member = Subscribe.objects.filter(community__Community_name=Community_name, user=request.user).first()
+        if member is not None:
+            return Response(data={"error":"Already Subscribed!!!"})
+        Subscribe.objects.create(community__Community_name=Community_name, user=request.user)
+        return Response(data={"success":"Subscribed!!!"})
 
-    def get_serializer_class(self):
-        return self.action_serializers.get(self.action, self.serializer_class)
-
-    def get_queryset(self):
-        qs = self.queryset.filter(User=self.request.user)
-        return qs
-    
-    def create(self, request):
-        
-        response = super(SubscribeViewset, self).create(request)
-        created_object_id = response.data["id"]
-        
-        return Response(data={"success": "subscribed successfully","id": created_object_id })
-    
-    def destroy(self, request, pk ):
-
-        super(SubscribeViewset, self).destroy(request,pk=pk)
-
-        return Response(data={"success": "Unsubscribed successfully"})
-
+    @action(methods=['post'], detail=False,url_path="(?.P<Community_name>.+)/unlike", permission_classes=[permissions.IsAuthenticated])
+    def unsubscribe(self, request,Community_name):
+        member = Subscribe.objects.filter(community__Community_name=Community_name,user=request.user).first()
+        if member is not None:
+            member.delete()
+            return Response(data={"success":"Unsubscribed!!!"})
+        else:
+            return Response(data={"error":"Did not Subscribe!!!"})
 
     
 class ArticleViewset(viewsets.ModelViewSet):
