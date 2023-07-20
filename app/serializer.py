@@ -1068,11 +1068,11 @@ class SocialPostListSerializer(serializers.ModelSerializer):
     bookmarks = serializers.SerializerMethodField(read_only=True)
     isbookmarked = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
-    avatar = serializers.SerializerMethodField(read_only=True)
+    image_url = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPost
-        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'bookmarks', 'isbookmarked','image','avatar']
+        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'bookmarks', 'isbookmarked','image', 'image_url']
 
     def get_username(self,obj):
         return obj.user.username
@@ -1107,12 +1107,12 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
     liked = serializers.SerializerMethodField(read_only=True)
     bookmarks = serializers.SerializerMethodField(read_only=True)
     isbookmarked = serializers.SerializerMethodField(read_only=True)
-    avatar = serializers.SerializerMethodField(read_only=True)
+    image_url = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPost
-        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments', 'bookmarks', 'isbookmarked', 'image', 'avatar']
+        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments', 'bookmarks', 'isbookmarked', 'image', 'image_url']
 
     def get_username(self,obj):
         return obj.user.username
