@@ -36,6 +36,6 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += [
-    path(r'^media/(?P<path>.*)$', django.views.static.serve, {
+    path('^media/(?P<path>.*)$', django.views.static.serve, {
     'document_root': settings.MEDIA_ROOT}),]
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
