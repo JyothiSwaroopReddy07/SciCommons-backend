@@ -356,7 +356,8 @@ class CommunityViewset(viewsets.ModelViewSet):
         member = Subscribe.objects.filter(community__Community_name=Community_name, user=request.user).first()
         if member is not None:
             return Response(data={"error":"Already Subscribed!!!"})
-        Subscribe.objects.create(community__Community_name=Community_name, user=request.user)
+        instance = Community.objects.filter(Community_name=Community_name).first()
+        Subscribe.objects.create(community=instance, user=request.user)
         return Response(data={"success":"Subscribed!!!"})
 
     @action(methods=['post'], detail=False,url_path='(?P<Community_name>.+)/unsubscribe', permission_classes=[permissions.IsAuthenticated])
