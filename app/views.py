@@ -33,7 +33,7 @@ class UserViewset(viewsets.ModelViewSet):
         'get_current_user':UserSerializer,
         'getMyArticles':AuthorSerializer,
         'getUserArticles':UserSerializer,
-        'getposts': SocialPostSerializer
+        'getposts': SocialPostSerializer,
     }
 
 
@@ -92,7 +92,7 @@ class UserViewset(viewsets.ModelViewSet):
         serializer.is_valid()
         articles = serializer.data
         return Response(data={"success": articles})
-
+    
     @action(methods=['get'], detail=False, url_path="(?P<username>.+)/posts", permission_classes=[permissions.IsAuthenticated])
     def getposts(self, request, username):
         queryset = User.objects.filter(username=username)
@@ -200,7 +200,8 @@ class CommunityViewset(viewsets.ModelViewSet):
         "get_requests":CommunityRequestSerializer,
         "approve_request":ApproverequestSerializer,
         "subscribe": SubscribeSerializer,
-        "unsubscribe": SubscribeSerializer
+        "unsubscribe": SubscribeSerializer,
+        'mycommunity': CommunitySerializer,
     }
     
     def get_serializer_class(self):
@@ -256,6 +257,15 @@ class CommunityViewset(viewsets.ModelViewSet):
         serializer.is_valid()
         articles = serializer.data
         return Response(data={"success": articles})
+
+    @action(methods=['get'], detail=False, url_path="mycommunity", permission_classes=[permissions.IsAuthenticated,])
+    def getMyCommunity(self, request):
+        member = CommunityMember.objects.filter(user=request.user,is_admin=True).first()
+        instance = Community.objects.filter(id=member.community.id)
+        serializer = CommunitySerializer(data=instance, many=True)
+        serializer.is_valid()
+        community = serializer.data
+        return Response(data={"success": community[0]})
     
     @action(methods=['POST'], detail=False, url_path='(?P<Community_name>.+)/article/(?P<article_id>.+)/publish',permission_classes=[CommunityPermission])
     def addPublishedInfo(self, request, Community_name, article_id):

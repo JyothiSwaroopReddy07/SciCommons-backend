@@ -16,7 +16,7 @@ class UserPermission(permissions.BasePermission):
             return True
         elif view.action in [
             'retrieve', 'update', 'partial_update', 'destroy',
-            'change_password', 'getMyArticles', 'getUserArticles'
+            'change_password', 'getMyArticles', 'getUserArticles','getMyCommunity'
             ]:
             return request.user.is_authenticated
         else:
