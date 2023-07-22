@@ -197,7 +197,7 @@ class CommunityViewset(viewsets.ModelViewSet):
         "list": CommunitylistSerializer,
         "retrieve": CommunityGetSerializer,
         "join_request":JoinRequestSerializer,
-        "get_requests":CommunityRequestSerializer,
+        "get_requests":CommunityRequestGetSerializer,
         "approve_request":ApproverequestSerializer,
         "subscribe": SubscribeSerializer,
         "unsubscribe": SubscribeSerializer,
@@ -358,6 +358,8 @@ class CommunityViewset(viewsets.ModelViewSet):
 
         if serializer.data['status']=="approved":
             obj.members.add(serializer.data['user'])
+
+        joinrequest.delete()
 
         return Response(data={"success":serializer.data})
     

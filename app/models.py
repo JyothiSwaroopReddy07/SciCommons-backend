@@ -117,9 +117,14 @@ class CommunityMember(models.Model):
     
     class Meta:
         db_table = 'community_member'
+        constraints = [
+            models.UniqueConstraint(fields=['community', 'is_admin'], condition=models.Q(is_admin=True), name='unique_admin_per_community')
+        ]
         
     def __str__(self) -> str:
         return f"{self.user} - {self.community}"
+
+
 
 class OfficialReviewer(models.Model):
     User = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -215,6 +220,7 @@ class Author(models.Model):
     
     class Meta:
         db_table = 'author'
+        unique_together = ('article', 'User')
 
     def __str__(self) -> str:
         return self.User.username

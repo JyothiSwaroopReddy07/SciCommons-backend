@@ -267,6 +267,9 @@ class JoinRequestSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'user']
 
     def create(self, validated_data):
+        requests = self.Meta.model.objects.filter(status='pending', user=self.context['request'].user).first()
+        if requests:
+            raise serializers.ValidationError(detail={"error":"you already made request"})  
         instance = self.Meta.model.objects.create(**validated_data, status='pending', user=self.context['request'].user)
         instance.save()
 
@@ -277,6 +280,22 @@ class CommunityRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommunityRequests
         fields = ['id', 'user', 'community', 'summary', 'about', 'status']
+
+
+class CommunityRequestGetSerializer(serializers.ModelSerializer):
+
+    username = serializers.SerializerMethodField()
+    rank = serializers.SerializerMethodField()
+    class Meta:
+        model = CommunityRequests
+        fields = ['id', 'user', 'community', 'summary', 'about', 'status', 'username', 'rank']
+    
+    def get_username(self, obj):
+        return obj.user.username
+    
+    def get_rank(self, obj):
+        member = Rank.objects.filter(user_id=obj.user.id).first()
+        return member.rank
 
 class ApproverequestSerializer(serializers.ModelSerializer):
 

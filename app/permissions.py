@@ -5,11 +5,12 @@ from app.serializer import *
 
 class UserPermission(permissions.BasePermission):
 
-    def has_permission(self, request, view):
-
-        if view.action == 'list':
+    def has_object_permission(self, request, view, obj):
+        
+        if view.action in ['list']:
             return request.user.is_authenticated
-        elif view.action in [
+        
+        if view.action in [
             'create', 'login', 'refresh_token',
             'forgot_password', 'reset_password',
             ]:
@@ -18,7 +19,7 @@ class UserPermission(permissions.BasePermission):
             'retrieve', 'update', 'partial_update', 'destroy',
             'change_password', 'getMyArticles', 'getUserArticles','getMyCommunity'
             ]:
-            return request.user.is_authenticated
+            return request.user.is_authenticated and request.user == obj
         else:
             return False
         
@@ -91,7 +92,6 @@ class ArticlePermission(permissions.BasePermission):
                 return False
         elif view.action in ['blockUser', 'unblockUser']:
             member = Article.objects.filter(id=obj.pk).first()
-            print(member)
             if request.user in member["moderators"]:
                 return True
             else:
@@ -171,3 +171,12 @@ class FollowPermission(permissions.BasePermission):
         
         elif view.action in ['destroy']:
             return obj.user == request.user
+
+class ChatPermission(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if view.action in ['retrieve', 'list', 'create']:
+            return request.user.is_authenticated
+
+        elif view.action in ['update', 'destroy']:
+            return obj.sener == request.user
