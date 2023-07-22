@@ -620,7 +620,6 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
                         send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.User.email], fail_silently=False)
                         UserActivity.objects.create(user=self.context['request'].user, action=f'you added article {instance.article_name}')
             instance.authorstring = authorstr
-            communities = validated_data.get('communities', [])
             if len(communities) > 0 and instance.link is not None:
                 raise serializers.ValidationError(detail={"error": "you can not submit external article"})
 

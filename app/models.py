@@ -44,6 +44,10 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     profile_picture = CloudinaryField('profile_images', null=True)
+    pubmed = models.CharField(max_length=255,null=True,blank=True)
+    google_scholar = models.CharField(max_length=255,null=True,blank=True)
+    institute = models.CharField(max_length=255,null=True,blank=True)
+    email_notify = models.BooleanField(default=True)
 
     objects = UserManager()
 
@@ -80,15 +84,6 @@ class ForgetPassword(models.Model):
     def __str__(self) -> str:
         return str(self.id)
 
-class UserMeta(models.Model):
-    pubmed = models.CharField(max_length=255,null=True,blank=True)
-    google_scholar = models.CharField(max_length=255,null=True,blank=True)
-    institute = models.CharField(max_length=255,null=True,blank=True)
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
-    email_notify = models.BooleanField(default=True)
-
-    class Meta:
-        db_table = 'user_meta'
     
 class Community(models.Model):
     title = models.CharField(max_length=300, unique=True, name='Community_name')
