@@ -295,7 +295,8 @@ class CommunityUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Community
-        fields = ['subtitle', 'description', 'location', 'github', 'email', 'website']
+        fields = ['id','Community_name','subtitle', 'description', 'location', 'github', 'email', 'website']
+        read_only_fields = ['Community_name','id']
 
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():
