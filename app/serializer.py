@@ -629,7 +629,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
                         community_meta = CommunityMeta.objects.create(community_id=community, article=instance, status='submitted')
                         community_meta.save()
                         
-                        community = Community.objects.get(id=community)
+                        community = Community.objects.filter(id=community).first()
 
                         emails = [member.user.email for member in CommunityMember.objects.filter(community=community)]
                         send_mail("New Article Alerts", f'New Article {instance.article_name} added on {community}', settings.EMAIL_HOST_USER, emails, fail_silently=False) 
