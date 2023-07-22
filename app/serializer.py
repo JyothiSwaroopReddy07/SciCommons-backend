@@ -289,7 +289,8 @@ class CommunityRequestGetSerializer(serializers.ModelSerializer):
 
     username = serializers.SerializerMethodField()
     rank = serializers.SerializerMethodField()
-    profile_pic_url = serializers.ReadOnlyField()
+    profile_pic_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = CommunityRequests
         fields = ['id', 'user', 'community', 'summary', 'about', 'status', 'username', 'rank', 'profile_pic_url']
