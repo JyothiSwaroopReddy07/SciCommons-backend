@@ -267,6 +267,9 @@ class JoinRequestSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'user']
 
     def create(self, validated_data):
+        member = CommunityMember.objects.filter(user=self.context['request'].user, community=validated_data['community']).first()
+        if member is not None:
+            raise serializers.ValidationError(detail={"error":"you are already member of community"})
         requests = self.Meta.model.objects.filter(status='pending', user=self.context['request'].user).first()
         if requests:
             raise serializers.ValidationError(detail={"error":"you already made request"})  
