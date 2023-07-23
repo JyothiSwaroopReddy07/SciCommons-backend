@@ -290,7 +290,7 @@ class CommunityRequestGetSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
     rank = serializers.SerializerMethodField()
     profile_pic_url = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CommunityRequests
         fields = ['id', 'user', 'community', 'summary', 'about', 'status', 'username', 'rank', 'profile_pic_url']
@@ -1039,10 +1039,27 @@ class CommunityMetaApproveSerializer(serializers.ModelSerializer):
 communitymembers serializer
 '''
 class CommunityMemberSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField(read_only=True)
+    email = serializers.SerializerMethodField(read_only=True)
+    profile_pic_url = serializers.SerializerMethodField(read_only=True)
+    user_id = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = CommunityMember
-        fields = ['user','is_reviewer','is_moderator','is_admin']
-        depth = 1
+        fields = ['username','is_reviewer','is_moderator','is_admin', 'profile_pic_url', 'user_id','email']
+    
+    def get_username(self, obj):
+        return obj.user.username
+
+    def get_email(self, obj):
+        return obj.user.email
+
+    def get_profile_pic_url(self, obj):
+        return obj.user.profile_pic_url()
+    
+    def get_user_id(self, obj):
+        return obj.user.id
+
 
 '''
 AuthorSerializer
