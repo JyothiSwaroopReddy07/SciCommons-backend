@@ -293,9 +293,12 @@ class CommunityViewset(viewsets.ModelViewSet):
     
     @action(methods=['POST'],detail=False, url_path='(?P<Community_name>.+)/promote_member',permission_classes=[CommunityPermission]) 
     def promote_member(self, request, Community_name):
-        
         obj = self.get_object()
         self.check_object_permissions(request,obj)
+        member = User.objects.filter(username=request.data["username"]).first()
+        if member is None:
+            return Response(data={"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        request.data["user_id"] = member.id
         serializer = self.get_serializer(obj, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
