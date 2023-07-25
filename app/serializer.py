@@ -402,6 +402,12 @@ class PromoteSerializer(serializers.ModelSerializer):
                 UserActivity.objects.create(user=self.context['request'].user, action=f'you added {member.user.username} to {instance.Community_name} as moderator')
                 
             elif role == 'admin':
+                reviewer = OfficialReviewer.objects.filter(User_id=user_id, community=instance)
+                if reviewer.exists():
+                    reviewer.delete()
+                moderator = Moderator.objects.create(user_id=user_id, community=instance)
+                if moderator.exists():
+                    moderator.delete()
                 member.is_moderator = False
                 member.is_reviewer = False
                 member.is_admin = True
