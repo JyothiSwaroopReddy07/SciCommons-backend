@@ -402,17 +402,17 @@ class PromoteSerializer(serializers.ModelSerializer):
                 UserActivity.objects.create(user=self.context['request'].user, action=f'you added {member.user.username} to {instance.Community_name} as moderator')
                 
             elif role == 'admin':
-                reviewer = OfficialReviewer.objects.filter(User_id=user_id, community=instance)
-                if reviewer.exists():
+                reviewer = OfficialReviewer.objects.filter(User_id=user_id, community=instance).first()
+                if reviewer is not None:
                     reviewer.delete()
-                moderator = Moderator.objects.create(user_id=user_id, community=instance)
-                if moderator.exists():
+                moderator = Moderator.objects.filter(user_id=user_id, community=instance).first()
+                if moderator is not None:
                     moderator.delete()
                 member.is_moderator = False
                 member.is_reviewer = False
                 member.is_admin = True
                 member.save()
-                send_mail("you are admin", f'You have been added as Admin to {instance.Community_name}', settings.EMAIL_HOST_USER , [member.user.email], fail_silently=False)
+                send_mail("you are now admin", f'You have been added as Admin to {instance.Community_name}', settings.EMAIL_HOST_USER , [member.user.email], fail_silently=False)
                 UserActivity.objects.create(user=self.context['request'].user, action=f'you added {member.user.username} to {instance.Community_name} as admin')
                                 
             elif role == 'member':
@@ -1218,13 +1218,12 @@ class SocialPostCommentListSerializer(serializers.ModelSerializer):
 
     likes = serializers.SerializerMethodField(read_only=True)
     liked = serializers.SerializerMethodField(read_only=True)
-    replies_count = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPostComment
-        fields = ['id', 'username', 'post', 'comment', 'created_at', 'likes', 'liked', 'replies_count', 'avatar']
+        fields = ['id', 'username', 'post', 'comment', 'created_at', 'likes', 'liked', 'avatar']
     
     def get_username(self,obj):
         return obj.user.username
@@ -1240,21 +1239,16 @@ class SocialPostCommentListSerializer(serializers.ModelSerializer):
         liked = SocialPostCommentLike.objects.filter(comment_id=obj.id, user=self.context['request'].user).count()
         return liked
 
-    def get_replies_count(self, obj):
-        replies_count = SocialPostComment.objects.filter(parent_comment=obj.id).count()
-        return replies_count
     
 class SocialPostCommentGetSerializer(serializers.ModelSerializer):
     liked = serializers.SerializerMethodField(read_only=True)
     likes = serializers.SerializerMethodField(read_only=True)
-    replies_count = serializers.SerializerMethodField(read_only=True)
-    replies = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPostComment
-        fields = ['id', 'username', 'post', 'comment', 'created_at', 'likes', 'liked', 'replies_count', 'replies', 'avatar']
+        fields = ['id', 'username', 'post', 'comment', 'created_at', 'likes', 'liked', 'avatar']
 
     def get_username(self,obj):
         return obj.user.username
@@ -1269,15 +1263,6 @@ class SocialPostCommentGetSerializer(serializers.ModelSerializer):
     def get_liked(self, obj):
         liked = SocialPostCommentLike.objects.filter(comment_id=obj.id, user=self.context['request'].user).count()
         return liked
-    
-    def get_replies_count(self, obj):
-        replies_count = SocialPostComment.objects.filter(parent_comment=obj.id).count()
-        return replies_count
-
-    def get_replies(self, obj):
-        replies = SocialPostComment.objects.filter(parent_comment=obj.id)
-        serializer = SocialPostCommentListSerializer(replies, many=True)
-        return serializer.data
 
 class SocialPostLikeSerializer(serializers.ModelSerializer):
     class Meta:
