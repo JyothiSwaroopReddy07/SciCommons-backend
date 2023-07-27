@@ -1014,6 +1014,13 @@ class SocialPostViewset(viewsets.ModelViewSet):
         response = super(SocialPostViewset, self).destroy(request, pk)
     
         return Response(data={"success":"Post Successfuly removed!!!"})
+    
+    @action(methods=['get'],detail=False,url_path="timeline", permission_classes=[SocialPostPermission])
+    def timeline(self,request):
+        following = Follow.objects.filter(follower=request.user).values_list('following', flat=True)
+        posts = SocialPost.objects.filter(user__in=following.all())
+        serializer = SocialPostSerializer(posts, many=True)
+        return Response(data={"success":serializer.data})
 
     @action(methods=['post'], detail=False,url_path="like", permission_classes=[SocialPostPermission])
     def like(self, request):
@@ -1062,7 +1069,7 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     action_serializers = {
         "create": SocialPostCommentCreateSerializer,
         "destroy": SocialPostCommentSerializer,
-        "retrieve": SocialPostCommentGetSerializer,
+        "retrieve": SocialPostCommentListSerializer,
         "list": SocialPostCommentListSerializer,
         "update": SocialPostCommentSerializer,
         "like": SocialPostCommentLikeSerializer

@@ -1120,16 +1120,17 @@ class SocialPostListSerializer(serializers.ModelSerializer):
     isbookmarked = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
     image_url = serializers.SerializerMethodField(read_only=True)
+    avatar = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPost
-        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'bookmarks', 'isbookmarked','image', 'image_url']
+        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'bookmarks','avatar', 'isbookmarked', 'image_url']
 
     def get_username(self,obj):
         return obj.user.username
     
     def get_avatar(self,obj):
-        return obj.user.profile_picture
+        return obj.user.profile_pic_url()
 
     def get_comments_count(self, obj):
         comments_count = SocialPostComment.objects.filter(post_id=obj.id).count()
@@ -1142,6 +1143,9 @@ class SocialPostListSerializer(serializers.ModelSerializer):
     def get_liked(self, obj):
         liked = SocialPostLike.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
         return liked
+    
+    def get_image_url(self,obj):
+        return obj.image_url()
 
     def get_bookmarks(self,obj):
         bookmarks = BookMark.objects.filter(post_id=obj.id).count()
@@ -1160,16 +1164,17 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
     isbookmarked = serializers.SerializerMethodField(read_only=True)
     image_url = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
+    avatar = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPost
-        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments', 'bookmarks', 'isbookmarked', 'image', 'image_url']
+        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments', 'bookmarks','avatar', 'isbookmarked', 'image_url']
 
     def get_username(self,obj):
         return obj.user.username
     
     def get_avatar(self,obj):
-        return obj.user.profile_picture
+        return obj.user.profile_pic_url()
     
     def get_comments(self, obj):
         comments = SocialPostComment.objects.filter(post_id=obj.id)
@@ -1187,6 +1192,9 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
     def get_liked(self, obj):
         liked = SocialPostLike.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
         return liked
+    
+    def get_image_url(self,obj):
+        return obj.image_url()
     
     def get_bookmarks(self,obj):
         bookmarks = BookMark.objects.filter(post_id=obj.id).count()
@@ -1229,7 +1237,7 @@ class SocialPostCommentListSerializer(serializers.ModelSerializer):
         return obj.user.username
     
     def get_avatar(self,obj):
-        return obj.user.profile_picture
+        return obj.user.profile_pic_url()
 
     def get_likes(self, obj):
         likes = SocialPostCommentLike.objects.filter(comment_id=obj.id).count()
@@ -1240,30 +1248,6 @@ class SocialPostCommentListSerializer(serializers.ModelSerializer):
         return liked
 
     
-class SocialPostCommentGetSerializer(serializers.ModelSerializer):
-    liked = serializers.SerializerMethodField(read_only=True)
-    likes = serializers.SerializerMethodField(read_only=True)
-    avatar = serializers.SerializerMethodField(read_only=True)
-    username = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = SocialPostComment
-        fields = ['id', 'username', 'post', 'comment', 'created_at', 'likes', 'liked', 'avatar']
-
-    def get_username(self,obj):
-        return obj.user.username
-    
-    def get_avatar(self,obj):
-        return obj.user.profile_picture
-    
-    def get_likes(self, obj):
-        likes = SocialPostCommentLike.objects.filter(comment_id=obj.id).count()
-        return likes
-    
-    def get_liked(self, obj):
-        liked = SocialPostCommentLike.objects.filter(comment_id=obj.id, user=self.context['request'].user).count()
-        return liked
-
 class SocialPostLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialPostLike
