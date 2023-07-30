@@ -995,7 +995,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
     def create(self, request):
         print(request.data)
         response = super(SocialPostViewset, self).create(request)
-        created = response.data
+        created = SocialPostListSerializer(data=response.data)
     
         return Response(data={"success":"Post Successfully added!!!","post": created})
     

@@ -646,7 +646,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
                         
                         community = Community.objects.filter(id=community).first()
 
-                        emails = [member.user.email for member in CommunityMember.objects.filter(community=community)]
+                        emails = [member.user.email for member in CommunityMember.objects.filter(community_id=community)]
                         send_mail("New Article Alerts", f'New Article {instance.article_name} added on {community}', settings.EMAIL_HOST_USER, emails, fail_silently=False) 
             instance.save()
             return instance
