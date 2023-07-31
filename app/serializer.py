@@ -359,7 +359,6 @@ class PromoteSerializer(serializers.ModelSerializer):
         
         if user_id is None:
             raise serializers.ValidationError(detail={"error": "user id can't be None"})
-        print()
         member = CommunityMember.objects.filter(community=instance, user_id=user_id).first()
         
         if member is None:

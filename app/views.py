@@ -446,7 +446,6 @@ class ArticleViewset(viewsets.ModelViewSet):
         article = self.queryset.filter(article_name=name).first()
         if article is not None:
             return Response(data={"error": "Article with same name already exists!!!"}, status=status.HTTP_400_BAD_REQUEST)
-        print(request.data)
         response = super(ArticleViewset, self).create(request)
     
         return Response(data={"success": "Article successfully submitted"})
@@ -993,7 +992,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
     
     
     def create(self, request):
-        print(request.data)
+
         response = super(SocialPostViewset, self).create(request)
         created = SocialPostListSerializer(data=response.data)
     
@@ -1024,6 +1023,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False,url_path="like", permission_classes=[SocialPostPermission])
     def like(self, request):
+
         post = SocialPostLike.objects.filter(post_id=request.data["post"], user=request.user).first()
         if post is not None:
             return Response(data={"error":"Already Liked!!!"})
@@ -1032,7 +1032,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False,url_path="unlike", permission_classes=[SocialPostCommentPermission])
     def unlike(self, request):
-        print(request.data["post"])
+
         member = SocialPostLike.objects.filter(post_id=request.data["post"],user=request.user).first()
         if member is not None:
             member.delete()
