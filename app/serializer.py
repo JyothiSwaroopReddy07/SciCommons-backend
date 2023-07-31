@@ -320,15 +320,27 @@ class ApproverequestSerializer(serializers.ModelSerializer):
         return instance
     
 class CommunityUpdateSerializer(serializers.ModelSerializer):
+    members = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True
+    )
     
     class Meta:
         model = Community
-        fields = ['id','Community_name','subtitle', 'description', 'location', 'github', 'email', 'website']
+        fields = ['id','Community_name','subtitle', 'description', 'location', 'github', 'email', 'website', 'members']
         read_only_fields = ['Community_name','id']
 
     def update(self, instance, validated_data):
+        members = validated_data.pop("members", [])
+        if members:
+            with transaction.atomic():
+                for member in members:
+                    member = CommunityMember.objects.create(user_id=member, community_id=instance.id)
+                    member.save()
+                members = [member.user.id for member in CommunityMember.objects.all()]
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        instance.members.set(members)
         instance.save()
         send_mail("you have updated community" , f'You have updated {instance.Community_name} details', settings.EMAIL_HOST_USER,[instance.user.email], fail_silently=False)
         UserActivity.objects.create(user=self.context['request'].user, action=f'you have updated deatils in {instance.Community_name}')

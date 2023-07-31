@@ -113,7 +113,8 @@ class CommunityMember(models.Model):
     class Meta:
         db_table = 'community_member'
         constraints = [
-            models.UniqueConstraint(fields=['community', 'is_admin'], condition=models.Q(is_admin=True), name='unique_admin_per_community')
+            models.UniqueConstraint(fields=['community', 'user'], name='unique_admin_per_community'),
+            models.UniqueConstraint(fields=['user', 'is_admin'], condition=models.Q(is_admin=True), name='only_one_community_admin')
         ]
         
     def __str__(self) -> str:
