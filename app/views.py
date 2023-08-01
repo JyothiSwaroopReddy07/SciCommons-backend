@@ -994,9 +994,8 @@ class SocialPostViewset(viewsets.ModelViewSet):
     def create(self, request):
 
         response = super(SocialPostViewset, self).create(request)
-        created = SocialPostListSerializer(data=response.data)
     
-        return Response(data={"success":"Post Successfully added!!!","post": created})
+        return Response(data={"success":"Post Successfully added!!!"})
     
     def update(self, request, pk):
 
@@ -1018,7 +1017,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
     def timeline(self,request):
         following = Follow.objects.filter(follower=request.user).values_list('following', flat=True)
         posts = SocialPost.objects.filter(user__in=following.all())
-        serializer = SocialPostSerializer(posts, many=True)
+        serializer = SocialPostListSerializer(posts, many=True)
         return Response(data={"success":serializer.data})
 
     @action(methods=['post'], detail=False,url_path="like", permission_classes=[SocialPostPermission])

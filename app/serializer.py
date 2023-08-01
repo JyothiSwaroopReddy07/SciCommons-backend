@@ -1113,15 +1113,22 @@ class SocialPostSerializer(serializers.ModelSerializer):
         read_only_fields = ['user','id','created_at', 'image']
 
 class SocialPostCreateSerializer(serializers.ModelSerializer):
+    image_url = serializers.ReadOnlyField()
     class Meta:
         model = SocialPost
-        fields = ['id', 'user', 'body', 'created_at', 'image']
-        read_only_fields = ['user','id','created_at', 'image']
+        fields = ['id', 'user', 'body', 'created_at', 'image', 'image_url']
+        read_only_fields = ['user','id','created_at']
 
     def create(self, validated_data):
         instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
         instance.save()
         return instance
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop("image")
+
+        return representation
 
 class SocialPostListSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField(read_only=True)
