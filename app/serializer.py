@@ -1197,6 +1197,7 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
     def get_comments(self, obj):
         comments = SocialPostComment.objects.filter(post_id=obj.id)
         serializer = SocialPostCommentListSerializer(self,comments, many=True)
+        serializer.is_valid()
         return serializer.data
 
     def get_comments_count(self, obj):
