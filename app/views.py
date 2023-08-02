@@ -1071,7 +1071,9 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
         "retrieve": SocialPostCommentListSerializer,
         "list": SocialPostCommentListSerializer,
         "update": SocialPostCommentSerializer,
-        "like": SocialPostCommentLikeSerializer
+        "like": SocialPostCommentLikeSerializer,
+        "unlike": SocialPostCommentLikeSerializer,
+        "replies": SocialPostCommentListSerializer
     }
         
     def get_serializer_class(self):
@@ -1080,7 +1082,7 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         post = self.request.query_params.get("post", None)
         if post is not None:
-            qs = self.queryset.filter(post_id=post)
+            qs = self.queryset.filter(post_id=post).order_by('-created_at')
         else:
             qs = []
         return qs
@@ -1135,7 +1137,14 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
             return Response(data={"success":"DisLiked!!!"})
         else:
             return Response(data={"error":"Comment not found!!!"})
-
+    
+    @action(methods=['get'], detail=False,url_path="replies", permission_classes=[SocialPostCommentPermission])
+    def replies(self, request):
+        comment = request.query_params.get("comment", None)
+        post = request.query_params.get("post", None)
+        comments = self.queryset.filter(post_id=post,parent_comment=comment).order_by('-created_at')
+        serializer = SocialPostCommentListSerializer(comments, many=True)
+        return Response(data={"success":serializer.data})
     
 class FollowViewset(viewsets.ModelViewSet):
     queryset = Follow.objects.all()

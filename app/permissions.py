@@ -153,7 +153,7 @@ class SocialPostCommentPermission(permissions.BasePermission):
         if view.action in ['retrieve', 'list']:
             return True
         
-        elif view.action in ['create', 'like', 'unlike']:
+        elif view.action in ['create', 'like', 'unlike', 'replies']:
             return request.user.is_authenticated
         
         elif view.action in [ 'destroy', 'update']:
