@@ -1122,7 +1122,7 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     
         return Response(data={"success":"Comment Successfuly removed!!!"})
 
-    @action(methods=['post'], detail=False,url_path="/like", permission_classes=[SocialPostCommentPermission])
+    @action(methods=['post'], detail=False,url_path="like", permission_classes=[SocialPostCommentPermission])
     def like(self, request):
         if SocialPostCommentLike.objects.filter(comment_id=request.data["comment"], user=request.user).first() is not None:
             return Response(data={"error":"Already Liked!!!"})
