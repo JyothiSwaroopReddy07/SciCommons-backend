@@ -1195,7 +1195,7 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
         return obj.user.profile_pic_url()
     
     def get_comments(self, obj):
-        comments = SocialPostComment.objects.filter(post_id=obj.id).order_by('-created_at')
+        comments = SocialPostComment.objects.filter(post_id=obj.id, parent_comment__isnull=True).order_by('-created_at')
         serializer = SocialPostCommentListSerializer(comments, many=True, context={'request': self.context['request']})
         return serializer.data
 
@@ -1232,7 +1232,7 @@ class SocialPostCommentSerializer(serializers.ModelSerializer):
 class SocialPostCommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialPostComment
-        fields = ['id', 'user', 'post', 'comment', 'created_at']
+        fields = ['id', 'user', 'post', 'comment', 'created_at','parent_comment']
         read_only_fields = ['user','id','created_at']
 
     def create(self, validated_data):
