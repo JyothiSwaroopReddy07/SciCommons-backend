@@ -1249,7 +1249,7 @@ class SocialPostCommentListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SocialPostComment
-        fields = ['id', 'username', 'post', 'comment', 'created_at', 'commentlikes', 'commentliked', 'commentavatar']
+        fields = ['id', 'username', 'post', 'comment', 'created_at', 'commentlikes', 'commentliked', 'commentavatar','replies']
     
     def get_username(self,obj):
         return obj.user.username
@@ -1264,6 +1264,10 @@ class SocialPostCommentListSerializer(serializers.ModelSerializer):
     def get_commentliked(self, obj):
         liked = SocialPostCommentLike.objects.filter(comment_id=obj.id, user=self.context['request'].user).count()
         return liked
+    
+    def replies(self,obj):
+        replies = SocialPostComment.objects.filter(parent_comment=obj).count()
+        return replies
 
     
 class SocialPostLikeSerializer(serializers.ModelSerializer):
