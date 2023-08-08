@@ -968,7 +968,8 @@ class SocialPostViewset(viewsets.ModelViewSet):
         "like": SocialPostLikeSerializer,
         "unlike": SocialPostLikeSerializer,
         "bookmark": SocialPostBookmarkSerializer,
-        "unbookmark": SocialPostBookmarkSerializer
+        "unbookmark": SocialPostBookmarkSerializer,
+        "bookmarks": SocialPostListSerializer,
     }
         
     def get_serializer_class(self):
