@@ -1080,9 +1080,9 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     
     def get_queryset(self):
         post = self.request.query_params.get("post", None)
-        parent_comment = self.request.query_params.get("comment", None)
-        if parent_comment is not None:
-            qs = self.queryset.filter(post_id = post,parent_comment_id=parent_comment).order_by('-created_at')
+        comment = self.request.query_params.get("comment", None)
+        if comment is not None:
+            qs = self.queryset.filter(post_id = post,parent_comment_id=comment).order_by('-created_at')
         elif post is not None:
             qs = self.queryset.filter(post_id=post).order_by('-created_at').exclude(parent_comment__isnull=False)
         else:
