@@ -1019,6 +1019,13 @@ class SocialPostViewset(viewsets.ModelViewSet):
         posts = SocialPost.objects.filter(user__in=following.all())
         serializer = SocialPostListSerializer(posts, many=True)
         return Response(data={"success":serializer.data})
+    
+    @action(methods=['get'],detail=False,url_path="bookmarks", permission_classes=[SocialPostPermission])
+    def bookmarks(self,request):
+        bookmarks = BookMark.objects.filter(user=request.user).values_list('post', flat=True)
+        posts = SocialPost.objects.filter(id__in=bookmarks.all())
+        serializer = SocialPostListSerializer(posts, many=True)
+        return Response(data={"success":serializer.data})
 
     @action(methods=['post'], detail=False,url_path="like", permission_classes=[SocialPostPermission])
     def like(self, request):
