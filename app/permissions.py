@@ -140,7 +140,7 @@ class SocialPostPermission(permissions.BasePermission):
         if view.action in ['retrieve', 'list']:
             return True
         
-        elif view.action in ['create', 'like','unlike']:
+        elif view.action in ['create', 'like','unlike', 'bookmarks']:
             return request.user.is_authenticated
         
         elif view.action in ['destroy', 'update','getMyPosts','bookmark','unbookmark']:
