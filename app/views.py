@@ -1142,7 +1142,7 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     def replies(self, request):
         comment = request.query_params.get("comment", None)
         post = request.query_params.get("post", None)
-        comments = self.queryset.filter(post_id=post,parent_comment=comment).order_by('-created_at')
+        comments = self.queryset.filter(post_id=post,parent_comment_id=comment).order_by('-created_at')
         serializer = SocialPostCommentListSerializer(comments, many=True)
         return Response(data={"success":serializer.data})
     
