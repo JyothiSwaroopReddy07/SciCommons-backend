@@ -1078,7 +1078,7 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
         "destroy": SocialPostCommentSerializer,
         "retrieve": SocialPostCommentListSerializer,
         "list": SocialPostCommentListSerializer,
-        "update": SocialPostCommentSerializer,
+        "update": SocialPostCommentUpdateSerializer,
         "like": SocialPostCommentLikeSerializer,
         "unlike": SocialPostCommentLikeSerializer
     }
@@ -1118,7 +1118,9 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     
     def update(self, request, pk):
 
-        instance = self.get_object()
+        print("jyothi swaroop!!!")
+        instance = SocialPostComment.objects.filter(id=pk).first()
+        print(instance)
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)

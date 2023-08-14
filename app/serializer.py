@@ -1239,6 +1239,17 @@ class SocialPostCommentCreateSerializer(serializers.ModelSerializer):
         instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
         instance.save()
         return instance
+    
+class SocialPostCommentUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialPostComment
+        fields = ['id', 'user', 'post', 'comment', 'created_at','parent_comment']
+        read_only_fields = ['user','id','created_at','post']
+
+    def update(self, instance, validated_data):
+        instance.comment = validated_data.get('comment', instance.comment)
+        instance.save()
+        return instance
 
 class SocialPostCommentListSerializer(serializers.ModelSerializer):
 
