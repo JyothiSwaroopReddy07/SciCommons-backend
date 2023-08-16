@@ -172,11 +172,40 @@ class FollowPermission(permissions.BasePermission):
         elif view.action in ['destroy']:
             return obj.user == request.user
 
-class ChatPermission(permissions.BasePermission):
-
+class MessagePermissions(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if view.action in ['retrieve', 'list', 'create']:
-            return request.user.is_authenticated
+        if view.action in ["list", "retrive"]:
+            if obj.sender == request.User or obj.receiver == request.user:
+                return True
+            else:
+                return False
 
-        elif view.action in ['update', 'destroy']:
-            return obj.sener == request.user
+        elif view.action in ["destroy", "update"]:
+            return obj.sender == request.user
+
+
+class ArticleChatPermissions(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+
+        if request.user in obj.article.blocked_users.all():
+            return False
+        
+        if view.action in ["list", "retrive"]:
+            if obj.sender == request.User or obj.receiver == request.user:
+                return True
+            else:
+                return False
+
+        elif view.action in ["destroy"]:
+            if obj.sender == request.user:
+                return True
+            elif request.user in obj.article.moderator.all():
+                return True
+            else:
+                return False
+
+        elif view.action in ["update"]:
+            if obj.sender == request.user:
+                return True
+            else:
+                return False

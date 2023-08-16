@@ -928,64 +928,57 @@ class LikeSerializer(serializers.ModelSerializer):
         model = LikeBase
         fields = ['post', 'value']
 
-
 '''
-chat serializer
+Article Chat Serializers
 '''
-
-class ChatSerializer(serializers.ModelSerializer):
+class ArticleChatSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Message
-        fields = ['id', 'sender', 'body', 'article', 'created_at']
-    
+        fields = ["id", "sender", "body", "media", "article", "created_at"]
+
     def get_sender(self, obj):
         user = User.objects.filter(id=obj.sender.id).first()
-        return f'{user.username}'
+        return f"{user.username}"
 
-        
-class ChatCreateSerializer(serializers.ModelSerializer):
+
+class ArticleChatUpdateSerializer(serializers.ModelSerializer):
+    sender = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Message
-        fields = ['body', 'channel', 'article', 'receiver']
-    
+        fields = ["body", "media"]
+
+
+class ArticleChatCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArticleMessage
+        fields = ["body", "article", "media"]
+
     def create(self, validated_data):
         from channels.layers import get_channel_layer
         from asgiref.sync import async_to_sync
-        receiver = validated_data('receiver', None)
-        sender = validated_data('sender', None)
-        article = validated_data('article', None)
 
-        instance = self.Meta.model.objects.create(**validated_data, sender=self.context['request'].user)
+        article = validated_data("article", None)
+        channel = f"Article_{article}"
+
+        instance = self.Meta.model.objects.create(
+            **validated_data, channel=channel, sender=self.context["request"].user
+        )
         instance.save()
 
-        if receiver:
-            channel = f"chat_{sender}_{receiver}"
-            message = {
-            "sender":instance.sender,
-            "receiver":instance.receiver,
-            "body":instance.body
-        }
-        elif article:
-            channel = f"chat_{article}"
-            message = {
-            "article":instance.article,
-            "body":instance.body
-        }
+        message = {"article": instance.article, "body": instance.body, "media":instance.media.url}
 
         # Send the message via websockets
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            channel,
-            {
-                'type': 'chat_message',
-                'message': message
-            }
+            channel, {"type": "chat_message", "message": message}
         )
 
         return instance
 
+ 
 '''
 notification serializer
 '''
@@ -1328,6 +1321,63 @@ class SocialPostBookmarkSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
         instance.save()
+        return instance
+    
+'''
+Message Serailizer
+'''
+    
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ["id", "sender", "receiver", "media", "body", "created_at"]
+
+    def get_sender(self, obj):
+        user = User.objects.filter(id=obj.sender.id).first()
+        return f"{user.username}"
+
+    def get_receiver(self, obj):
+        user = User.objects.filter(id=obj.receiver.id).first()
+        return f"{user.username}"
+
+
+class MessageUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ["body", "media"]
+
+
+class MessageCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ["body", "receiver", "media"]
+
+    def create(self, validated_data):
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+
+        receiver = validated_data("receiver", None)
+        channel = f"chat_{self.context['request'].user}_{receiver}"
+
+        instance = self.Meta.model.objects.create(
+            **validated_data, channel=channel, sender=self.context["request"].user
+        )
+        instance.save()
+
+        if receiver:
+            message = {
+                "sender": instance.sender,
+                "receiver": instance.receiver,
+                "body": instance.body,
+                "media":instance.media.url
+            }
+
+        # Send the message via websockets
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            channel, {"type": "chat_message", "message": message}
+        )
+
         return instance
 
 

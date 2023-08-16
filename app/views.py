@@ -814,64 +814,6 @@ class CommentViewset(viewsets.ModelViewSet):
                                    
 
                 return Response({'success': 'Comment disliked successfully.'})
-
-class ChatViewset(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
-    permission_classes = [GeneralPermission]    
-    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
-    serializer_class = ChatSerializer
-    http_method_names = ['post', 'get', 'put', 'delete']
-    
-    action_serializer = {
-        "create":ChatCreateSerializer
-    }
-    
-    def get_serializer_class(self):
-        return self.action_serializer.get(self.action, self.serializer_class)
-    
-    def get_queryset(self):
-        article = self.request.query_params.get("article", None)
-        if article is not None:
-            qs = self.queryset.filter(article=article).order_by('created_at')
-        else:
-            qs = []
-            
-        return qs
-    
-    def list(self, request):
-        response = super(ChatViewset , self).list(request)
-    
-        return Response(data={"success":response.data})
-    
-    def retrieve(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(ChatViewset, self).retrieve(request,pk=pk)
-    
-        return Response(data={"success":response.data})
-    
-    def create(self, request):
-        
-        response = super(ChatViewset, self).create(request)
-        return Response(data={"success":response.data})
-    
-    def update(self, request, pk):
-
-        obj = self.get_object()
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        return Response(data={"success":serializer.data})
-
-
-    def destroy(self, request, pk ):
-
-        super(CommentViewset, self).destroy(request,pk=pk)
-
-        return Response(data={"success":"chat successfully deleted"})
-
     
 
 class NotificationViewset(viewsets.ModelViewSet):
@@ -1196,6 +1138,125 @@ class FollowViewset(viewsets.ModelViewSet):
         response = super(FollowViewset, self).destroy(request, pk)
     
         return Response(data={"success":"Unfollowed!!!"})
+    
+
+
+class ArticleChatViewset(viewsets.ModelViewSet):
+    queryset = Message.objects.all()
+    permission_classes = [ArticleChatPermissions]
+    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
+    serializer_class = ArticleChatSerializer
+    http_method_names = ["post", "get", "put", "delete"]
+
+    action_serializer = {
+                        "create": ArticleChatCreateSerializer,
+                         "retrieve": ArticleChatSerializer,
+                         "list": ArticleChatSerializer,
+                         "update": ArticleChatUpdateSerializer,
+                         "destroy": ArticleChatSerializer
+                        }
+
+    def get_serializer_class(self):
+        return self.action_serializer.get(self.action, self.serializer_class)
+
+    def get_queryset(self):
+        article = self.request.query_params.get("article", None)
+        if article is not None:
+            qs = self.queryset.filter(article=article).order_by("created_at")
+
+        return qs
+
+    def list(self, request):
+        response = super(ArticleChatViewset, self).list(request)
+
+        return Response(data={"success": response.data})
+
+    def retrieve(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request, obj)
+        response = super(ArticleChatViewset, self).retrieve(request, pk=pk)
+
+        return Response(data={"success": response.data})
+
+    def create(self, request):
+        response = super(ArticleChatViewset, self).create(request)
+
+        return Response(data={"success": response.data})
+
+    def update(self, request, pk):
+        self.get_object()
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(data={"success": serializer.data})
+
+    def destroy(self, request, pk):
+        super(ArticleChatViewset, self).destroy(request, pk=pk)
+
+        return Response(data={"success": "chat successfully deleted"})
+
+
+class MessageViewset(viewsets.ModelViewSet):
+    queryset = Message.objects.all()
+    permission_classes = [MessagePermissions]
+    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
+    serializer_class = MessageSerializer
+    http_method_names = ["get", "post", "delete", "put"]
+
+    action_serializers = {
+        "create": MessageCreateSerializer,
+        "retrieve": MessageSerializer,
+        "list": MessageSerializer,
+        "update": MessageUpdateSerializer,
+        "destroy": MessageSerializer,
+    }
+
+    def get_serializer_class(self):
+        return self.action_serializers.get(self.action, self.serializer_class)
+
+    def get_queryset(self):
+        qs = self.queryset.filter(
+            Q(sender=self.request.user) | Q(receiver=self.request.user)
+        )
+        return qs
+
+    def list(self, request):
+        response = super(MessageViewset, self).list(request)
+
+        return Response(data={"success": response.data})
+
+    def retrieve(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request, obj)
+        response = super(MessageViewset, self).retrieve(request, pk=pk)
+
+        return Response(data={"success": response.data})
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            data={"success": "Message Successfully sent", "message": serializer.data},
+            status=status.HTTP_201_CREATED,
+        )
+
+    def update(self, request, pk):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(data={"success": serializer.data})
+
+    def destroy(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request, obj)
+        super(MessageViewset, self).destroy(request, pk)
+
+        return Response(data={"success": "Message Successfuly removed!!!"})
 
 
     

@@ -251,20 +251,6 @@ class HandlersBase(models.Model):
     class Meta:
         db_table = "handler_base"
         unique_together = ['User', 'handle_name', 'article']
-
-class Message(models.Model):
-    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, null=True, blank=False, on_delete=models.CASCADE)
-    channel = models.CharField(max_length=255, null=False, blank=None)
-    article = models.ForeignKey(Article, null=True, blank=False, on_delete=models.CASCADE)
-    body = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        db_table = 'message'
-
-    def __str__(self):
-        return self.body
     
     
 class LikeBase(models.Model):
@@ -431,3 +417,37 @@ class BookMark(models.Model):
     class Meta:
         db_table = 'bookmark'
         unique_together = ['user','post']
+
+def message_media(self, instance, filename):
+    if filename:
+        return f"message_media/{instance.id}/{filename}"
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, related_name="sent_messages", on_delete=models.CASCADE)
+    channel = models.CharField(max_length=255)
+    receiver = models.ForeignKey(User, related_name="received_messages",null=True,blank=True, on_delete=models.CASCADE)
+    body = models.TextField(null=True)
+    media = CloudinaryField(message_media, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "message"
+
+    def __str__(self):
+        return self.body
+
+
+class ArticleMessage(models.Model):
+    sender = models.ForeignKey(User, related_name="sent_article_messages", on_delete=models.CASCADE)
+    channel = models.CharField(max_length=255)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    media = CloudinaryField(message_media, null=True)
+    body = models.TextField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "article_message"
+
+    def __str__(self):
+        return self.body
