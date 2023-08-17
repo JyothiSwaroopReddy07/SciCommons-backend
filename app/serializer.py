@@ -935,7 +935,7 @@ class ArticleChatSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = Message
+        model = ArticleMessage
         fields = ["id", "sender", "body", "media", "article", "created_at"]
 
     def get_sender(self, obj):
@@ -947,8 +947,8 @@ class ArticleChatUpdateSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = Message
-        fields = ["body", "media"]
+        model = ArticleMessage
+        fields = ["body", "media", "sender"]
 
 
 class ArticleChatCreateSerializer(serializers.ModelSerializer):
@@ -1329,7 +1329,7 @@ Message Serailizer
     
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Message
+        model = PersonalMessage
         fields = ["id", "sender", "receiver", "media", "body", "created_at"]
 
     def get_sender(self, obj):
@@ -1343,13 +1343,13 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class MessageUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Message
+        model = PersonalMessage
         fields = ["body", "media"]
 
 
 class MessageCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Message
+        model = PersonalMessage
         fields = ["body", "receiver", "media"]
 
     def create(self, validated_data):

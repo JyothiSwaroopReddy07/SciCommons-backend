@@ -1142,7 +1142,7 @@ class FollowViewset(viewsets.ModelViewSet):
 
 
 class ArticleChatViewset(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
+    queryset = ArticleMessage.objects.all()
     permission_classes = [ArticleChatPermissions]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = ArticleChatSerializer
@@ -1198,8 +1198,8 @@ class ArticleChatViewset(viewsets.ModelViewSet):
         return Response(data={"success": "chat successfully deleted"})
 
 
-class MessageViewset(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
+class PersonalMessageViewset(viewsets.ModelViewSet):
+    queryset = PersonalMessage.objects.all()
     permission_classes = [MessagePermissions]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = MessageSerializer
@@ -1223,14 +1223,14 @@ class MessageViewset(viewsets.ModelViewSet):
         return qs
 
     def list(self, request):
-        response = super(MessageViewset, self).list(request)
+        response = super(PersonalMessageViewset, self).list(request)
 
         return Response(data={"success": response.data})
 
     def retrieve(self, request, pk):
         obj = self.get_object()
         self.check_object_permissions(request, obj)
-        response = super(MessageViewset, self).retrieve(request, pk=pk)
+        response = super(PersonalMessageViewset, self).retrieve(request, pk=pk)
 
         return Response(data={"success": response.data})
 
@@ -1254,7 +1254,7 @@ class MessageViewset(viewsets.ModelViewSet):
     def destroy(self, request, pk):
         obj = self.get_object()
         self.check_object_permissions(request, obj)
-        super(MessageViewset, self).destroy(request, pk)
+        super(PersonalMessageViewset, self).destroy(request, pk)
 
         return Response(data={"success": "Message Successfuly removed!!!"})
 
