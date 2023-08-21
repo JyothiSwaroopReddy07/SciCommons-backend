@@ -529,7 +529,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video',
-                    'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status'
+                    'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status',
                     'isFavourite', 'userrating','commentcount']
     
     def get_versions(self, obj):
