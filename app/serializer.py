@@ -474,7 +474,7 @@ class ArticlePostPublishSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ["id","license","published_article_file"]
+        fields = ["id","license","published_article_file", "published_date"]
 
 class ArticlePublisherSerializer(serializers.ModelSerializer):
     published_article_file_url = serializers.ReadOnlyField()
@@ -525,12 +525,13 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     commentcount = serializers.SerializerMethodField()
     authors = serializers.SerializerMethodField()
     article_file_url = serializers.ReadOnlyField()
+    favourites = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
         fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video',
                     'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status',
-                    'isFavourite', 'userrating','commentcount']
+                    'isFavourite', 'userrating','commentcount', 'favourites','license','published_date' ]
     
     def get_versions(self, obj):
         
@@ -546,6 +547,10 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     def get_commentcount(self, obj):
         count = CommentBase.objects.filter(article_id=obj.id).count()
         return count
+    
+    def get_favourites(self, obj):
+        favourites = Favourite.objects.filter(article_id=obj.id).count()
+        return favourites
     
     def get_rating(self, obj):
         rating = CommentBase.objects.filter(article_id=obj.id,Type='review').aggregate(Avg('rating'))['rating__avg']

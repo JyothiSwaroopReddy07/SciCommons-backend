@@ -152,6 +152,7 @@ class Article(models.Model):
     license = models.CharField(max_length=255,null=True)
     published_article_file = CloudinaryField('published_article_file',blank=True)
     published = models.CharField(max_length=255, null=True)
+    published_date = models.DateTimeField(null=True,blank=True)
     Code = models.CharField(max_length=100, null=True, blank=True)
     Abstract = models.TextField(blank=True, null=True, max_length=5000)
     authors = models.ManyToManyField(User,through="Author",related_name="article_authors")

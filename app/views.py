@@ -199,9 +199,6 @@ class UserViewset(viewsets.ModelViewSet):
         member = Follow.objects.filter(followed_user=request.user)
         
 
-    
-
-
 class CommunityViewset(viewsets.ModelViewSet):
     queryset = Community.objects.all()
     queryset2 = CommunityMeta.objects.all()
