@@ -34,6 +34,10 @@ class UserViewset(viewsets.ModelViewSet):
         'getMyArticles':AuthorSerializer,
         'getUserArticles':UserSerializer,
         'getposts': SocialPostSerializer,
+        'follow': FollowSerializer,
+        'unfollow': FollowSerializer,
+        'followers': FollowersSerializer,
+        'following': FollowersSerializer
     }
 
 
@@ -172,6 +176,30 @@ class UserViewset(viewsets.ModelViewSet):
             messages.error(request, 'Invalid OTP.')
             return Response(data={"error":"Invalid OTP."})
             # return redirect('resetPassword')
+        
+    @action(methods=['post'],url_path='follow', detail=False, permission_classes=[permissions.IsAuthenticated])
+    def follow(self, request):
+        member = Follow.objects.filter(followed_user=request.data["followed_user"], user=request.user).first()
+        if member is not None:
+            return Response(data={"error":"Already following!!!"})
+        Follow.objects.create(followed_user=request.data["followed_user"], user=request.user)
+        return Response(data={"success":"followed!!!"})
+
+    @action(methods=['post'],url_path='unfollow', detail=False, permission_classes=[permissions.IsAuthenticated])
+    def unfollow(self, request):
+        member = Follow.objects.filter(followed_user=request.data["followed_user"],user=request.user).first()
+        if member is not None:
+            member.delete()
+            return Response(data={"success":"UnFollowed!!!"})
+        else:
+            return Response(data={"error":"Did not Follow!!!"})
+        
+    @action(methods=['get'],url_path="followers", detail=False,permission_classes=[permissions.IsAuthenticated])
+    def followers(self,request):
+        member = Follow.objects.filter(followed_user=request.user)
+        
+
+    
 
 
 class CommunityViewset(viewsets.ModelViewSet):
@@ -1091,53 +1119,7 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
             return Response(data={"success":"DisLiked!!!"})
         else:
             return Response(data={"error":"Comment not found!!!"})
-    
-class FollowViewset(viewsets.ModelViewSet):
-    queryset = Follow.objects.all()
-    permission_classes = [FollowPermission]    
-    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
-    serializer_class = FollowSerializer
-    http_method_names = ['get', 'post', 'delete']
-    
-    action_serializers = {
-        "create": FollowCreateSerializer,
-        "destroy": FollowSerializer,
-        "retrieve": FollowSerializer,
-        "list": FollowSerializer
-    }
-        
-    def get_serializer_class(self):
-        return self.action_serializers.get(self.action, self.serializer_class)
-    
-    def get_queryset(self):
-        qs = self.queryset.filter(Q(user=self.request.user) | Q(followed_user=self.request.user))
-        return qs
-    
-    def list(self, request):
-        response = super(FollowViewset , self).list(request)
-    
-        return Response(data={"success":response.data})
-    
-    def retrieve(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(FollowViewset, self).retrieve(request,pk=pk)
-    
-        return Response(data={"success":response.data})
-    
-    
-    def create(self, request):
-        response = super(FollowViewset, self).create(request)
-        created = response.data["id"]
-    
-        return Response(data={"success":"Following the user!!!","id": created})
-    
-    def destroy(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(FollowViewset, self).destroy(request, pk)
-    
-        return Response(data={"success":"Unfollowed!!!"})
+  
     
 
 

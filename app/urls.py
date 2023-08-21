@@ -16,7 +16,6 @@ router.register(r'favourite',FavouriteViewset)
 router.register(r'feed',SocialPostViewset)
 router.register(r'feedcomment',SocialPostCommentViewset)
 router.register(r"article_chat", ArticleChatViewset)
-router.register(r'follow',FollowViewset)
 
 urlpatterns = [
     path("",include(router.urls)),

@@ -153,7 +153,7 @@ class Article(models.Model):
     published_article_file = CloudinaryField('published_article_file',blank=True)
     published = models.CharField(max_length=255, null=True)
     Code = models.CharField(max_length=100, null=True, blank=True)
-    Abstract = models.TextField(null=True, max_length=5000)
+    Abstract = models.TextField(blank=True, null=True, max_length=5000)
     authors = models.ManyToManyField(User,through="Author",related_name="article_authors")
     community = models.ManyToManyField(Community, through="CommunityMeta")
     views = models.IntegerField(default=0)
