@@ -531,7 +531,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
         model = Article
         fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video',
                     'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status',
-                    'isFavourite', 'userrating','commentcount', 'favourites','license','published_date' ]
+                    'isFavourite', 'userrating','commentcount', 'favourites','license','published_date', 'published' ]
     
     def get_versions(self, obj):
         
