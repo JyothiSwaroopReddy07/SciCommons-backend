@@ -529,7 +529,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video',
-                    'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor',
+                    'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status'
                     'isFavourite', 'userrating','commentcount']
     
     def get_versions(self, obj):
@@ -578,7 +578,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     def get_userrating(self, obj):
         rating = CommentBase.objects.filter(article_id=obj.id,Type='review',User=self.context['request'].user).first()
         if rating is None:
-            return "null"
+            return 0
         return f'{rating.rating}'
     
     def get_authors(self, obj):
