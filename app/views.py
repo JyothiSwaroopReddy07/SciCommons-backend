@@ -608,7 +608,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         post = Favourite.objects.filter(article=request.data["article"], user=request.user).first()
         if post is not None:
             return Response(data={"error":"Already added to Favourites!!!"})
-        Favourite.objects.create(artilce=request.data["article"], user=request.user)
+        Favourite.objects.create(article=request.data["article"], user=request.user)
         return Response(data={"success":"Favourite added!!!"})
 
     @action(methods=['post'], detail=False,url_path="unfavourite", permission_classes=[FavouritePermission])
