@@ -435,7 +435,10 @@ class ArticleViewset(viewsets.ModelViewSet):
         "getPublished": ArticlePublishSelectionSerializer,
         "status": StatusSerializer,
         "updateViews": ArticleViewsSerializer,
-        "block_user": ArticleBlockUserSerializer
+        "block_user": ArticleBlockUserSerializer,
+        "favourite": FavouriteCreateSerializer,
+        "unfavourite": FavouriteSerializer
+
     }
     
     def get_serializer_class(self):
@@ -599,6 +602,23 @@ class ArticleViewset(viewsets.ModelViewSet):
         serializer.save()
         
         return Response(data={"success":"article approved"})
+    
+    @action(methods=['post'], detail=False,url_path="favourite", permission_classes=[FavouritePermission])
+    def favourite(self, request):
+        post = Favourite.objects.filter(article=request.data["article"], user=request.user).first()
+        if post is not None:
+            return Response(data={"error":"Already added to Favourites!!!"})
+        Favourite.objects.create(artilce=request.data["article"], user=request.user)
+        return Response(data={"success":"Favourite added!!!"})
+
+    @action(methods=['post'], detail=False,url_path="unfavourite", permission_classes=[FavouritePermission])
+    def unfavourite(self, request):
+        member = Favourite.objects.filter(article=request.data["article"],user=request.user).first()
+        if member is not None:
+            member.delete()
+            return Response(data={"success":"Favourite Removed!!!"})
+        else:
+            return Response(data={"error":"Favourite not found!!!"})
     
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/reject_article', permission_classes=[ArticlePermission])    
     def reject_article(self, request, pk):
@@ -870,54 +890,7 @@ class NotificationViewset(viewsets.ModelViewSet):
         response = super(NotificationViewset, self).destroy(request, pk)
     
         return Response(data={"success":"Notification deleted successfully."})
-    
-    
-class FavouriteViewset(viewsets.ModelViewSet):
-    queryset = Favourite.objects.all()
-    permission_classes = [FavouritePermission]    
-    parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
-    serializer_class = FavouriteSerializer
-    http_method_names = ['get', 'post', 'delete']
-    
-    action_serializers = {
-        "create":FavouriteCreateSerializer,
-        "destroy":FavouriteSerializer,
-        "list":FavouriteSerializer,
-        "retrieve":FavouriteSerializer
-    }
-        
-    def get_serializer_class(self):
-        return self.action_serializers.get(self.action, self.serializer_class)
-    
-    def get_queryset(self):
-        qs = self.queryset.filter(user=self.request.user)
-        return qs
-    
-    def list(self, request):
-        response = super(FavouriteViewset , self).list(request)
-    
-        return Response(data={"success":response.data})
-    
-    def retrieve(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(FavouriteViewset, self).retrieve(request,pk=pk)
-    
-        return Response(data={"success":response.data})
-    
-    def create(self, request):
-        if self.queryset.filter(user=request.user,article=request.data["article"]).first() is not None:
-            return  Response(data={"error":"added Already to Favourites"}, status=status.HTTP_400_BAD_REQUEST)
-        response = super(FavouriteViewset, self).create(request)
-        return  Response(data={"success":"added to Favourites", "id":response.data["id"]})
-    
-    def destroy(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(FavouriteViewset, self).destroy(request, pk)
-    
-        return Response(data={"success":"Removed to Favourite"})
-    
+
 
 class SocialPostViewset(viewsets.ModelViewSet):
     queryset = SocialPost.objects.all()
