@@ -605,15 +605,15 @@ class ArticleViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'], detail=False,url_path="favourite", permission_classes=[FavouritePermission])
     def favourite(self, request):
-        post = Favourite.objects.filter(article=request.data["article"], user=request.user).first()
+        post = Favourite.objects.filter(article_id=request.data["article"], user=request.user).first()
         if post is not None:
             return Response(data={"error":"Already added to Favourites!!!"})
-        Favourite.objects.create(article=request.data["article"], user=request.user)
+        Favourite.objects.create(article_id=request.data["article"], user=request.user)
         return Response(data={"success":"Favourite added!!!"})
 
     @action(methods=['post'], detail=False,url_path="unfavourite", permission_classes=[FavouritePermission])
     def unfavourite(self, request):
-        member = Favourite.objects.filter(article=request.data["article"],user=request.user).first()
+        member = Favourite.objects.filter(article_id=request.data["article"],user=request.user).first()
         if member is not None:
             member.delete()
             return Response(data={"success":"Favourite Removed!!!"})
