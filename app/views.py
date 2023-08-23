@@ -437,7 +437,8 @@ class ArticleViewset(viewsets.ModelViewSet):
         "updateViews": ArticleViewsSerializer,
         "block_user": ArticleBlockUserSerializer,
         "favourite": FavouriteCreateSerializer,
-        "unfavourite": FavouriteSerializer
+        "unfavourite": FavouriteSerializer,
+        "favourites": FavouriteSerializer
 
     }
     
@@ -559,6 +560,13 @@ class ArticleViewset(viewsets.ModelViewSet):
         else:
             return Response(data={"error": "Article is still not approved by community"})        
 
+    @action(methods=['get'], detail=False, url_path='favourites', permission_classes=[ArticlePermission])
+    def favourites(self, request):
+        favourites = Favourite.objects.filter(user=request.user).values_list('article', flat=True)
+        posts = Article.objects.filter(id__in=favourites.all())
+        serializer = ArticlelistSerializer(posts, many=True, context={"request":request})
+        return Response(data={"success":serializer.data})
+        
 
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/submit_article', permission_classes=[ArticlePermission])
     def submit_article(self, request, pk):

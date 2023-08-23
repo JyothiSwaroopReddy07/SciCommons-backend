@@ -71,7 +71,7 @@ class ArticlePermission(permissions.BasePermission):
         if view.action in ['retrieve', 'list', 'getPublisherDetails','updateViews']:
             return True
         
-        elif view.action in ['create', 'submit_article']:
+        elif view.action in ['create', 'submit_article','favourite','unfavourite', 'favourites']:
             return request.user.is_authenticated
         
         elif view.action in ['approve_article']:
