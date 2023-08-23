@@ -1115,10 +1115,31 @@ class ModeratorSerializer(serializers.ModelSerializer):
 
 
 class SocialPostSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = SocialPost
         fields = ['id', 'user', 'body', 'created_at', 'image']
         read_only_fields = ['user','id','created_at', 'image']
+
+class SocialPostUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SocialPost
+        fields = ['id', 'user', 'body', 'created_at','image', 'image_url']
+        read_only_fields = ['user','id','created_at', 'image_url']
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop("image")
+
+        return representation
+
 
 class SocialPostCreateSerializer(serializers.ModelSerializer):
     image_url = serializers.ReadOnlyField()

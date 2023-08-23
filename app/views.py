@@ -904,7 +904,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
         "destroy": SocialPostSerializer,
         "retrieve": SocialPostGetSerializer,
         "list": SocialPostListSerializer,
-        "update": SocialPostListSerializer,
+        "update": SocialPostUpdateSerializer,
         "like": SocialPostLikeSerializer,
         "unlike": SocialPostLikeSerializer,
         "bookmark": SocialPostBookmarkSerializer,
@@ -939,12 +939,12 @@ class SocialPostViewset(viewsets.ModelViewSet):
         return Response(data={"success":"Post Successfully added!!!"})
     
     def update(self, request, pk):
-
+        print(request.data)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-
+        print(serializer.data)
         return Response(data={"success":serializer.data})
     
     def destroy(self, request, pk):
