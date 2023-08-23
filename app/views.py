@@ -904,7 +904,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
         "destroy": SocialPostSerializer,
         "retrieve": SocialPostGetSerializer,
         "list": SocialPostListSerializer,
-        "update": SocialPostSerializer,
+        "update": SocialPostListSerializer,
         "like": SocialPostLikeSerializer,
         "unlike": SocialPostLikeSerializer,
         "bookmark": SocialPostBookmarkSerializer,

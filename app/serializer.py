@@ -676,6 +676,16 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             validated_data['article_name'] = name.replace(' ','_')
             validated_data['keywords'] = keywords
             instance = self.Meta.model.objects.create(**validated_data,id=uuid.uuid4().hex)
+            Author.objects.create(User=self.context['request'].user, article=instance)
+            authorstr = ""
+            if len(authors)!=0:
+                with transaction.atomic():
+                    for author in authors:
+                        author = Author.objects.create(User_id=author, article=instance)
+                        authorstr += author.User.first_name + '_' + author.User.last_name + "||"
+                        send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.User.email], fail_silently=False)
+                        UserActivity.objects.create(user=self.context['request'].user, action=f'you added article {instance.article_name}')
+            instance.authorstring = authorstr
             communities = [community for community in parentinstance.communities]
             instance.communities.set(communities)
             instance.parent_article = parent_article
