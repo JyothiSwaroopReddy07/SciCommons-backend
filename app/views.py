@@ -99,11 +99,7 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'], detail=False, url_path="(?P<username>.+)/posts", permission_classes=[permissions.IsAuthenticated])
     def getposts(self, request, username):
-        queryset = User.objects.filter(username=username)
-        serializer = UserSerializer(data=queryset, many=True)
-        serializer.is_valid()
-        user = serializer.data
-        queryset = SocialPost.objects.filter(User_id=user[0]["id"])
+        queryset = SocialPost.objects.filter(User_username=username)
         serializer = SocialPostSerializer(data=queryset, many=True)
         serializer.is_valid()
         posts = serializer.data
