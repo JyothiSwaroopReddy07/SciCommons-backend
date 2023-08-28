@@ -237,9 +237,6 @@ class CommentBase(models.Model):
         ('review', 'Review'),
         ('decision', 'Decision'),
         ('comment', 'Comment'),
-        ('blog', 'Blog'),
-        ('video','Video'),
-        ('discussion','Discussion')
     )
     Type = models.CharField(max_length=10, choices=types, default='comment')
 
