@@ -790,80 +790,48 @@ class CommentViewset(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        if serializer.data['value'] == 'Like':
-            comment = self.queryset.get(id=serializer.data['post'])
+        member = LikeBase.objects.filter(user=request.user, comment=serializer.data['comment']).first()
+        comment = self.queryset.get(id=serializer.data['comment'])
+        if member is not None:
+            rank = Rank.objects.filter(user=comment.User).first()
+            rank.rank -= member.value
+            rank.rank += serializer.data['value']
+            member.value = serializer.data['value']
+            member.save()
+            rank.save()
+            notification = Notification.objects.create(user=comment.User, message=f'{handle.handle_name} rated your comment on {comment.article.article_name}', link=f'/article/{comment.article}/{comment.id}')
+            notification.save()
+                
+            send_mail('Someone rated your comment', f'{handle.handle_name} rated your comment on {comment.article.article_name}', settings.EMAIL_HOST_USER, [comment.User.email], fail_silently=True)
+            
+            return Response({'success': 'Comment rated successfully.'})
+        else :
             handler = HandlersBase.objects.filter(User=request.user, article=comment.article).first()
             if not handler: 
                 handler = HandlersBase.objects.create(User=request.user, article=comment.article, handle_name=fake.name())
                 handler.save()
-            # check if user already liked the comment
-            if LikeBase.objects.filter(user=self.request.user, post=comment, value='Like').first():
-                return Response({'error': 'comment already liked.'})
-            
+
+            handle = HandlersBase.objects.filter(User=self.request.user,article=comment.article).first()
+
+            like = LikeBase.objects.create(user=self.request.user, post=comment, value=serializer.data['value'])
+            like.save()
+                
+            rank = Rank.objects.filter(user=comment.User).first()
+            if rank:
+                rank.rank += serializer.data['value']
+                rank.save()
+
             else:
-                # check if user already disliked the comment
-                handle = HandlersBase.objects.filter(User=self.request.user,article=comment.article).first()
-                unlike = LikeBase.objects.filter(user=self.request.user, post=comment, value='Unlike').first()
-                if unlike:
-                    unlike.delete()
+                rank = Rank.objects.create(user=self.request.user, rank=serializer.data['value'])
+                rank.save()
 
-                like = LikeBase.objects.create(user=self.request.user, post=comment, value='Like')
-                like.save()
+            notification = Notification.objects.create(user=comment.User, message=f'{handle.handle_name} rated your comment on {comment.article.article_name}', link=f'/article/{comment.article}/{comment.id}')
+            notification.save()
                 
-                rank = Rank.objects.filter(user=self.request.user).first()
-                if rank:
-                    rank.rank += 1
-                    rank.save()
-
-                else:
-                    rank = Rank.objects.create(user=self.request.user, rank=1)
-                    rank.save()
-
-                notification = Notification.objects.create(user=comment.User, message=f'{handle.handle_name} liked your comment on {comment.article.article_name}', link=f'/venues/{comment.article.community}/{comment.article.community}')
-                notification.save()
-                
-                send_mail('Someone liked your comment', f'{handle.handle_name} liked your comment on {comment.article.article_name}', settings.EMAIL_HOST_USER, [comment.User.email], fail_silently=True)
+            send_mail('Someone rated your comment', f'{handle.handle_name} rated your comment on {comment.article.article_name}', settings.EMAIL_HOST_USER, [comment.User.email], fail_silently=True)
             
-                return Response({'success': 'Comment liked successfully.'})
+            return Response({'success': 'Comment rated successfully.'})
             
-        elif serializer.data['value'] == 'Unlike':
-            comment = self.queryset.get(id=serializer.data['post'])
-            handler = HandlersBase.objects.filter(User=request.user, article=comment.article).first()
-        
-            if not handler: 
-                handler = HandlersBase.objects.create(User=request.user, article=comment.article, handle_name=fake.name())
-                handler.save()
-            # check if user already liked the comment
-            if LikeBase.objects.filter(user=self.request.user, post=comment, value='Unlike').first():
-                return Response({'error': 'Comment already unliked.'})
-            else:
-                # check if user already liked the comment
-                handle = HandlersBase.objects.filter(User=self.request.user,article=comment.article).first()
-                like = LikeBase.objects.filter(user=self.request.user, post=comment, value='Like').first()
-                if like:
-                    like.delete()
-
-                unlike = LikeBase.objects.create(user=self.request.user, post=comment, value='Unlike')
-                unlike.save()
-
-                rank = Rank.objects.filter(user=self.request.user).first()
-                if rank:
-                    rank.rank -= 1
-                    rank.save()
-                    
-                else:
-                    rank = Rank.objects.create(user=self.request.user)
-                    rank.rank -= 1
-                    rank.save()
-                
-                notification = Notification.objects.create(user=comment.User, message=f'{handle.handle_name} disliked your comment on {comment.article.article_name}', link=f'/venues/{comment.article.community}/{comment.article.community}')
-                notification.save()
-                         
-                send_mail('Someone disliked your comment', f'{handle.handle_name} disliked your comment on {comment.article.article_name}', settings.EMAIL_HOST_USER, {comment.User.email}, fail_silently=True)
-                                   
-
-                return Response({'success': 'Comment disliked successfully.'})
     
 
 class NotificationViewset(viewsets.ModelViewSet):

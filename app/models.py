@@ -226,7 +226,7 @@ class CommentBase(models.Model):
     User = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article,on_delete=models.CASCADE)
     Comment = models.TextField(max_length=20000)
-    rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)], null=True, blank=True)
+    rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)], null=True, blank=True)
     confidence = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], null=True, blank=True)
     Title = models.CharField(max_length=200,null=False)
     Comment_date = models.DateTimeField(auto_now_add=True)
@@ -257,7 +257,8 @@ class HandlersBase(models.Model):
 class LikeBase(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(CommentBase, on_delete=models.CASCADE, related_name="posts")
-    value = models.CharField(max_length=10, choices=(('Like', 'Like'), ('Unlike', 'Unlike')))
+    value = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)], null=True, blank=True)
+
     
     class Meta:
         db_table = 'like_base'
