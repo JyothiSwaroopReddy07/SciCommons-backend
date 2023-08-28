@@ -691,29 +691,31 @@ class CommentViewset(viewsets.ModelViewSet):
         tag = self.request.query_params.get("Community_name",None)
         Type = self.request.query_params.get("Type",None)
         comment_type = self.request.query_params.get("comment_type",None)
+        parent_comment = self.request.query_params.get("parent_comment",None)
+        version = self.request.query_params.get("version",None)
         if article is not None:
             if Type is not None:
                 if tag is not None:
                     if comment_type is not None:
-                        qs = self.queryset.filter(article=article,tag=tag,Type=Type,comment_type=comment_type)
+                        qs = self.queryset.filter(article=article,tag=tag,Type=Type,comment_type=comment_type,parent_comment=parent_comment,version=version)
                     else:
-                        qs = self.queryset.filter(article=article,tag=tag,Type=Type)
+                        qs = self.queryset.filter(article=article,tag=tag,Type=Type,parent_comment=parent_comment,version=version)
                 else:
                     if comment_type is not None:
-                        qs = self.queryset.filter(article=article,Type=Type,comment_type=comment_type)
+                        qs = self.queryset.filter(article=article,Type=Type,comment_type=comment_type,parent_comment=parent_comment,version=version)
                     else:
-                        qs = self.queryset.filter(article=article,Type=Type)
+                        qs = self.queryset.filter(article=article,Type=Type,parent_comment=parent_comment,version=version)
             else:
                 if tag is not None:
                     if comment_type is not None:
-                        qs = self.queryset.filter(article=article,tag=tag,Type__in=['review', 'decision'],comment_type=comment_type)
+                        qs = self.queryset.filter(article=article,tag=tag,Type__in=['review', 'decision'],comment_type=comment_type,parent_comment=parent_comment,version=version)
                     else:
-                        qs = self.queryset.filter(article=article,tag=tag,Type__in=['review', 'decision'])
+                        qs = self.queryset.filter(article=article,tag=tag,Type__in=['review', 'decision'],parent_comment=parent_comment,version=version)
                 else:
                     if comment_type is not None:
-                        qs = self.queryset.filter(article=article,Type__in=['review', 'decision'],comment_type=comment_type)
+                        qs = self.queryset.filter(article=article,Type__in=['review', 'decision'],comment_type=comment_type,parent_comment=parent_comment,version=version)
                     else:
-                        qs = self.queryset.filter(article_id=article,Type__in=['review', 'decision'])
+                        qs = self.queryset.filter(article_id=article,Type__in=['review', 'decision'],parent_comment=parent_comment,version=version)
         else:
             qs = []
             
@@ -1031,7 +1033,6 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     
     def update(self, request, pk):
 
-        print("jyothi swaroop!!!")
         instance = SocialPostComment.objects.filter(id=pk).first()
         print(instance)
         serializer = self.get_serializer(instance, data=request.data, partial=True)

@@ -239,6 +239,7 @@ class CommentBase(models.Model):
         ('comment', 'Comment'),
     )
     Type = models.CharField(max_length=10, choices=types, default='comment')
+    version = models.ForeignKey('self', related_name='versions',null=True, blank=True ,on_delete=models.CASCADE)
 
 
     class Meta:

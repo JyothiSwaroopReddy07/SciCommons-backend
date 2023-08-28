@@ -880,7 +880,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentBase
         fields = ['id', 'article', 'Comment', 'Title', 'Type', 'tag','comment_type', 'user','likes', 'dislikes','Comment_date',
-                    'parent_comment','rank','personal','Liked','Unliked', 'replies', 'rating','confidence']
+                    'parent_comment','rank','personal','Liked','Unliked', 'replies', 'rating','confidence','version']
         
     def get_user(self, obj):
         handle = HandlersBase.objects.filter(User=obj.User,article=obj.article).first()
@@ -920,7 +920,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CommentBase
-        fields = ['article', 'Comment', 'Title', 'Type', 'tag','comment_type','parent_comment','rating','confidence']
+        fields = ['article', 'Comment', 'Title', 'Type', 'tag','comment_type','parent_comment','rating','confidence','version']
 
     def create(self, validated_data):
         authors = [author for author in Author.objects.filter(article=validated_data["article"],User=self.context["request"].user)]
