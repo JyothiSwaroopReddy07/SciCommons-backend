@@ -734,6 +734,7 @@ class CommentViewset(viewsets.ModelViewSet):
         return Response(data={"success":response.data})
 
     def create(self, request):
+        
         if request.data["parent_comment"]:
             request.data["Type"] = "comment"
 
@@ -750,6 +751,10 @@ class CommentViewset(viewsets.ModelViewSet):
                 return Response(data={"error": "You can't write a decision on the article!!!"}, status=status.HTTP_400_BAD_REQUEST)
         
         elif request.data['Type'] == 'review':
+            author = Author.objects.filter(User=request.user,article=request.data["article"]).first()
+            if author is not None:
+                return Response(data={"error": "You are Author of Article.You can't submit a review"}, status=status.HTTP_400_BAD_REQUEST)
+            
             c = ArticleModerator.objects.filter(article=request.data["article"],moderator__user = request.user).count()
             if c > 0:
                 return Response(data={"error": "You can't make a review over article"}, status=status.HTTP_400_BAD_REQUEST)
