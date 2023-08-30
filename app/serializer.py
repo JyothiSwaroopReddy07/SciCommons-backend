@@ -526,14 +526,12 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     authors = serializers.SerializerMethodField()
     article_file_url = serializers.ReadOnlyField()
     favourites = serializers.SerializerMethodField()
-    isReviewed = serializers.SerializerMethodField()
-    isDecision = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
         fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video',
-                    'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status', 'isDecision',
-                    'isFavourite', 'userrating','commentcount', 'favourites','license','published_date', 'published', 'isReviewed' ]
+                    'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status',
+                    'isFavourite', 'userrating','commentcount', 'favourites','license','published_date', 'published' ]
     
     def get_versions(self, obj):
         
@@ -557,18 +555,6 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     def get_rating(self, obj):
         rating = CommentBase.objects.filter(article_id=obj.id,Type='review').aggregate(Avg('rating'))['rating__avg']
         return rating
-    
-    def get_isReviewed(self, obj):
-        if (CommentBase.objects.filter(article_id=obj.id,Type='review',User=self.context['request'].user).count() > 0):
-            return True 
-        else:
-            return False
-    
-    def get_isDecision(self, obj):
-        if (CommentBase.objects.filter(article_id=obj.id,Type='decision',User=self.context['request'].user).count() > 0):
-            return True 
-        else:
-            return False
 
     def get_isArticleReviewer(self, obj):
         if (ArticleReviewer.objects.filter(article=obj.id,officialreviewer__User_id=self.context['request'].user).count()>0):
