@@ -830,21 +830,18 @@ class CommentlistSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     rank = serializers.SerializerMethodField(read_only=True)
     personal = serializers.SerializerMethodField(read_only=True)
+    userrating = serializers.SerializerMethodField(read_only=True)
+    commentrating = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CommentBase
         fields = ['id', 'article', 'Comment', 'Title','Type','rating','confidence',
-                        'tag','comment_type', 'user','Comment_date',
-                    'parent_comment','rank','personal']
+                        'tag','comment_type', 'user','Comment_date', 'commentrating',
+                    'parent_comment','rank','personal','userrating']
         
     def get_user(self, obj):
         handle = HandlersBase.objects.filter(User=obj.User,article=obj.article).first()
         return handle.handle_name
-    
-    def get_replies(self, obj):
-        replies = CommentBase.objects.filter(parent_comment=obj)
-        serializer = CommentSerializer(replies, many=True, context=self.context)
-        return serializer.data
 
     def get_rank(self, obj):
         rank = Rank.objects.filter(user=obj.User).first()
@@ -853,29 +850,33 @@ class CommentlistSerializer(serializers.ModelSerializer):
     def get_personal(self, obj): 
         personal = (obj.User == self.context['request'].user)
         return personal
+    
+    def get_commentrating(self,obj):
+        rating = LikeBase.objects.filter(post_id=obj.id).aggregate(Avg('value'))['value__avg']
+        return rating
+
+    def get_userrating(self,obj):
+        member = LikeBase.objects.filter(user=self.context['request'].user, post_id=obj.id).first()
+        if member is not None:
+            return member.value
+        else:
+            return 0
 
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
-    replies = serializers.SerializerMethodField(read_only=True)
     rank = serializers.SerializerMethodField(read_only=True)
     personal = serializers.SerializerMethodField(read_only=True)
-    likes = serializers.SerializerMethodField(read_only=True)
-    dislikes = serializers.SerializerMethodField(read_only=True)
-    Liked = serializers.SerializerMethodField(read_only=True)
-    Unliked = serializers.SerializerMethodField(read_only=True)
+    userrating = serializers.SerializerMethodField(read_only=True)
+    commentrating = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = CommentBase
-        fields = ['id', 'article', 'Comment', 'Title', 'Type', 'tag','comment_type', 'user','likes', 'dislikes','Comment_date',
-                    'parent_comment','rank','personal','Liked','Unliked', 'replies', 'rating','confidence','version']
+        fields = ['id', 'article', 'Comment', 'Title', 'Type', 'tag','comment_type', 'user','Comment_date',
+                    'parent_comment','rank','personal', 'replies', 'rating','confidence','version','commentrating','userrating']
         
     def get_user(self, obj):
         handle = HandlersBase.objects.filter(User=obj.User,article=obj.article).first()
         return handle.handle_name
-    
-    def get_replies(self, obj):
-        replies = CommentBase.objects.filter(parent_comment=obj)
-        serializer = CommentSerializer(replies, many=True, context=self.context)
-        return serializer.data
 
     def get_rank(self, obj):
         rank = Rank.objects.filter(user=obj.User).first()
@@ -885,21 +886,16 @@ class CommentSerializer(serializers.ModelSerializer):
         personal = (obj.User == self.context['request'].user)
         return personal
     
-    def get_likes(self, obj):
-        count = LikeBase.objects.filter(post_id=obj.id,value='Like').count()
-        return count
-    
-    def get_dislikes(self, obj):
-        count = LikeBase.objects.filter(post_id=obj.id,value='Unlike').count()
-        return count
-    
-    def get_Liked(self, obj):
-        Liked = LikeBase.objects.filter(value='Like',post_id=obj.id,user=self.context['request'].user).count()
-        return Liked
-    
-    def get_Unliked(self, obj):
-        Unliked = LikeBase.objects.filter(value='Unlike',post_id=obj.id,user=self.context['request'].user).count()
-        return Unliked
+    def get_commentrating(self,obj):
+        rating = LikeBase.objects.filter(post_id=obj.id).aggregate(Avg('value'))['value__avg']
+        return rating
+
+    def get_userrating(self,obj):
+        member = LikeBase.objects.filter(user=self.context['request'].user, post_id=obj.id).first()
+        if member is not None:
+            return member.value
+        else:
+            return 0
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):
