@@ -848,8 +848,10 @@ class CommentlistSerializer(serializers.ModelSerializer):
         return f'{int(rank.rank)}'
     
     def get_personal(self, obj): 
-        personal = (obj.User == self.context['request'].user)
-        return personal
+        if obj.User == self.context['request'].user:
+            return True
+        else:
+            return False
     
     def get_commentrating(self,obj):
         rating = LikeBase.objects.filter(post=obj).aggregate(Avg('value'))['value__avg']
@@ -883,8 +885,10 @@ class CommentSerializer(serializers.ModelSerializer):
         return f'{int(rank.rank)}'
     
     def get_personal(self, obj): 
-        personal = (obj.User == self.context['request'].user)
-        return personal
+        if obj.User == self.context['request'].user:
+            return True
+        else:
+            return False
     
     def get_commentrating(self,obj):
         rating = LikeBase.objects.filter(post=obj).aggregate(Avg('value'))['value__avg']
