@@ -852,11 +852,11 @@ class CommentlistSerializer(serializers.ModelSerializer):
         return personal
     
     def get_commentrating(self,obj):
-        rating = LikeBase.objects.filter(post_id=obj.id).aggregate(Avg('value'))['value__avg']
+        rating = LikeBase.objects.filter(post=obj).aggregate(Avg('value'))['value__avg']
         return rating
 
     def get_userrating(self,obj):
-        member = LikeBase.objects.filter(user=self.context['request'].user, post_id=obj.id).first()
+        member = LikeBase.objects.filter(user=self.context['request'].user, post=obj).first()
         if member is not None:
             return member.value
         else:
@@ -887,11 +887,11 @@ class CommentSerializer(serializers.ModelSerializer):
         return personal
     
     def get_commentrating(self,obj):
-        rating = LikeBase.objects.filter(post_id=obj.id).aggregate(Avg('value'))['value__avg']
+        rating = LikeBase.objects.filter(post=obj).aggregate(Avg('value'))['value__avg']
         return rating
 
     def get_userrating(self,obj):
-        member = LikeBase.objects.filter(user=self.context['request'].user, post_id=obj.id).first()
+        member = LikeBase.objects.filter(user=self.context['request'].user, post=obj).first()
         if member is not None:
             return member.value
         else:
