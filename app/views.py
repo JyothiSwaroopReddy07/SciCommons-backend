@@ -831,7 +831,7 @@ class CommentViewset(viewsets.ModelViewSet):
                 rank = Rank.objects.create(user=self.request.user, rank=serializer.data['value'])
                 rank.save()
 
-            notification = Notification.objects.create(user=comment.User, message=f'{handle.handle_name} rated your comment on {comment.article.article_name}', link=f'/article/{comment.article}/{comment.id}')
+            notification = Notification.objects.create(user=comment.User, message=f'{handle.handle_name} rated your comment on {comment.article.article_name}', link=f'/article/{comment.article.id}/{comment.id}')
             notification.save()
                 
             send_mail('Someone rated your comment', f'{handle.handle_name} rated your comment on {comment.article.article_name}', settings.EMAIL_HOST_USER, [comment.User.email], fail_silently=True)
