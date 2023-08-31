@@ -798,7 +798,7 @@ class CommentViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         member = LikeBase.objects.filter(user=request.user, comment=serializer.data['post']).first()
-        comment = self.queryset.get(id=serializer.data['post'])
+        comment = CommentBase.objects.filter(id=serializer.data['post']).first()
         if member is not None:
             rank = Rank.objects.filter(user=comment.User).first()
             rank.rank -= member.value
