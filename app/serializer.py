@@ -832,10 +832,11 @@ class CommentlistSerializer(serializers.ModelSerializer):
     personal = serializers.SerializerMethodField(read_only=True)
     userrating = serializers.SerializerMethodField(read_only=True)
     commentrating = serializers.SerializerMethodField(read_only=True)
+    replies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CommentBase
-        fields = ['id', 'article', 'Comment', 'Title','Type','rating','confidence',
+        fields = ['id', 'article', 'Comment', 'Title','Type','rating','confidence', 'replies',
                         'tag','comment_type', 'user','Comment_date', 'commentrating',
                     'parent_comment','rank','personal','userrating']
         
@@ -852,6 +853,10 @@ class CommentlistSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+    
+    def get_replies(self,obj):
+        member = CommentBase.objects.filter(parent_comment=obj).count()
+        return member
     
     def get_commentrating(self,obj):
         rating = LikeBase.objects.filter(post=obj).aggregate(Avg('value'))['value__avg']
@@ -870,6 +875,7 @@ class CommentSerializer(serializers.ModelSerializer):
     personal = serializers.SerializerMethodField(read_only=True)
     userrating = serializers.SerializerMethodField(read_only=True)
     commentrating = serializers.SerializerMethodField(read_only=True)
+    replies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CommentBase
@@ -889,6 +895,10 @@ class CommentSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+        
+    def get_replies(self,obj):
+        member = CommentBase.objects.filter(parent_comment=obj).count()
+        return member
     
     def get_commentrating(self,obj):
         rating = LikeBase.objects.filter(post=obj).aggregate(Avg('value'))['value__avg']
