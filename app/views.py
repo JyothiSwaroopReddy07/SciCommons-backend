@@ -799,6 +799,11 @@ class CommentViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         member = LikeBase.objects.filter(user=request.user, post=serializer.data['post']).first()
         comment = CommentBase.objects.filter(id=serializer.data['post']).first()
+        handle = HandlersBase.objects.filter(User=request.user, article=comment.article).first()
+        if handle is None: 
+            handle = HandlersBase.objects.create(User=request.user, article=comment.article, handle_name=fake.name())
+            handle.save()
+        handle = HandlersBase.objects.filter(User=self.request.user,article=comment.article).first()
         if member is not None:
             rank = Rank.objects.filter(user=comment.User).first()
             rank.rank -= member.value
@@ -813,12 +818,6 @@ class CommentViewset(viewsets.ModelViewSet):
             
             return Response({'success': 'Comment rated successfully.'})
         else :
-            handler = HandlersBase.objects.filter(User=request.user, article=comment.article).first()
-            if not handler: 
-                handler = HandlersBase.objects.create(User=request.user, article=comment.article, handle_name=fake.name())
-                handler.save()
-
-            handle = HandlersBase.objects.filter(User=self.request.user,article=comment.article).first()
 
             like = LikeBase.objects.create(user=self.request.user, post=comment, value=serializer.data['value'])
             like.save()
