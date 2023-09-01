@@ -734,7 +734,6 @@ class CommentViewset(viewsets.ModelViewSet):
         return Response(data={"success":response.data})
 
     def create(self, request):
-        print("jyothi swaroop", request)
         if request.data["parent_comment"]:
             request.data["Type"] = "comment"
 
@@ -800,7 +799,7 @@ class CommentViewset(viewsets.ModelViewSet):
         member = LikeBase.objects.filter(user=request.user, post=serializer.data['post']).first()
         comment = CommentBase.objects.filter(id=serializer.data['post']).first()
         if comment.User == request.user:
-            return Response({'error': "you can't rate your comment"})
+            return Response(data={'error': "you can't rate your comment"}, status=status.HTTP_400_BAD_REQUEST)
         handle = HandlersBase.objects.filter(User=request.user, article=comment.article).first()
         if handle is None: 
             handle = HandlersBase.objects.create(User=request.user, article=comment.article, handle_name=fake.name())
