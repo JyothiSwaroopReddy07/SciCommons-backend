@@ -545,7 +545,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
             return serialized_child_articles.data
     
     def get_commentcount(self, obj):
-        count = CommentBase.objects.filter(article_id=obj.id).count()
+        count = CommentBase.objects.filter(article_id=obj.id,parent_comment=None,version=None).count()
         return count
     
     def get_favourites(self, obj):
@@ -939,7 +939,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         handler = HandlersBase.objects.filter(User=instance.User, article=instance.article).first()
 
         if validated_data["parent_comment"]:
-            member = CommentBase.objects.filter(id=validated_data["parent_comment"]).first()
+            member = CommentBase.objects.filter(id=validated_data['parent_comment'].id).first()
             notification = Notification.objects.create(user=member.User, message=f'{handler.handle_name} replied to your comment on {member.article.article_name} ', link=f'/article/{member.article.id}/{instance.id}')
             notification.save()
             send_mail(f"somebody replied to your comment",f"{handler.handle_name} have made a replied to your comment", settings.EMAIL_HOST_USER,[member.User.email], fail_silently=False)
@@ -947,9 +947,9 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         if validated_data["Type"] == "review" or validated_data["Type"] == "decision":
             emails = [author.User.email for author in authors ]
             for author in authors:
-                notification = Notification.objects.create(user=member.User, message=f'{handler.handle_name} has added a comment to your article: {instance.article.article_name} ', link=f'/article/{member.article.id}/{instance.id}')
+                notification = Notification.objects.create(user=author.User, message=f'{handler.handle_name} has added a {validated_data["Type"]} to your article: {instance.article.article_name} ', link=f'/article/{member.article.id}/{instance.id}')
                 notification.save()
-            send_mail(f"A new {validated_data['Type']} is added ",f"{handler.handle_name} has added a comment to your article: {instance.article.article_name}", settings.EMAIL_HOST_USER,emails, fail_silently=False)
+            send_mail(f"A new {validated_data['Type']} is added ",f"{handler.handle_name} has added a {validated_data['Type']} to your article: {instance.article.article_name}", settings.EMAIL_HOST_USER,emails, fail_silently=False)
 
             
         send_mail(f"you have made {instance.Type}",f"You have made a {instance.Type} on {instance.article.article_name}", settings.EMAIL_HOST_USER,[instance.User.email], fail_silently=False)
@@ -1206,7 +1206,7 @@ class SocialPostListSerializer(serializers.ModelSerializer):
         return obj.user.profile_pic_url()
 
     def get_comments_count(self, obj):
-        comments_count = SocialPostComment.objects.filter(post_id=obj.id).count()
+        comments_count = SocialPostComment.objects.filter(post_id=obj.id,parent_comment=None).count()
         return comments_count
     
     def get_likes(self, obj):

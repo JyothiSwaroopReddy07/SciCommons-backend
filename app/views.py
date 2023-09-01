@@ -734,7 +734,7 @@ class CommentViewset(viewsets.ModelViewSet):
         return Response(data={"success":response.data})
 
     def create(self, request):
-        
+        print("jyothi swaroop", request)
         if request.data["parent_comment"]:
             request.data["Type"] = "comment"
 
