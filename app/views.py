@@ -743,8 +743,9 @@ class CommentViewset(viewsets.ModelViewSet):
                 if self.queryset.filter(article=request.data["article"],User=request.user,Type="decision").first():
                     return Response(data={"error": "You have already made decision!!!"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    super(CommentViewset, self).create(request)
-                    return Response(data={"success":"Decision successfully added"})
+                    response = super(CommentViewset, self).create(request)
+                    created = response.data
+                    return Response(data={"success":"Decision successfully added", "comment": created})
             
             else: 
                 return Response(data={"error": "You can't write a decision on the article!!!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -760,9 +761,9 @@ class CommentViewset(viewsets.ModelViewSet):
             
             count = CommentBase.objects.filter(article=request.data["article"],User=request.user,tag=request.data['tag'],Type='review').count()
             if count == 0:
-                super(CommentViewset, self).create(request)
-
-                return Response(data={"success":"Review successfully added"})
+                response = super(CommentViewset, self).create(request)
+                created = response.data
+                return Response(data={"success":"Review successfully added", "comment": created})
             
             else: 
                 return Response(data={"error":"Review already added by you!!!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -771,9 +772,10 @@ class CommentViewset(viewsets.ModelViewSet):
             if request.data['Type'] == 'comment' and request.data['parent_comment'] is None:
                 return Response(data={"error":"Comment must have a parent instance"}, status=status.HTTP_400_BAD_REQUEST)
             
-            super(CommentViewset, self).create(request)
+            response = super(CommentViewset, self).create(request)
+            created = response.data
 
-            return Response(data={"success":"Comment successfully added"})
+            return Response(data={"success":"Comment successfully added","comment": created})
 
 
     def update(self, request, pk):
