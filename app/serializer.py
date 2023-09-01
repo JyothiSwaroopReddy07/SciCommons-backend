@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError, transaction
 from faker import Faker
 from django.core.mail import send_mail
-from django.db.models import Avg
+from django.db.models import Avg, Sum
 from django.conf import settings
 
 
@@ -859,7 +859,7 @@ class CommentlistSerializer(serializers.ModelSerializer):
         return member
     
     def get_commentrating(self,obj):
-        rating = LikeBase.objects.filter(post=obj).aggregate(Avg('value'))['value__avg']
+        rating = LikeBase.objects.filter(post=obj).aggregate(Sum('value'))['value__sum']
         return rating
 
     def get_userrating(self,obj):
@@ -901,7 +901,7 @@ class CommentSerializer(serializers.ModelSerializer):
         return member
     
     def get_commentrating(self,obj):
-        rating = LikeBase.objects.filter(post=obj).aggregate(Avg('value'))['value__avg']
+        rating = LikeBase.objects.filter(post=obj).aggregate(Sum('value'))['value__sum']
         return rating
 
     def get_userrating(self,obj):
