@@ -799,6 +799,8 @@ class CommentViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         member = LikeBase.objects.filter(user=request.user, post=serializer.data['post']).first()
         comment = CommentBase.objects.filter(id=serializer.data['post']).first()
+        if comment.User == request.user:
+            return Response({'error': "you can't rate your comment"})
         handle = HandlersBase.objects.filter(User=request.user, article=comment.article).first()
         if handle is None: 
             handle = HandlersBase.objects.create(User=request.user, article=comment.article, handle_name=fake.name())
