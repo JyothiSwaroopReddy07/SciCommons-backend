@@ -708,14 +708,14 @@ class CommentViewset(viewsets.ModelViewSet):
             else:
                 if tag is not None:
                     if comment_type is not None:
-                        qs = self.queryset.filter(article=article,tag=tag,Type__in=['review', 'decision'],comment_type=comment_type,parent_comment=parent_comment,version=version)
+                        qs = self.queryset.filter(article=article,tag=tag,comment_type=comment_type,parent_comment=parent_comment,version=version)
                     else:
-                        qs = self.queryset.filter(article=article,tag=tag,Type__in=['review', 'decision'],parent_comment=parent_comment,version=version)
+                        qs = self.queryset.filter(article=article,tag=tag,parent_comment=parent_comment,version=version)
                 else:
                     if comment_type is not None:
-                        qs = self.queryset.filter(article=article,Type__in=['review', 'decision'],comment_type=comment_type,parent_comment=parent_comment,version=version)
+                        qs = self.queryset.filter(article=article,comment_type=comment_type,parent_comment=parent_comment,version=version)
                     else:
-                        qs = self.queryset.filter(article_id=article,Type__in=['review', 'decision'],parent_comment=parent_comment,version=version)
+                        qs = self.queryset.filter(article_id=article,parent_comment=parent_comment,version=version)
         else:
             qs = []
             
