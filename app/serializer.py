@@ -916,7 +916,8 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CommentBase
-        fields = ['article', 'Comment', 'Title', 'Type', 'tag','comment_type','parent_comment','rating','confidence','version']
+        fields = ['id', 'article', 'Comment', 'Title', 'Type', 'tag','comment_type','parent_comment','rating','confidence','version']
+        read_only = ['id']
 
     def create(self, validated_data):
         authors = [author for author in Author.objects.filter(article=validated_data["article"],User=self.context["request"].user)]
