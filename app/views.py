@@ -744,8 +744,9 @@ class CommentViewset(viewsets.ModelViewSet):
                     return Response(data={"error": "You have already made decision!!!"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     response = super(CommentViewset, self).create(request)
-                    created = response.data
-                    return Response(data={"success":"Decision successfully added", "comment": created})
+                    created = CommentSerializer(data=response.data)
+                    created.is_valid(raise_exception=True)
+                    return Response(data={"success":"Decision successfully added", "comment": created.data})
             
             else: 
                 return Response(data={"error": "You can't write a decision on the article!!!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -762,8 +763,9 @@ class CommentViewset(viewsets.ModelViewSet):
             count = CommentBase.objects.filter(article=request.data["article"],User=request.user,tag=request.data['tag'],Type='review').count()
             if count == 0:
                 response = super(CommentViewset, self).create(request)
-                created = response.data
-                return Response(data={"success":"Review successfully added", "comment": created})
+                created = CommentSerializer(data=response.data)
+                created.is_valid(raise_exception=True)
+                return Response(data={"success":"Review successfully added", "comment": created.data})
             
             else: 
                 return Response(data={"error":"Review already added by you!!!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -774,8 +776,9 @@ class CommentViewset(viewsets.ModelViewSet):
             
             response = super(CommentViewset, self).create(request)
             created = CommentSerializer(data=response.data)
+            created.is_valid(raise_exception=True)
 
-            return Response(data={"success":"Comment successfully added","comment": created})
+            return Response(data={"success":"Comment successfully added","comment": created.data})
 
 
     def update(self, request, pk):
