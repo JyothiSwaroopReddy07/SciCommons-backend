@@ -773,7 +773,7 @@ class CommentViewset(viewsets.ModelViewSet):
                 return Response(data={"error":"Comment must have a parent instance"}, status=status.HTTP_400_BAD_REQUEST)
             
             response = super(CommentViewset, self).create(request)
-            created = response.data
+            created = CommentSerializer(data=response.data)
 
             return Response(data={"success":"Comment successfully added","comment": created})
 
