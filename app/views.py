@@ -744,9 +744,8 @@ class CommentViewset(viewsets.ModelViewSet):
                     return Response(data={"error": "You have already made decision!!!"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     response = super(CommentViewset, self).create(request)
-                    member = CommentBase.objects.filter(id=response.data.id).first()
-                    created = CommentSerializer(data=member)
-                    created.is_valid(raise_exception=True)
+                    member = CommentBase.objects.filter(id=response.data.get("id")).first()
+                    created = CommentSerializer(instance=member, context={'request': request})
                     return Response(data={"success":"Decision successfully added", "comment": created.data})
             
             else: 
@@ -764,9 +763,8 @@ class CommentViewset(viewsets.ModelViewSet):
             count = CommentBase.objects.filter(article=request.data["article"],User=request.user,tag=request.data['tag'],Type='review').count()
             if count == 0:
                 response = super(CommentViewset, self).create(request)
-                member = CommentBase.objects.filter(id=response.data.id).first()
-                created = CommentSerializer(data=member)
-                created.is_valid(raise_exception=True)
+                member = CommentBase.objects.filter(id=response.data.get("id")).first()
+                created = CommentSerializer(instance=member, context={'request':request})
                 return Response(data={"success":"Review successfully added", "comment": created.data})
             
             else: 
@@ -777,10 +775,8 @@ class CommentViewset(viewsets.ModelViewSet):
                 return Response(data={"error":"Comment must have a parent instance"}, status=status.HTTP_400_BAD_REQUEST)
             
             response = super(CommentViewset, self).create(request)
-            member = CommentBase.objects.filter(id=response.data.id).first()
-            created = CommentSerializer(data=member)
-            created.is_valid(raise_exception=True)
-
+            member = CommentBase.objects.filter(id=response.data.get("id")).first()
+            created = CommentSerializer(instance=member, context={'request': request})
             return Response(data={"success":"Comment successfully added","comment": created.data})
 
 
