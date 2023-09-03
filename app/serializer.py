@@ -833,11 +833,12 @@ class CommentlistSerializer(serializers.ModelSerializer):
     userrating = serializers.SerializerMethodField(read_only=True)
     commentrating = serializers.SerializerMethodField(read_only=True)
     replies = serializers.SerializerMethodField(read_only=True)
+    versions = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CommentBase
         fields = ['id', 'article', 'Comment', 'Title','Type','rating','confidence', 'replies',
-                        'tag','comment_type', 'user','Comment_date', 'commentrating',
+                        'tag','comment_type', 'user','Comment_date', 'commentrating', 'versions',
                     'parent_comment','rank','personal','userrating']
         
     def get_user(self, obj):
@@ -868,6 +869,12 @@ class CommentlistSerializer(serializers.ModelSerializer):
             return member.value
         else:
             return 0
+    
+    def get_versions(self, obj):
+        comment = CommentBase.objects.filter(version=obj)
+        serializer = CommentSerializer(data=comment,many=True)
+        serializer.is_valid(raise_exception=True)
+        return serializer.data
 
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
