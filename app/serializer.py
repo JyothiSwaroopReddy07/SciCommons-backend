@@ -872,7 +872,8 @@ class CommentlistSerializer(serializers.ModelSerializer):
     
     def get_versions(self, obj):
         comment = CommentBase.objects.filter(version=obj)
-        serializer = CommentSerializer(data=comment,many=True)
+        comment_list = list(comment)
+        serializer = CommentSerializer(data=comment_list,many=True)
         serializer.is_valid(raise_exception=True)
         return serializer.data
 
@@ -921,7 +922,8 @@ class CommentSerializer(serializers.ModelSerializer):
     
     def get_versions(self, obj):
         comment = CommentBase.objects.filter(version=obj)
-        serializer = CommentSerializer(data=comment,many=True)
+        comment_list = list(comment)
+        serializer = CommentSerializer(data=comment_list,many=True)
         serializer.is_valid(raise_exception=True)
         return serializer.data
 
