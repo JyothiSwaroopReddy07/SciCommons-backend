@@ -771,7 +771,7 @@ class CommentViewset(viewsets.ModelViewSet):
                 return Response(data={"error":"Review already added by you!!!"}, status=status.HTTP_400_BAD_REQUEST)
                 
         else:
-            if request.data['Type'] == 'comment' and request.data['parent_comment'] is None:
+            if request.data['Type'] == 'comment' and (request.data['parent_comment'] or request.data['version']) is None:
                 return Response(data={"error":"Comment must have a parent instance"}, status=status.HTTP_400_BAD_REQUEST)
             
             response = super(CommentViewset, self).create(request)
