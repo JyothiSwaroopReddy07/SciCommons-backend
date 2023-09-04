@@ -872,7 +872,7 @@ class CommentlistSerializer(serializers.ModelSerializer):
     
     def get_versions(self, obj):
         comment = CommentBase.objects.filter(version=obj)
-        serializer = CommentSerializer(data=comment,many=True, context={'request': self.context['request']})
+        serializer = CommentSerializer(comment,many=True, context={'request': self.context['request']})
         return serializer.data
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -920,7 +920,7 @@ class CommentSerializer(serializers.ModelSerializer):
     
     def get_versions(self, obj):
         comment = CommentBase.objects.filter(version=obj)
-        serializer = CommentSerializer(data=comment,many=True, context={"request": self.context['request']})
+        serializer = CommentSerializer(comment,many=True, context={"request": self.context['request']})
         return serializer.data
 
 
