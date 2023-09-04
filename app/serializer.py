@@ -925,6 +925,7 @@ class CommentSerializer(serializers.ModelSerializer):
         comment_list = list(comment)
         serializer = CommentSerializer(data=comment_list,many=True)
         serializer.is_valid(raise_exception=True)
+        raise serializer.ValidationError(f"error: {serializer.data}")
         return serializer.data
 
 
