@@ -418,7 +418,7 @@ class ArticleViewset(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filter_backends = (filters.OrderingFilter, django_filters.DjangoFilterBackend)
     filter_class = ArticleFilter
-    ordering_fields = ('Public_date', 'views') 
+    ordering_fields = ('Public_date', 'views', 'favourite_count') 
     http_method_names = ['post', 'get', 'put', 'delete']
     
     # filterset_class = ArticleFilter
@@ -884,6 +884,14 @@ class NotificationViewset(viewsets.ModelViewSet):
         response = super(NotificationViewset, self).retrieve(request,pk=pk)
     
         return Response(data={"success":response.data})
+
+    def update(self, request, pk):
+        instance = Notification.objects.filter(id=pk).first()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(data={"success":"notification marked!!!"})
     
     def destroy(self, request, pk):
         obj = self.get_object()
@@ -891,6 +899,7 @@ class NotificationViewset(viewsets.ModelViewSet):
         response = super(NotificationViewset, self).destroy(request, pk)
     
         return Response(data={"success":"Notification deleted successfully."})
+
 
 
 class SocialPostViewset(viewsets.ModelViewSet):
@@ -940,7 +949,6 @@ class SocialPostViewset(viewsets.ModelViewSet):
         return Response(data={"success":"Post Successfully added!!!"})
     
     def update(self, request, pk):
-        print(request.data)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
