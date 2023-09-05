@@ -452,7 +452,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         if self.request.query_params.get('filter') == 'rated':
             queryset = queryset.order_by('-commentbase__rating')
-        elif self.request.query_params.get('filter') == 'lowest_rated':
+        elif self.request.query_params.get('filter') == 'least_rated':
             queryset = queryset.order_by('commentbase__rating')
         elif self.request.query_params.get('filter') == 'recent':
             queryset = queryset.order_by('-Public_date')

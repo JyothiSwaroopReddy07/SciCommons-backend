@@ -19,7 +19,7 @@ class ArticleFilter(django_filters.FilterSet):
     )
 
     # Custom filter for articles ordered by rating in descending order
-    lowest_rated = django_filters.OrderingFilter(
+    least_rated = django_filters.OrderingFilter(
         fields=('-commentbase__rating',),
         field_labels={'-commentbase__rating': 'Lowest Rating'},
     )
