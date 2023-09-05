@@ -14,6 +14,9 @@ from django.db.models import Q
 from app.models import *
 from app.serializer import *
 from app.permissions import *
+from app.filters import *
+from rest_framework import filters
+from django_filters import rest_framework as django_filters 
 
 class UserViewset(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -413,6 +416,9 @@ class ArticleViewset(viewsets.ModelViewSet):
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = ArticleSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
+    filter_backends = (filters.OrderingFilter, django_filters.DjangoFilterBackend)
+    filter_class = ArticleFilter
+    ordering_fields = ('Public_date', 'views') 
     http_method_names = ['post', 'get', 'put', 'delete']
     
     # filterset_class = ArticleFilter
@@ -443,15 +449,24 @@ class ArticleViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
     
     def get_queryset(self):
-        community = self.request.query_params.get("community_name", None)
-        
-        if community is not None:
-            communities = CommunityMeta.objects.filter(community__Community_name=community)
-            qs = self.queryset.filter(id__in=[community.article.id for community in communities])
-            return qs
-        else:
-            qs = self.queryset
-            return qs
+        queryset = super().get_queryset()
+        if self.request.query_params.get('filter') == 'rated':
+            queryset = queryset.order_by('-commentbase__rating')
+        elif self.request.query_params.get('filter') == 'lowest_rated':
+            queryset = queryset.order_by('commentbase__rating')
+        elif self.request.query_params.get('filter') == 'recent':
+            queryset = queryset.order_by('-Public_date')
+        elif self.request.query_params.get('filter') == 'least_recent':
+            queryset = queryset.order_by('Public_date')
+        elif self.request.query_params.get('filter') == 'viewed':
+            queryset = queryset.order_by('-views')
+        elif self.request.query_params.get('filter') == 'least_viewed':
+            queryset = queryset.order_by('views')
+        elif self.request.query_params.get('filter') == 'favourite':
+            queryset = queryset.annotate(favourite_count=Count('favourite')).order_by('-favourite_count')
+        elif self.request.query_params.get('filter') == 'least_favourite':
+            queryset = queryset.annotate(favourite_count=Count('favourite')).order_by('favourite_count')
+        return queryset
     
     def list(self, request):
         response = super(ArticleViewset, self).list(request)
@@ -1088,8 +1103,8 @@ class ArticleChatViewset(viewsets.ModelViewSet):
         article = self.request.query_params.get("article", None)
         if article is not None:
             qs = self.queryset.filter(article=article).order_by("created_at")
-
-        return qs
+            return qs
+        return self.queryset
 
     def list(self, request):
         response = super(ArticleChatViewset, self).list(request)
