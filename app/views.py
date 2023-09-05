@@ -858,7 +858,7 @@ class NotificationViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'delete']
         
     def get_queryset(self):
-        qs = self.queryset.filter(user=self.request.user)
+        qs = self.queryset.filter(user=self.request.user).order_by('date')
         return qs
     
     def list(self, request):
