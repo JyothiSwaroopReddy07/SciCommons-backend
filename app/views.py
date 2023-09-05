@@ -96,7 +96,7 @@ class UserViewset(viewsets.ModelViewSet):
     def getMyArticles(self, request):
         authors = Author.objects.filter(User_id=request.user.id)
         articles = Article.objects.filter(author__in=authors)
-        article_serializer = ArticleGetSerializer(articles, many=True, context={'request':request})
+        article_serializer = ArticlelistSerializer(articles, many=True, context={'request':request})
 
         return Response(data={"success": article_serializer.data})
     
