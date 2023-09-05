@@ -9,8 +9,8 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
-from django.db.models import Q
-# from app.filters import ArticleFilter, ReviewFilter, DecisionFilter
+from django.db.models import Q,Count,Subquery, OuterRef
+from django.db.models.functions import Coalesce
 from app.models import *
 from app.serializer import *
 from app.permissions import *
@@ -463,10 +463,22 @@ class ArticleViewset(viewsets.ModelViewSet):
         elif self.request.query_params.get('filter') == 'least_viewed':
             queryset = queryset.order_by('views')
         elif self.request.query_params.get('filter') == 'favourite':
-            queryset = queryset.annotate(favourite_count=Count('favourite')).order_by('-favourite_count')
+            # Use a subquery to annotate the favorite_count
+            subquery = Subquery(
+                Article.objects.filter(pk=OuterRef('pk'))
+                .annotate(favourite_count=Count('favourite'))
+                .values('favourite_count')
+            )
+            queryset = queryset.annotate(favourite_count=Coalesce(subquery, 0)).order_by('-favourite_count')
         elif self.request.query_params.get('filter') == 'least_favourite':
-            queryset = queryset.annotate(favourite_count=Count('favourite')).order_by('favourite_count')
+            subquery = Subquery(
+                Article.objects.filter(pk=OuterRef('pk'))
+                .annotate(favourite_count=Count('favourite'))
+                .values('favourite_count')
+            )
+            queryset = queryset.annotate(favourite_count=Coalesce(subquery, 0)).order_by('favourite_count')
         return queryset
+
     
     def list(self, request):
         response = super(ArticleViewset, self).list(request)
