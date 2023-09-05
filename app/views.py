@@ -97,8 +97,9 @@ class UserViewset(viewsets.ModelViewSet):
         queryset = Author.objects.filter(User_id=request.user.id)
         serializer = AuthorSerializer(data=queryset, many=True)
         serializer.is_valid()
-        articles = serializer.data
-        return Response(data={"success": articles})
+        articles = ArticleGetSerializer(data=serializer.data,many=True)
+        articles.is_valid()
+        return Response(data={"success": articles.data})
     
     @action(methods=['get'], detail=False, url_path="(?P<username>.+)/posts", permission_classes=[permissions.IsAuthenticated])
     def getposts(self, request, username):
