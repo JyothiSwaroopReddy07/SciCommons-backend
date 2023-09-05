@@ -870,7 +870,7 @@ class NotificationViewset(viewsets.ModelViewSet):
     http_method_names = ['get', 'delete']
         
     def get_queryset(self):
-        qs = self.queryset.filter(user=self.request.user).order_by('date')
+        qs = self.queryset.filter(user=self.request.user).order_by('-date')
         return qs
     
     def list(self, request):
@@ -1114,7 +1114,7 @@ class ArticleChatViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         article = self.request.query_params.get("article", None)
         if article is not None:
-            qs = self.queryset.filter(article=article).order_by("created_at")
+            qs = self.queryset.filter(article=article).order_by("-created_at")
             return qs
         return self.queryset
 
@@ -1171,7 +1171,7 @@ class PersonalMessageViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = self.queryset.filter(
             Q(sender=self.request.user) | Q(receiver=self.request.user)
-        )
+        ).order_by('-created_at')
         return qs
 
     def list(self, request):
