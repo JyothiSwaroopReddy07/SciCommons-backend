@@ -867,7 +867,7 @@ class NotificationViewset(viewsets.ModelViewSet):
     permission_classes = [NotificationPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = NotificationSerializer
-    http_method_names = ['get', 'delete']
+    http_method_names = ['get','put', 'delete']
         
     def get_queryset(self):
         qs = self.queryset.filter(user=self.request.user).order_by('-date')
