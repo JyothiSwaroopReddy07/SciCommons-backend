@@ -94,12 +94,11 @@ class UserViewset(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path="articles", permission_classes=[permissions.IsAuthenticated,])
     def getMyArticles(self, request):
-        queryset = Author.objects.filter(User_id=request.user.id)
-        serializer = AuthorSerializer(data=queryset, many=True)
-        serializer.is_valid()
-        articles = ArticleGetSerializer(data=serializer.data,many=True)
-        articles.is_valid()
-        return Response(data={"success": articles.data})
+        authors = Author.objects.filter(User_id=request.user.id)
+        articles = Article.objects.filter(author__in=authors)
+        article_serializer = ArticleGetSerializer(articles, many=True)
+
+        return Response(data={"success": article_serializer.data})
     
     @action(methods=['get'], detail=False, url_path="(?P<username>.+)/posts", permission_classes=[permissions.IsAuthenticated])
     def getposts(self, request, username):
