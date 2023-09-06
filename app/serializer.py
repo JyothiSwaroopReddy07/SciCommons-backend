@@ -739,8 +739,8 @@ class SubmitArticleSerializer(serializers.Serializer):
         return {"meta_id":meta_id}
 
 class InReviewSerializer(serializers.Serializer):
-    status = serializers.BooleanField(read_only=True)
-    community = serializers.CharField(write_only=True)
+    status = serializers.SerializerMethodField(read_only=True)
+    community = serializers.SerializerMethodField()
     reviwers = serializers.ListField(
         child=serializers.IntegerField(),
         read_only=True
@@ -754,12 +754,13 @@ class InReviewSerializer(serializers.Serializer):
         fields = ['status', 'community', 'reviwers', 'moderator']
         
     def update(self, instance ,validated_data):
-        community_meta = CommunityMeta.objects.filter(community__Community_name=validated_data['community'], article=instance).first()
+        member = Community.objects.filter(Community_name=validated_data["community"])
+        community_meta = CommunityMeta.objects.filter(community_id=member.id, article=instance).first()
         if community_meta is None:
             raise serializers.ValidationError(detail=f'article not submitted for review {community_meta.community.Community_name}')
     
-        reviewers_arr = [reviewer for reviewer in OfficialReviewer.objects.filter(community__Community_name = validated_data['community'])]
-        moderators_arr = [moderator for moderator in Moderator.objects.filter(community__Community_name = validated_data['community'])]
+        reviewers_arr = [reviewer for reviewer in OfficialReviewer.objects.filter(community_id = member.id)]
+        moderators_arr = [moderator for moderator in Moderator.objects.filter(community_id = member.id)]
 
         if len(reviewers_arr)==0:
             raise serializers.ValidationError(detail={"error":"No Reviewer on Community"})
@@ -788,15 +789,16 @@ class InReviewSerializer(serializers.Serializer):
         return {"status":community_meta.status, 'reviewers':instance.reviewer, 'moderator':instance.moderator}
 
 class ApproveSerializer(serializers.Serializer):
-    status = serializers.CharField()
-    community = serializers.CharField()
-    article = serializers.IntegerField(read_only=True)    
+    status = serializers.SerializerMethodField()
+    community = serializers.SerializerMethodField()
+    article = serializers.SerializerMethodField(read_only=True)    
     class Meta:
         fields = ['status', 'community', 'article']
 
     def update(self, instance, validated_data):
+        member = Community.objects.filter(Community_name=validated_data["community"])
         communitymeta = CommunityMeta.objects.filter(article_id=instance.id,
-                                                community__Community_name=validated_data['community'],
+                                                community_id=member.id,
                                                 article=instance).first()
         communitymeta.status = 'accepted'
         communitymeta.save()
@@ -807,15 +809,16 @@ class ApproveSerializer(serializers.Serializer):
         return communitymeta
 
 class RejectSerializer(serializers.Serializer):
-    status = serializers.CharField()
-    community = serializers.IntegerField()
-    article = serializers.IntegerField(read_only=True)    
+    status = serializers.SerializerMethodField()
+    community = serializers.SerializerMethodField()
+    article = serializers.SerializerMethodField(read_only=True)    
     class Meta:
         fields = ['status', 'community', 'article']
 
     def update(self, instance, validated_data):
+        member = Community.objects.filter(Community_name=validated_data['community'])
         communitymeta = CommunityMeta.objects.filter(article_id=instance.id,
-                                                community__Community_name=validated_data['community'],
+                                                community_id=member.id,
                                                 article=instance).first()
         communitymeta.status = 'rejected'
         communitymeta.save()
