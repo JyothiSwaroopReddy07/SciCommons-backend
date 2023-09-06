@@ -754,7 +754,7 @@ class InReviewSerializer(serializers.Serializer):
         fields = ['status', 'community', 'reviwers', 'moderator']
         
     def update(self, instance ,validated_data):
-        member = Community.objects.filter(Community_name=validated_data["community"])
+        member = Community.objects.filter(Community_name=validated_data["community"]).first()
         community_meta = CommunityMeta.objects.filter(community_id=member.id, article=instance).first()
         if community_meta is None:
             raise serializers.ValidationError(detail=f'article not submitted for review {community_meta.community.Community_name}')
@@ -796,7 +796,7 @@ class ApproveSerializer(serializers.Serializer):
         fields = ['status', 'community', 'article']
 
     def update(self, instance, validated_data):
-        member = Community.objects.filter(Community_name=validated_data["community"])
+        member = Community.objects.filter(Community_name=validated_data["community"]).first()
         communitymeta = CommunityMeta.objects.filter(article_id=instance.id,
                                                 community_id=member.id,
                                                 article=instance).first()
@@ -816,7 +816,7 @@ class RejectSerializer(serializers.Serializer):
         fields = ['status', 'community', 'article']
 
     def update(self, instance, validated_data):
-        member = Community.objects.filter(Community_name=validated_data['community'])
+        member = Community.objects.filter(Community_name=validated_data['community']).first()
         communitymeta = CommunityMeta.objects.filter(article_id=instance.id,
                                                 community_id=member.id,
                                                 article=instance).first()
