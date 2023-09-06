@@ -26,10 +26,11 @@ class UserSerializer(serializers.ModelSerializer):
     isFollowing = serializers.SerializerMethodField()
     posts = serializers.SerializerMethodField()
     profile_pic_url = serializers.ReadOnlyField()
+    notifications = serializers.ReadOnlyField()
 
     class Meta:
         model = User
-        fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers', 'following', 'isFollowing', 'posts']
+        fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers', 'following', 'isFollowing', 'posts', 'notifications']
         
     def get_rank(self, obj):
         rank = Rank.objects.get(user_id=obj.id)
@@ -52,6 +53,10 @@ class UserSerializer(serializers.ModelSerializer):
     def get_posts(self, obj):
         posts = SocialPost.objects.filter(user=obj.id).count()
         return posts
+    
+    def get_notifications(self,obj):
+        member = Notification.objects.filter(user=obj.id, is_read=False).count()
+        return member
 
 class UserCreateSerializer(serializers.ModelSerializer):
     
