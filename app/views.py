@@ -127,7 +127,6 @@ class UserViewset(viewsets.ModelViewSet):
         get logged in user
         """
         serializer = self.get_serializer(self.get_authenticated_user())
-        # prepare response
         return Response(data={"success": serializer.data})
 
     @action(methods=['post'], detail=False,permission_classes=[permissions.AllowAny,])
