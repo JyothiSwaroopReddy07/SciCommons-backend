@@ -540,6 +540,8 @@ class ArticleViewset(viewsets.ModelViewSet):
         '''
             article approved for review process
         '''
+        member = Community.objects.filter(Community_name=request.data["community"]).first()
+        request.data["community"] = member.id
         obj = self.get_object()
         serializer = self.get_serializer(obj,data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -630,6 +632,8 @@ class ArticleViewset(viewsets.ModelViewSet):
         '''
         admin approve article and select reviewers and moderators
         '''
+        member = Community.objects.filter(Community_name=request.data["community"]).first()
+        request.data["community"] = member.id
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         serializer = self.get_serializer(obj ,data=request.data, partial=True)
@@ -660,6 +664,8 @@ class ArticleViewset(viewsets.ModelViewSet):
         '''
         reject the article
         '''
+        member = Community.objects.filter(Community_name=request.data["community"]).first()
+        request.data["community"] = member.id
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         serializer = self.get_serializer(obj ,data=request.data, partial=True)
