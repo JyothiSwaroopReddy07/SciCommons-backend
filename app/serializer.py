@@ -26,7 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
     isFollowing = serializers.SerializerMethodField()
     posts = serializers.SerializerMethodField()
     profile_pic_url = serializers.ReadOnlyField()
-    notifications = serializers.ReadOnlyField()
+    notifications = serializers.SerializerMethodField()
 
     class Meta:
         model = User
