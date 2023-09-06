@@ -722,7 +722,7 @@ class SubmitArticleSerializer(serializers.Serializer):
         if len(communities)==0:
             raise serializers.ValidationError(detail={"error": "communities can't be empty or None"})
         
-        if instance.link is not None:
+        if len(instance.link):
             raise serializers.ValidationError(detail={"error": "you can not submit external article"})
         
         with transaction.atomic():
