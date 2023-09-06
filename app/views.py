@@ -658,7 +658,7 @@ class ArticleViewset(viewsets.ModelViewSet):
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/reject_article', permission_classes=[ArticlePermission])    
     def reject_article(self, request, pk):
         '''
-        admin approve article and select reviewers and moderators
+        reject the article
         '''
         obj = self.get_object()
         self.check_object_permissions(request,obj)
