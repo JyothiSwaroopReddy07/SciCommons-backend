@@ -789,7 +789,7 @@ class InReviewSerializer(serializers.Serializer):
 
 class ApproveSerializer(serializers.Serializer):
     status = serializers.CharField()
-    community = serializers.IntegerField()
+    community = serializers.CharField()
     article = serializers.IntegerField(read_only=True)    
     class Meta:
         fields = ['status', 'community', 'article']
@@ -815,7 +815,7 @@ class RejectSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         communitymeta = CommunityMeta.objects.filter(article_id=instance.id,
-                                                community=validated_data['community'],
+                                                community__Community_name=validated_data['community'],
                                                 article=instance).first()
         communitymeta.status = 'rejected'
         communitymeta.save()
