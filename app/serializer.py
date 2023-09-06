@@ -754,7 +754,7 @@ class InReviewSerializer(serializers.Serializer):
         fields = ['status', 'community', 'reviwers', 'moderator']
         
     def update(self, instance ,validated_data):
-        community_meta = CommunityMeta.objects.filter(community_id=validated_data['community'], article=instance).first()
+        community_meta = CommunityMeta.objects.filter(community__Community_name=validated_data['community'], article=instance).first()
         if community_meta is None:
             raise serializers.ValidationError(detail=f'article not submitted for review {community_meta.community.Community_name}')
     
