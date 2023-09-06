@@ -537,6 +537,9 @@ class ArticleViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/approve_for_review', permission_classes=[ArticlePermission])
     def approve_review(self, request, pk):
+        '''
+            article approved for review process
+        '''
         obj = self.get_object()
         serializer = self.get_serializer(obj,data=request.data)
         serializer.is_valid(raise_exception=True)

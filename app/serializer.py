@@ -757,8 +757,7 @@ class InReviewSerializer(serializers.Serializer):
         community_meta = CommunityMeta.objects.filter(community_id=validated_data['community'], article=instance).first()
         if community_meta is None:
             raise serializers.ValidationError(detail=f'article not submitted for review {community_meta.community.Community_name}')
-        community_meta.status = 'in review'
-        community_meta.save()
+    
         reviewers_arr = [reviewer for reviewer in OfficialReviewer.objects.filter(community_id = validated_data['community'])]
         moderators_arr = [moderator for moderator in Moderator.objects.filter(community_id = validated_data['community'])]
 
@@ -773,6 +772,9 @@ class InReviewSerializer(serializers.Serializer):
 
         if len(moderators_arr)>=1:
             moderators_arr = random.sample(moderators_arr, 1)
+        
+        community_meta.status = 'in review'
+        community_meta.save()
 
         instance.reviewer.add(*[reviewer.id for reviewer in reviewers_arr])
         instance.moderator.add(*[moderator.id for moderator in moderators_arr])
