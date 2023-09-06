@@ -758,8 +758,8 @@ class InReviewSerializer(serializers.Serializer):
         if community_meta is None:
             raise serializers.ValidationError(detail=f'article not submitted for review {community_meta.community.Community_name}')
     
-        reviewers_arr = [reviewer for reviewer in OfficialReviewer.objects.filter(community_id = validated_data['community'])]
-        moderators_arr = [moderator for moderator in Moderator.objects.filter(community_id = validated_data['community'])]
+        reviewers_arr = [reviewer for reviewer in OfficialReviewer.objects.filter(community__Community_name = validated_data['community'])]
+        moderators_arr = [moderator for moderator in Moderator.objects.filter(community__Community_name = validated_data['community'])]
 
         if len(reviewers_arr)==0:
             raise serializers.ValidationError(detail={"error":"No Reviewer on Community"})
@@ -796,7 +796,7 @@ class ApproveSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         communitymeta = CommunityMeta.objects.filter(article_id=instance.id,
-                                                community=validated_data['community'],
+                                                community__Community_name=validated_data['community'],
                                                 article=instance).first()
         communitymeta.status = 'accepted'
         communitymeta.save()
