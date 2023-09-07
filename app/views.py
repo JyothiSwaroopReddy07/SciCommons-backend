@@ -961,7 +961,6 @@ class SocialPostViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        print(serializer.data)
         return Response(data={"success":serializer.data})
     
     def destroy(self, request, pk):
@@ -1076,7 +1075,6 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     def update(self, request, pk):
 
         instance = SocialPostComment.objects.filter(id=pk).first()
-        print(instance)
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)

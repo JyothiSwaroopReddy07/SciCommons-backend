@@ -68,10 +68,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = self.Meta.model.objects.filter(email=validated_data['email']).first()
         if user:
-            raise serializers.ValidationError("User with mail already exists.Please use another email or Login using this mail")
+            raise serializers.ValidationError(detail={"error": "User with mail already exists.Please use another email or Login using this mail"})
         user = self.Meta.model.objects.filter(username=validated_data['username']).first()
         if user:
-            raise serializers.ValidationError("Username already exists.Please use another username!!!")
+            raise serializers.ValidationError(detail={"error":"Username already exists.Please use another username!!!"})
         
         instance = self.Meta.model.objects.create(**validated_data)
         instance.set_password(password)
@@ -108,59 +108,42 @@ class LoginSerializer(serializers.Serializer):
 
 
     def validate(self, data):
-        username = data.get("username", None)
-        email = data.get("email",None)
-        password = data.get("password", None)
-        if email is not None:
+        request = self.context.get('request')
+        username = request.data.get("username", None)
+        email = request.data.get("email",None)
+        password = request.data.get("password", None)
+        if username is None and email is None:
+            raise serializers.ValidationError(detail={"error":"Username or email must be entered"})
+
+        if username is None and email is not None:
             member = User.objects.filter(email=email).first()
             if member is None:
-                raise serializers.ValidationError(
-                    "Account does not exist. \nPlease try registering to scicommons first."
-                )
-            user = authenticate(email=email, password=password)
+                raise serializers.ValidationError(detail={"error":"Enter a valid email address"})
+            username = member.username
 
-            if user and not user.is_active:
-                raise serializers.ValidationError(
-                    "Account has been deactivated. \n Please contact your company's admin to restore your account."
-                )
+        member = User.objects.filter(username=username).first()
+        if member is None:
+            raise serializers.ValidationError(
+                detial={"error":"Account does not exist. \nPlease try registering to scicommons first"}
+            )
+        user = authenticate(username=username, password=password)
 
-            if not user:
-                raise serializers.ValidationError("Username or Password is wrong.")
+        if user and not user.is_active:
+            raise serializers.ValidationError(
+                detail={"error":"Account has been deactivated. \n Please contact your company's admin to restore your account"}
+            )
 
-            refresh = RefreshToken.for_user(user)
-            data = {"access": str(refresh.access_token), "refresh": str(refresh)}
+        if not user:
+            raise serializers.ValidationError(detail={"error":"Username or Password is wrong"})
 
-            UserActivity.objects.create(user=user, action=f"you Logged in at {datetime.datetime.now()}")
+        refresh = RefreshToken.for_user(user)
+        data = {"access": str(refresh.access_token), "refresh": str(refresh)}
 
-            return data
-        
-        elif username is not None:
-            member = User.objects.filter(username=username).first()
-            if member is None:
-                raise serializers.ValidationError(
-                    "Account does not exist. \nPlease try registering to scicommons first."
-                )
-            user = authenticate(username=username, password=password)
+        UserActivity.objects.create(user=user, action=f"you Logged in at {datetime.datetime.now()}")
 
-            if user and not user.is_active:
-                raise serializers.ValidationError(
-                    "Account has been deactivated. \n Please contact your company's admin to restore your account."
-                )
+        return data
 
-            if not user:
-                raise serializers.ValidationError("Username or Password is wrong.")
 
-            refresh = RefreshToken.for_user(user)
-            data = {"access": str(refresh.access_token), "refresh": str(refresh)}
-
-            UserActivity.objects.create(user=user, action=f"you Logged in at {datetime.datetime.now()}")
-
-            return data
-        raise serializers.ValidationError(
-                    "Please enter username or email"
-                )
-
-        
 
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -792,7 +775,7 @@ class InReviewSerializer(serializers.Serializer):
         community_data = request.data.get('community')
         community_meta = CommunityMeta.objects.filter(community_id=community_data, article=instance).first()
         if community_meta is None:
-            raise serializers.ValidationError(detail=f'article not submitted for review {community_meta.community.Community_name}')
+            raise serializers.ValidationError(detail={"error":f'article not submitted for review {community_meta.community.Community_name}'})
     
         reviewers_arr = [reviewer for reviewer in OfficialReviewer.objects.filter(community_id = community_data)]
         moderators_arr = [moderator for moderator in Moderator.objects.filter(community_id = community_data)]
