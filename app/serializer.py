@@ -392,6 +392,7 @@ class PromoteSerializer(serializers.ModelSerializer):
                 member = CommunityMember.objects.create(community=instance, user_id=user_id)
                 member.is_reviewer = False
                 member.is_moderator = False
+                member.is_admin = False
                 member.save()
                 send_mail("added member" , f'You have been added as member to {instance.Community_name}', settings.EMAIL_HOST_USER , [member.user.email], fail_silently=False)
                 UserActivity.objects.create(user=self.context['request'].user, action=f'you added {member.user.username} to community')
@@ -410,6 +411,7 @@ class PromoteSerializer(serializers.ModelSerializer):
                 OfficialReviewer.objects.create(User_id=user_id, community=instance, Official_Reviewer_name=fake.name())
                 member.is_reviewer = True
                 member.is_moderator = False
+                member.is_admin = False
                 member.save()
                 send_mail("you are Reviewer", f'You have been added as Official Reviewer to {instance.Community_name}', settings.EMAIL_HOST_USER , [member.user.email], fail_silently=False)
                 UserActivity.objects.create(user=self.context['request'].user, action=f'you added {member.user.username} to {instance.Community_name} as reviewer')
@@ -421,6 +423,7 @@ class PromoteSerializer(serializers.ModelSerializer):
                 Moderator.objects.create(user_id=user_id, community=instance)
                 member.is_moderator = True
                 member.is_reviewer = False
+                member.is_admin = False
                 member.save()
                 send_mail(" you are moderator", f'You have been added as Moderator to {instance.Community_name}', settings.EMAIL_HOST_USER , [member.user.email], fail_silently=False)
                 UserActivity.objects.create(user=self.context['request'].user, action=f'you added {member.user.username} to {instance.Community_name} as moderator')
