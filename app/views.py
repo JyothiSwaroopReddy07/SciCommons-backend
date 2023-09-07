@@ -331,7 +331,7 @@ class CommunityViewset(viewsets.ModelViewSet):
         member = User.objects.filter(username=request.data["username"]).first()
         if member is None:
             return Response(data={"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-        admin = Community.objects.filter(user_id=member.id)
+        admin = Community.objects.filter(user_id=member.id).first()
         if admin is not None:
             return Response(data={"error": "You cant perform this action"},status=status.HTTP_404_NOT_FOUND)
         request.data["user_id"] = member.id
@@ -347,7 +347,7 @@ class CommunityViewset(viewsets.ModelViewSet):
         obj = self.get_object()
         self.check_object_permissions(request,obj)
 
-        admin = Community.objects.filter(user_id=user_id)
+        admin = Community.objects.filter(user_id=user_id).first()
         if admin is not None:
             return Response(data={"error": "You cant perform this action"},status=status.HTTP_404_NOT_FOUND)
         
