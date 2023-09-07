@@ -35,6 +35,7 @@ class UserViewset(viewsets.ModelViewSet):
         'reset_password':ResetPasswordSerializer,
         'get_current_user':UserSerializer,
         'getMyArticles':AuthorSerializer,
+        'getMyArticle':AuthorSerializer,
         'getUserArticles':UserSerializer,
         'getposts': SocialPostSerializer,
         'follow': FollowSerializer,
@@ -97,6 +98,14 @@ class UserViewset(viewsets.ModelViewSet):
         authors = Author.objects.filter(User_id=request.user.id)
         articles = Article.objects.filter(author__in=authors)
         article_serializer = ArticlelistSerializer(articles, many=True, context={'request':request})
+
+        return Response(data={"success": article_serializer.data})
+    
+    @action(methods=['get'], detail=False, url_path="articles/(?P<articleId>.+)", permission_classes=[permissions.IsAuthenticated,])
+    def getMyArticle(self, request,articleId):
+        authors = Author.objects.filter(User_id=request.user.id)
+        articles = Article.objects.filter(author__in=authors,id=articleId)
+        article_serializer = ArticleGetSerializer(articles, many=True, context={'request':request})
 
         return Response(data={"success": article_serializer.data})
     
