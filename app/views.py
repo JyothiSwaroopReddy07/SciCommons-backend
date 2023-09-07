@@ -449,33 +449,33 @@ class ArticleViewset(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = super().get_queryset()
-        if self.request.query_params.get('filter') == 'rated':
-            queryset = queryset.order_by('-commentbase__rating')
-        elif self.request.query_params.get('filter') == 'least_rated':
-            queryset = queryset.order_by('commentbase__rating')
-        elif self.request.query_params.get('filter') == 'recent':
-            queryset = queryset.order_by('-Public_date')
-        elif self.request.query_params.get('filter') == 'least_recent':
-            queryset = queryset.order_by('Public_date')
-        elif self.request.query_params.get('filter') == 'viewed':
-            queryset = queryset.order_by('-views')
-        elif self.request.query_params.get('filter') == 'least_viewed':
-            queryset = queryset.order_by('views')
-        elif self.request.query_params.get('filter') == 'favourite':
-            # Use a subquery to annotate the favorite_count
-            subquery = Subquery(
-                Article.objects.filter(pk=OuterRef('pk'))
-                .annotate(favourite_count=Count('favourite'))
-                .values('favourite_count')
-            )
-            queryset = queryset.annotate(favourite_count=Coalesce(subquery, 0)).order_by('-favourite_count')
-        elif self.request.query_params.get('filter') == 'least_favourite':
-            subquery = Subquery(
-                Article.objects.filter(pk=OuterRef('pk'))
-                .annotate(favourite_count=Count('favourite'))
-                .values('favourite_count')
-            )
-            queryset = queryset.annotate(favourite_count=Coalesce(subquery, 0)).order_by('favourite_count')
+        # if self.request.query_params.get('filter') == 'rated':
+        #     queryset = queryset.order_by('-commentbase__rating')
+        # elif self.request.query_params.get('filter') == 'least_rated':
+        #     queryset = queryset.order_by('commentbase__rating')
+        # elif self.request.query_params.get('filter') == 'recent':
+        #     queryset = queryset.order_by('-Public_date')
+        # elif self.request.query_params.get('filter') == 'least_recent':
+        #     queryset = queryset.order_by('Public_date')
+        # elif self.request.query_params.get('filter') == 'viewed':
+        #     queryset = queryset.order_by('-views')
+        # elif self.request.query_params.get('filter') == 'least_viewed':
+        #     queryset = queryset.order_by('views')
+        # elif self.request.query_params.get('filter') == 'favourite':
+        #     # Use a subquery to annotate the favorite_count
+        #     subquery = Subquery(
+        #         Article.objects.filter(pk=OuterRef('pk'))
+        #         .annotate(favourite_count=Count('favourite'))
+        #         .values('favourite_count')
+        #     )
+        #     queryset = queryset.annotate(favourite_count=Coalesce(subquery, 0)).order_by('-favourite_count')
+        # elif self.request.query_params.get('filter') == 'least_favourite':
+        #     subquery = Subquery(
+        #         Article.objects.filter(pk=OuterRef('pk'))
+        #         .annotate(favourite_count=Count('favourite'))
+        #         .values('favourite_count')
+        #     )
+        #     queryset = queryset.annotate(favourite_count=Coalesce(subquery, 0)).order_by('favourite_count')
         return queryset
 
     
