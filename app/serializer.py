@@ -96,7 +96,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         return representation
         
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=255, write_only=True)
+    username = serializers.CharField(max_length=255, read_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
     access = serializers.CharField(max_length=255, read_only=True)
     refresh = serializers.CharField(max_length=255, read_only=True)
@@ -134,7 +134,7 @@ class LoginSerializer(serializers.Serializer):
 
             return data
         
-        else:
+        elif username is not None:
             member = User.objects.filter(username=username).first()
             if member is None:
                 raise serializers.ValidationError(
@@ -156,6 +156,11 @@ class LoginSerializer(serializers.Serializer):
             UserActivity.objects.create(user=user, action=f"you Logged in at {datetime.datetime.now()}")
 
             return data
+        raise serializers.ValidationError(
+                    "Please enter username or email"
+                )
+
+        
 
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
