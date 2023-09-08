@@ -205,9 +205,8 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'],url_path='myactivity',detail=False,permission_classes=[permissions.IsAuthenticated])
     def myactivity(self,request):
-        member = UserActivity.objects.filter(user=request.user)
-        serializer = UserActivitySerializer(data=member,many=True)
-        serializer.is_valid(raise_exception=True)
+        activities = UserActivity.objects.filter(user_id=request.user)
+        serializer = UserActivitySerializer(activities,many=True)
         return Response(data={"success":serializer.data})
         
     # @action(methods=['get'],url_path="followers", detail=False,permission_classes=[permissions.IsAuthenticated])
