@@ -40,16 +40,6 @@ class CommunityPermission(permissions.BasePermission):
 
         if view.action in ['retrieve', 'list']:
             return True
-
-        elif view.action in ['getArticles']:
-            response = Community.objects.filter(Community_name=obj)
-            serializer = CommunitySerializer(data=response, many=True)
-            serializer.is_valid()
-            community = serializer.data
-            if request.user.id in community[0]["members"]:
-                return True
-            else:
-                return False
         
         elif view.action in ['update', 'getMembers', 'addPublishedInfo', 'destroy'
                              , 'remove_member', 'promote_member', 'get_requests', 'approve_request']:
@@ -59,7 +49,7 @@ class CommunityPermission(permissions.BasePermission):
             else:
                 return False
         
-        elif view.action in ['create', 'subscribe','unsubscribe', 'join_request']:
+        elif view.action in ['create', 'subscribe','unsubscribe', 'join_request', 'getArticles']:
             return request.user.is_authenticated
         
         return obj.user == request.user
