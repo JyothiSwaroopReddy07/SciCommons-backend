@@ -138,7 +138,11 @@ class LoginSerializer(serializers.Serializer):
 
         return data
 
-
+class UserActivitySerializer(serializers.Serializer):
+    
+    class Meta:
+        model = UserActivity
+        fields = ['id','action']
 
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()

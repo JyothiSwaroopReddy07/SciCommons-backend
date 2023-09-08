@@ -41,7 +41,8 @@ class UserViewset(viewsets.ModelViewSet):
         'follow': FollowSerializer,
         'unfollow': FollowSerializer,
         'followers': FollowersSerializer,
-        'following': FollowersSerializer
+        'following': FollowersSerializer,
+        'myactivity': UserActivitySerializer,
     }
 
 
@@ -201,10 +202,17 @@ class UserViewset(viewsets.ModelViewSet):
             return Response(data={"success":"UnFollowed!!!"})
         else:
             return Response(data={"error":"Did not Follow!!!"})
+    
+    @action(methods=['get'],url_path='myactivity',detail=False,permission_classes=[permissions.IsAuthenticated])
+    def myactivity(self,request):
+        member = UserActivity.objects.filter(user=request.user)
+        serializer = UserActivitySerializer(data=member,many=True)
+        serializer.is_valid(raise_exception=True)
+        return Response(data={"success":serializer.data})
         
-    @action(methods=['get'],url_path="followers", detail=False,permission_classes=[permissions.IsAuthenticated])
-    def followers(self,request):
-        member = Follow.objects.filter(followed_user=request.user)
+    # @action(methods=['get'],url_path="followers", detail=False,permission_classes=[permissions.IsAuthenticated])
+    # def followers(self,request):
+    #     member = Follow.objects.filter(followed_user=request.user)
         
 
 class CommunityViewset(viewsets.ModelViewSet):
