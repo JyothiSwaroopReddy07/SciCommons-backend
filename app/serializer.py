@@ -1260,7 +1260,7 @@ class SocialPostListSerializer(serializers.ModelSerializer):
         return liked
     
     def get_personal(self,obj):
-        if obj.User == self.context['request'].user:
+        if obj.user == self.context['request'].user:
             return True
         else:
             return False
