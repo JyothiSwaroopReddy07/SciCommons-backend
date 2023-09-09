@@ -1308,7 +1308,7 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
         return comments_count
     
     def get_personal(self,obj):
-        if obj.User == self.context['request'].user:
+        if obj.user == self.context['request'].user:
             return True
         else:
             return False
