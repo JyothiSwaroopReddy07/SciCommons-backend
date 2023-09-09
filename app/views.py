@@ -471,7 +471,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = Article.objects.filter(status='public')
         # if self.request.query_params.get('filter') == 'rated':
         #     queryset = queryset.order_by('-commentbase__rating')
         # elif self.request.query_params.get('filter') == 'least_rated':
