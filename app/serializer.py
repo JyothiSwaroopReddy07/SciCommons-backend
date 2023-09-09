@@ -779,14 +779,14 @@ class InReviewSerializer(serializers.Serializer):
         if community_meta is None:
             raise serializers.ValidationError(detail={"error":f'article not submitted for review {community_meta.community.Community_name}'})
     
-        reviewers_arr = [reviewer for reviewer in OfficialReviewer.objects.filter(community_id = community_data)]
-        moderators_arr = [moderator for moderator in Moderator.objects.filter(community_id = community_data)]
+        reviewers_arr = [reviewer for reviewer in OfficialReviewer.objects.filter(community_id = community_data).exclude(User__in=instance.authors)]
+        moderators_arr = [moderator for moderator in Moderator.objects.filter(community_id = community_data).exclude(user__in=instance.authors)]
 
-        if len(reviewers_arr)==0:
-            raise serializers.ValidationError(detail={"error":"No Reviewer on Community"})
+        if len(reviewers_arr)<3:
+            raise serializers.ValidationError(detail={"error":"Insufficient reviewers on Community"})
 
         if len(moderators_arr)==0:
-            raise serializers.ValidationError(detail={"error":"No Moderator on Community"})
+            raise serializers.ValidationError(detail={"error":"No Moderators on Community"})
 
         if len(reviewers_arr)>=3:
             reviewers_arr = random.sample(reviewers_arr, 3)
