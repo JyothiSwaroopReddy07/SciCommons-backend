@@ -1235,6 +1235,7 @@ class SocialPostListSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField(read_only=True)
     image_url = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
+    personal = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPost
@@ -1285,6 +1286,7 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
+    personal = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPost
