@@ -777,8 +777,12 @@ class InReviewSerializer(serializers.Serializer):
         community_data = request.data.get('community')
         community_meta = CommunityMeta.objects.filter(community_id=community_data, article=instance).first()
         if community_meta is None:
-            raise serializers.ValidationError(detail={"error":f'article not submitted for review {community_meta.community.Community_name}'})
-        print("swaroop", instance)
+            raise serializers.ValidationError(detail={"error":f'article is not submitted for review {community_meta.community.Community_name}'})
+        elif community_meta.status== "in review":
+            raise serializers.ValidationError(detail={"error":f'article is already submitted for review'})
+        elif community_meta.status == "accepted" or community_meta.status=="rejected":
+            raise serializers.ValidationError(detail={"error": "article is already processed in this community"})
+        
         authors = [User.id for User in Author.objects.filter(article=instance)]
         reviewers_arr = [reviewer for reviewer in OfficialReviewer.objects.filter(community_id = community_data).exclude(User__in=authors)]
         moderators_arr = [moderator for moderator in Moderator.objects.filter(community_id = community_data).exclude(user__in=authors)]
