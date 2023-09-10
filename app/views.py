@@ -614,7 +614,7 @@ class ArticleViewset(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False, url_path='favourites', permission_classes=[ArticlePermission])
     def favourites(self, request):
         favourites = Favourite.objects.filter(user=request.user).values_list('article', flat=True)
-        posts = Article.objects.filter(id__in=favourites.all())
+        posts = Article.objects.filter(id__in=favourites.all(),status="public")
         serializer = ArticlelistSerializer(posts, many=True, context={"request":request})
         return Response(data={"success":serializer.data})
         
