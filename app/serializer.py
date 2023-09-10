@@ -637,7 +637,7 @@ class StatusSerializer(serializers.ModelSerializer):
 class ArticleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ['article_file','Code','Abstract','authors','video', 'link']
+        fields = ['article_file','Code','Abstract','video', 'link','status']
         
        
 
