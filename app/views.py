@@ -439,7 +439,7 @@ class ArticleViewset(viewsets.ModelViewSet):
     serializer_class = ArticleSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filter_backends = (filters.OrderingFilter, django_filters.DjangoFilterBackend)
-    filterset_class = ArticleFilter
+    filterset_class = ArticleFilter, SearchFilter
     ordering_fields = ('Public_date', 'views', 'favourite_count') 
     http_method_names = ['post', 'get', 'put', 'delete']
     
