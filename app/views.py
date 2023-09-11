@@ -510,8 +510,8 @@ class ArticleViewset(viewsets.ModelViewSet):
     def retrieve(self, request, pk):
         obj = self.get_object()
         self.check_object_permissions(request,obj)
-
-        response = super(ArticleViewset, self).retrieve(request,pk=pk)
+        article = Article.objects.filter(id=pk).first()
+        response = ArticleGetSerializer(article,many=True, context={"request":request})
 
         return Response(data={"success":response.data})
 
