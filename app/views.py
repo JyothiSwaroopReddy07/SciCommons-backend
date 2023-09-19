@@ -440,10 +440,7 @@ class ArticleViewset(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filter_backends = (filters.OrderingFilter, django_filters.DjangoFilterBackend)
     filterset_class = ArticleFilter
-    ordering_fields = ('Public_date', 'views', 'favourite_count') 
     http_method_names = ['post', 'get', 'put', 'delete']
-    
-    # filterset_class = ArticleFilter
     search_fields = ['article_name', 'keywords', 'authorstring']
     
     action_serializers = {
@@ -472,33 +469,6 @@ class ArticleViewset(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = Article.objects.all()
-        # if self.request.query_params.get('filter') == 'rated':
-        #     queryset = queryset.order_by('-commentbase__rating')
-        # elif self.request.query_params.get('filter') == 'least_rated':
-        #     queryset = queryset.order_by('commentbase__rating')
-        # elif self.request.query_params.get('filter') == 'recent':
-        #     queryset = queryset.order_by('-Public_date')
-        # elif self.request.query_params.get('filter') == 'least_recent':
-        #     queryset = queryset.order_by('Public_date')
-        # elif self.request.query_params.get('filter') == 'viewed':
-        #     queryset = queryset.order_by('-views')
-        # elif self.request.query_params.get('filter') == 'least_viewed':
-        #     queryset = queryset.order_by('views')
-        # elif self.request.query_params.get('filter') == 'favourite':
-        #     # Use a subquery to annotate the favorite_count
-        #     subquery = Subquery(
-        #         Article.objects.filter(pk=OuterRef('pk'))
-        #         .annotate(favourite_count=Count('favourite'))
-        #         .values('favourite_count')
-        #     )
-        #     queryset = queryset.annotate(favourite_count=Coalesce(subquery, 0)).order_by('-favourite_count')
-        # elif self.request.query_params.get('filter') == 'least_favourite':
-        #     subquery = Subquery(
-        #         Article.objects.filter(pk=OuterRef('pk'))
-        #         .annotate(favourite_count=Count('favourite'))
-        #         .values('favourite_count')
-        #     )
-        #     queryset = queryset.annotate(favourite_count=Coalesce(subquery, 0)).order_by('favourite_count')
         return queryset
 
     
@@ -937,6 +907,8 @@ class SocialPostViewset(viewsets.ModelViewSet):
     permission_classes = [SocialPostPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = SocialPostSerializer
+    filter_backends=[DjangoFilterBackend]
+    filterset_class=PostFilters
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
@@ -1049,6 +1021,8 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     permission_classes = [SocialPostCommentPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = SocialPostCommentSerializer
+    filter_backends=[DjangoFilterBackend]
+    filterset_class= CommentFilter
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
