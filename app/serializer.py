@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers', 'following', 'isFollowing', 'posts']
+        fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers', 'following', 'isFollowing', 'posts','personal']
         
     def get_rank(self, obj):
         rank = Rank.objects.get(user_id=obj.id)
@@ -52,6 +52,11 @@ class UserSerializer(serializers.ModelSerializer):
     def get_posts(self, obj):
         posts = SocialPost.objects.filter(user=obj.id).count()
         return posts
+    
+    def get_personal(self,obj):
+        if obj.id is not None:
+            return obj.id==self.context['request'].user.id
+        return False
 
 class UserCreateSerializer(serializers.ModelSerializer):
     
@@ -214,18 +219,26 @@ class CommunityGetSerializer(serializers.ModelSerializer):
     
 
     def get_isMember(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         count = CommunityMember.objects.filter(community=obj.id,user = self.context["request"].user).count()
         return count
     
     def get_isReviewer(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         count = CommunityMember.objects.filter(community=obj.id,user = self.context["request"].user, is_reviewer=True).count()
         return count
     
     def get_isModerator(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         count = CommunityMember.objects.filter(community=obj.id,user = self.context["request"].user, is_moderator=True).count()
         return count
     
     def get_isAdmin(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         count = CommunityMember.objects.filter(community=obj.id,user = self.context["request"].user, is_admin=True).count()
         return count
     
@@ -242,6 +255,8 @@ class CommunityGetSerializer(serializers.ModelSerializer):
         return count
     
     def get_isSubscribed(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         count = Subscribe.objects.filter(user=self.context['request'].user,community=obj.id).count()
         if count > 0:
             return True
@@ -577,30 +592,40 @@ class ArticleGetSerializer(serializers.ModelSerializer):
         return rating
 
     def get_isArticleReviewer(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if (ArticleReviewer.objects.filter(article=obj.id,officialreviewer__User_id=self.context['request'].user).count()>0):
             return True
         else:
             return False
     
     def get_isArticleModerator(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if(ArticleModerator.objects.filter(article=obj.id,moderator__user_id=self.context['request'].user).count()>0):
             return True
         else:
             return False
     
     def get_isAuthor(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if(Author.objects.filter(article=obj.id,User=self.context['request'].user).count()>0):
             return True
         else:
             return False
     
     def get_isFavourite(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if (Favourite.objects.filter(article=obj.id,user=self.context['request'].user).count() > 0):
             return True 
         else:
             return False
     
     def get_userrating(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return 0
         rating = CommentBase.objects.filter(article_id=obj.id,Type='review',User=self.context['request'].user).first()
         if rating is None:
             return 0
@@ -883,6 +908,8 @@ class CommentlistSerializer(serializers.ModelSerializer):
         return f'{int(rank.rank)}'
     
     def get_personal(self, obj): 
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if obj.User == self.context['request'].user:
             return True
         else:
@@ -897,6 +924,8 @@ class CommentlistSerializer(serializers.ModelSerializer):
         return rating
 
     def get_userrating(self,obj):
+        if self.context['request'].user.is_authenticated is False:
+            return 0
         member = LikeBase.objects.filter(user=self.context['request'].user, post=obj).first()
         if member is not None:
             return member.value
@@ -930,7 +959,9 @@ class CommentSerializer(serializers.ModelSerializer):
         rank = Rank.objects.filter(user=obj.User).first()
         return f'{int(rank.rank)}'
     
-    def get_personal(self, obj): 
+    def get_personal(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if obj.User == self.context['request'].user:
             return True
         else:
@@ -945,6 +976,8 @@ class CommentSerializer(serializers.ModelSerializer):
         return rating
 
     def get_userrating(self,obj):
+        if self.context['request'].user.is_authenticated is False:
+            return 0
         member = LikeBase.objects.filter(user=self.context['request'].user, post=obj).first()
         if member is not None:
             return member.value
@@ -1261,10 +1294,14 @@ class SocialPostListSerializer(serializers.ModelSerializer):
         return likes
 
     def get_liked(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         liked = SocialPostLike.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
         return liked
     
     def get_personal(self,obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if obj.user == self.context['request'].user:
             return True
         else:
@@ -1278,6 +1315,8 @@ class SocialPostListSerializer(serializers.ModelSerializer):
         return bookmarks
 
     def get_isbookmarked(self,obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         isbookmarked = BookMark.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
         return isbookmarked
 
@@ -1313,6 +1352,8 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
         return comments_count
     
     def get_personal(self,obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if obj.user == self.context['request'].user:
             return True
         else:
@@ -1323,6 +1364,8 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
         return likes
 
     def get_liked(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         liked = SocialPostLike.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
         return liked
     
@@ -1334,6 +1377,8 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
         return bookmarks
 
     def get_isbookmarked(self,obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         isbookmarked = BookMark.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
         return isbookmarked
 
@@ -1390,10 +1435,14 @@ class SocialPostCommentListSerializer(serializers.ModelSerializer):
         return likes
     
     def get_commentliked(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         liked = SocialPostCommentLike.objects.filter(comment_id=obj.id, user=self.context['request'].user).count()
         return liked
     
     def get_personal(self,obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if obj.user == self.context['request'].user:
             return True
         else:
