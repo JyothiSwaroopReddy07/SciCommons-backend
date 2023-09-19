@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers', 'following', 'isFollowing', 'posts','personal']
+        fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers', 'following', 'isFollowing', 'posts']
         
     def get_rank(self, obj):
         rank = Rank.objects.get(user_id=obj.id)
@@ -53,10 +53,6 @@ class UserSerializer(serializers.ModelSerializer):
         posts = SocialPost.objects.filter(user=obj.id).count()
         return posts
     
-    def get_personal(self,obj):
-        if obj.id is not None:
-            return obj.id==self.context['request'].user.id
-        return False
 
 class UserCreateSerializer(serializers.ModelSerializer):
     
