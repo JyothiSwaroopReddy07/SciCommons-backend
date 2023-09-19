@@ -30,6 +30,7 @@ class UserViewset(viewsets.ModelViewSet):
     action_serializers = {
         'login':LoginSerializer,
         'create':UserCreateSerializer,
+        'list': UserSerializer,
         'update':UserUpdateSerializer,
         'forgot_password':ForgotPasswordSerializer,
         'reset_password':ResetPasswordSerializer,
@@ -437,9 +438,8 @@ class ArticleViewset(viewsets.ModelViewSet):
     permission_classes = [ArticlePermission]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = ArticleSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    filter_backends = (filters.OrderingFilter, django_filters.DjangoFilterBackend)
-    filterset_class = ArticleFilter
+    filter_backends = [DjangoFilterBackend, SearchFilter,filters.OrderingFilter]
+    # filterset_class = ArticleFilter
     http_method_names = ['post', 'get', 'put', 'delete']
     search_fields = ['article_name', 'keywords', 'authorstring']
     
@@ -468,7 +468,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
     
     def get_queryset(self):
-        queryset = Article.objects.all()
+        queryset = self.queryset
         return queryset
 
     
@@ -909,7 +909,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = SocialPostSerializer
     filter_backends=[DjangoFilterBackend]
-    filterset_class=PostFilters
+    # filterset_class = PostFilters
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
@@ -1023,7 +1023,7 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = SocialPostCommentSerializer
     filter_backends=[DjangoFilterBackend]
-    filterset_class= CommentFilter
+    # filterset_class= CommentFilter
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
@@ -1180,9 +1180,7 @@ class PersonalMessageViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
 
     def get_queryset(self):
-        qs = self.queryset.filter(
-            Q(sender=self.request.user) | Q(receiver=self.request.user)
-        ).order_by('-created_at')
+        qs = self.queryset.filter(Q(sender=self.request.user) | Q(receiver=self.request.user)).order_by('-created_at')
         return qs
 
     def list(self, request):
