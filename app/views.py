@@ -502,7 +502,9 @@ class ArticleViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return Response(data={"success": "Article successfully updated", "data":serializer.data})
+        article = Article.objects.filter(id=pk).first()
+        response = ArticleGetSerializer(article,context={'request': request})
+        return Response(data={"success": "Article successfully updated", "data":response.data})
 
     def destroy(self, request, pk ):
         obj = self.get_object()
