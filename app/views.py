@@ -198,7 +198,8 @@ class UserViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'],url_path='unfollow', detail=False, permission_classes=[permissions.IsAuthenticated])
     def unfollow(self, request):
-        member = Follow.objects.filter(followed_user=request.data["followed_user"],user=request.user).first()
+        instance = User.objects.filter(id=request.data["followed_user"]).first()
+        member = Follow.objects.filter(followed_user=instance,user=request.user).first()
         if member is not None:
             member.delete()
             return Response(data={"success":"UnFollowed!!!"})
