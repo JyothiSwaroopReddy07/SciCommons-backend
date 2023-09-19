@@ -193,7 +193,7 @@ class UserViewset(viewsets.ModelViewSet):
         member = Follow.objects.filter(followed_user=instance, user=request.user).first()
         if member is not None:
             return Response(data={"error":"Already following!!!"})
-        Follow.objects.create(followed_user=request.data["followed_user"], user=request.user)
+        Follow.objects.create(followed_user=instance, user=request.user)
         return Response(data={"success":"followed!!!"})
 
     @action(methods=['post'],url_path='unfollow', detail=False, permission_classes=[permissions.IsAuthenticated])
