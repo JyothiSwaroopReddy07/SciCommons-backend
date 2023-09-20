@@ -42,7 +42,7 @@ class UserViewset(viewsets.ModelViewSet):
         'follow': FollowSerializer,
         'unfollow': FollowSerializer,
         'followers': FollowersSerializer,
-        'following': FollowersSerializer,
+        'following': FollowingSerializer,
         'myactivity': UserActivitySerializer,
     }
 
@@ -220,7 +220,7 @@ class UserViewset(viewsets.ModelViewSet):
     def following(self,request):
         instance = User.objects.filter(username=request.query_params.get("username")).first()
         member = Follow.objects.filter(user=instance)
-        serializer = FollowersSerializer(member,many=True,context={'request':request})
+        serializer = FollowingSerializer(member,many=True,context={'request':request})
         return Response(data={"success": serializer.data})
 
 class CommunityViewset(viewsets.ModelViewSet):

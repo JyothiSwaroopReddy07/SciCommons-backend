@@ -1493,6 +1493,30 @@ class FollowersSerializer(serializers.ModelSerializer):
         else:
             return False
 
+class FollowingSerializer(serializers.ModelSerializer):
+
+    avatar = serializers.SerializerMethodField(read_only=True)
+    username = serializers.SerializerMethodField(read_only=True)
+    isFollowing = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Follow
+        fields = ['id', 'user', 'followed_user','avatar', 'username','isFollowing']
+        read_only_fields = ['user', 'id']
+    
+    def get_username(self, obj):
+        return obj.followed_user.username
+    
+    def get_avatar(self, obj):
+        return obj.followed_user.profile_pic_url()
+    
+    def get_isFollowing(self, obj):
+        member = Follow.objects.filter(user=self.context['request'].user, followed_user=obj.followed_user).first()
+        if member is not None:
+            return True
+        else:
+            return False
+
 class FollowCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
