@@ -29,7 +29,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers', 'following', 'isFollowing', 'posts']
+        fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers',
+                  'google_scholar','pubmed','institute', 'following', 'isFollowing', 'posts']
         
     def get_rank(self, obj):
         rank = Rank.objects.get(user_id=obj.id)
