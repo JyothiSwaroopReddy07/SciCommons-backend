@@ -1481,10 +1481,10 @@ class FollowersSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'id']
     
     def get_username(self, obj):
-        return obj.followed_user.username
+        return obj.user.username
     
     def get_avatar(self, obj):
-        return obj.followed_user.profile_pic_url()
+        return obj.user.profile_pic_url()
     
     def get_isFollowing(self, obj):
         member = Follow.objects.filter(user=self.context['request'].user, followed_user=obj.followed_user).first()
