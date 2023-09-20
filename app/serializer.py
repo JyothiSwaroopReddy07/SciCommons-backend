@@ -1487,7 +1487,7 @@ class FollowersSerializer(serializers.ModelSerializer):
         return obj.followed_user.profile_pic_url()
     
     def get_isFollowing(self, obj):
-        member = Follow.objects.filter(user=self.context['request'].user, followed_user=obj.user).first()
+        member = Follow.objects.filter(user=self.context['request'].user, followed_user=obj.followed_user).first()
         if member is not None:
             return True
         else:
