@@ -975,7 +975,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'],detail=False,url_path="timeline", permission_classes=[SocialPostPermission])
     def timeline(self,request):
-        following = Follow.objects.filter(followed_user=request.user).values_list('followed_user', flat=True)
+        following = Follow.objects.filter(user=request.user).values_list('followed_user', flat=True)
         posts = SocialPost.objects.filter(user__in=following.all())
         serializer = SocialPostListSerializer(posts, many=True)
         return Response(data={"success":serializer.data})
