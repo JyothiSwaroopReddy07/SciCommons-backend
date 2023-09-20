@@ -212,10 +212,17 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = UserActivitySerializer(activities,many=True)
         return Response(data={"success":serializer.data})
         
-    # @action(methods=['get'],url_path="followers", detail=False,permission_classes=[permissions.IsAuthenticated])
-    # def followers(self,request):
-    #     member = Follow.objects.filter(followed_user=request.user)
-        
+    @action(methods=['get'],url_path="followers", detail=False,permission_classes=[permissions.IsAuthenticated])
+    def followers(self,request):
+        member = Follow.objects.filter(followed_user=request.user)
+        serializer = FollowersSerializer(member,many=True,context={'request':request})
+        return Response(data={"success": serializer.data})
+
+    @action(methods=['get'],url_path="following", detail=False,permission_classes=[permissions.IsAuthenticated])
+    def following(self,request):
+        member = Follow.objects.filter(user=request.user)
+        serializer = FollowersSerializer(member,many=True,context={'request':request})
+        return Response(data={"success": serializer.data})
 
 class CommunityViewset(viewsets.ModelViewSet):
     queryset = Community.objects.all()
