@@ -122,11 +122,8 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'], detail=False, url_path="(?P<username>.+)/articles", permission_classes=[permissions.IsAuthenticated])
     def getUserArticles(self, request, username):
-        queryset = User.objects.filter(username=username)
-        serializer = UserSerializer(data=queryset, many=True)
-        serializer.is_valid()
-        user = serializer.data
-        queryset = Author.objects.filter(User_id=user[0]["id"])
+        user = User.objects.filter(username=username).first()
+        queryset = Author.objects.filter(User_id=user.id)
         serializer = AuthorSerializer(data=queryset, many=True)
         serializer.is_valid()
         articles = serializer.data
