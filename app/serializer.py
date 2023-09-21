@@ -84,7 +84,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'profile_picture','profile_pic_url']
+        fields = ['first_name', 'last_name', 'profile_picture','profile_pic_url','google_scholar','pubmed','institute']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
