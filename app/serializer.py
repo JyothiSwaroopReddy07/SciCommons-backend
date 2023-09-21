@@ -84,7 +84,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'profile_picture','profile_pic_url','google_scholar','pubmed','institute']
+        fields = ['id','email','first_name', 'last_name', 'profile_picture','profile_pic_url','google_scholar','pubmed','institute']
+        read_only_fields = ['id','email']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
