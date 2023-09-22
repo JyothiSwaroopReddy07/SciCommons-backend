@@ -144,7 +144,7 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         otp = random.randint(100000, 999999)
-        user = User.objects.get(email=serializer.data['email'])
+        user = User.objects.filter(email=serializer.data['email']).first()
         if user is None:
             return Response(data={"error": "Please Enter valid email address!!!"}, status=status.HTTP_400_BAD_REQUEST)
         verify = EmailVerify.objects.create(user=user, otp=otp)
@@ -178,7 +178,7 @@ class UserViewset(viewsets.ModelViewSet):
         
         otp = random.randint(100000, 999999)
 
-        user = User.objects.get(email=serializer.data['email'])
+        user = User.objects.filter(email=serializer.data['email']).first()
         if user is None:
             return Response(data={"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
         forget = ForgetPassword.objects.create(user=user, otp=otp)
