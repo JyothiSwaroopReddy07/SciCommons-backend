@@ -147,7 +147,7 @@ class UserViewset(viewsets.ModelViewSet):
         try:
             user = User.objects.get(email=serializer.data['email'])
             if user is None:
-                return Response(data={"error": "Please Enter valid email address!!!"})
+                return Response(data={"error": "Please Enter valid email address!!!"}, status=status.HTTP_400_BAD_REQUEST)
             verify = EmailVerify.objects.create(user=user, otp=otp)
             email_from = settings.EMAIL_HOST_USER
             email_subject = "Email Verification"
@@ -156,7 +156,7 @@ class UserViewset(viewsets.ModelViewSet):
             return Response(data={"success": "code sent to your email"})
         except Exception as e:
             messages.error(request, 'An error accured. Please try again.')
-            return Response(data={"error":"An error accured. Please try again."})
+            return Response(data={"error":"An error accured. Please try again."}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(methods=['post'],url_path="verify_email",detail=False,permission_classes=[permissions.AllowAny,])
     def verifyemail(self,request):
@@ -164,12 +164,12 @@ class UserViewset(viewsets.ModelViewSet):
         email = request.data.get('email')
         user = User.objects.filter(email=email).first()
         if user is None:
-            return Response(data={"error": "Please enter correct mail address"})
+            return Response(data={"error": "Please enter correct mail address"}, status=status.HTTP_400_BAD_REQUEST)
         res = EmailVerify.objects.filter(otp=otp,user=user).first()
         if res is None:
             res1 = EmailVerify.objects.filter(user=user).first()
             res1.delete()
-            return Response(data={"error": "Otp authentication failed.Please generate new Otp!!!"})
+            return Response(data={"error": "Otp authentication failed.Please generate new Otp!!!"}, status=status.HTTP_400_BAD_REQUEST)
         res.delete()
         user.email_verified = True
         user.save()
@@ -185,7 +185,7 @@ class UserViewset(viewsets.ModelViewSet):
         try:
             user = User.objects.get(email=serializer.data['email'])
             if user is None:
-                return Response(data={"error": "User not found"})
+                return Response(data={"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
             forget = ForgetPassword.objects.create(user=user, otp=otp)
             forget.save()
 
@@ -207,11 +207,11 @@ class UserViewset(viewsets.ModelViewSet):
         password2 = request.data.get('password2')
         user = User.objects.filter(email=email).first()
         if user is None:
-            return Response(data={"error": "User not found"})
+            return Response(data={"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             forget = ForgetPassword.objects.get(otp=otp, user=user)
             if forget is None:
-                return Response(data={"error":"Invalid OTP."})
+                return Response(data={"error":"Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
                 
             user = forget.user
             if password == password2:
@@ -221,7 +221,7 @@ class UserViewset(viewsets.ModelViewSet):
                 return Response(data={"success": "password reset successfully"})
             else:
                 messages.error(request, 'Password not matching.')
-                return Response(data={"error": "Password not matching"})
+                return Response(data={"error": "Password not matching"}, status=status.HTTP_400_BAD_REQUEST)
                 # return redirect('resetPassword')
         except Exception as e:
             messages.error(request, 'Invalid OTP.')
