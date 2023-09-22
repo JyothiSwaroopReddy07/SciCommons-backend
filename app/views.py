@@ -139,7 +139,7 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(self.get_authenticated_user())
         return Response(data={"success": serializer.data})
 
-    @action(methods=['post'],url_path="/verifyrequest", detail=False,permission_classes=[permissions.AllowAny,])
+    @action(methods=['post'],url_path="verifyrequest", detail=False,permission_classes=[permissions.AllowAny,])
     def verifyrequest(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -156,7 +156,7 @@ class UserViewset(viewsets.ModelViewSet):
             messages.error(request, 'An error accured. Please try again.')
             return Response(data={"error":"An error accured. Please try again."})
     
-    @action(methods=['post'],url_path="/verify_email",detail=False,permission_classes=[permissions.AllowAny,])
+    @action(methods=['post'],url_path="verify_email",detail=False,permission_classes=[permissions.AllowAny,])
     def verifyemail(self,request):
         otp = request.data.get('otp')
         email = request.data.get('email')
