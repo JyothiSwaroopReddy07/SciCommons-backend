@@ -144,19 +144,15 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         otp = random.randint(100000, 999999)
-        try:
-            user = User.objects.get(email=serializer.data['email'])
-            if user is None:
-                return Response(data={"error": "Please Enter valid email address!!!"}, status=status.HTTP_400_BAD_REQUEST)
-            verify = EmailVerify.objects.create(user=user, otp=otp)
-            email_from = settings.EMAIL_HOST_USER
-            email_subject = "Email Verification"
-            email_body = "Your OTP is " + str(otp)
-            send_mail(email_subject, email_body, email_from, [serializer.data['email']], fail_silently=False)
-            return Response(data={"success": "code sent to your email"})
-        except Exception as e:
-            messages.error(request, 'An error accured. Please try again.')
-            return Response(data={"error":"An error accured. Please try again."}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.get(email=serializer.data['email'])
+        if user is None:
+            return Response(data={"error": "Please Enter valid email address!!!"}, status=status.HTTP_400_BAD_REQUEST)
+        verify = EmailVerify.objects.create(user=user, otp=otp)
+        email_from = settings.EMAIL_HOST_USER
+        email_subject = "Email Verification"
+        email_body = "Your OTP is " + str(otp)
+        send_mail(email_subject, email_body, email_from, [serializer.data['email']], fail_silently=False)
+        return Response(data={"success": "code sent to your email"})
     
     @action(methods=['post'],url_path="verify_email",detail=False,permission_classes=[permissions.AllowAny,])
     def verifyemail(self,request):
@@ -182,22 +178,18 @@ class UserViewset(viewsets.ModelViewSet):
         
         otp = random.randint(100000, 999999)
 
-        try:
-            user = User.objects.get(email=serializer.data['email'])
-            if user is None:
-                return Response(data={"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
-            forget = ForgetPassword.objects.create(user=user, otp=otp)
-            forget.save()
+        user = User.objects.get(email=serializer.data['email'])
+        if user is None:
+            return Response(data={"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+        forget = ForgetPassword.objects.create(user=user, otp=otp)
+        forget.save()
 
-            email_from = settings.EMAIL_HOST_USER
-            email_subject = "Reset Password"
-            email_body = "You have forgot you account password. Your OTP is " + str(otp)
-            send_mail(email_subject, email_body, email_from, [serializer.data['email']], fail_silently=False)
-            # return redirect('resetPassword')
-            return Response(data={"success": "code sent to your email"})
-        except Exception as e:
-            messages.error(request, 'An error accured. Please try again.')
-            # return render(request, 'forgetPassword.html')
+        email_from = settings.EMAIL_HOST_USER
+        email_subject = "Reset Password"
+        email_body = "You have forgot you account password. Your OTP is " + str(otp)
+        send_mail(email_subject, email_body, email_from, [serializer.data['email']], fail_silently=False)
+        return Response(data={"success": "code sent to your email"})
+
         
     @action(methods=['post'],url_path="reset_password", detail=False,permission_classes=[permissions.AllowAny,])
     def reset_password(self, request):
