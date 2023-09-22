@@ -148,7 +148,7 @@ class UserViewset(viewsets.ModelViewSet):
             user = User.objects.get(email=serializer.data['email'])
             if user is None:
                 return Response(data={"error": "Please Enter valid email address!!!"})
-            verify = EmailVerify(user=user, otp=otp)
+            verify = EmailVerify.objects.create(user=user, otp=otp)
             email_from = settings.EMAIL_HOST_USER
             email_subject = "Email Verification"
             email_body = "Your OTP is " + str(otp)
@@ -186,7 +186,7 @@ class UserViewset(viewsets.ModelViewSet):
             user = User.objects.get(email=serializer.data['email'])
             if user is None:
                 return Response(data={"error": "User not found"})
-            forget = ForgetPassword(user=user, otp=otp)
+            forget = ForgetPassword.objects.create(user=user, otp=otp)
             forget.save()
 
             email_from = settings.EMAIL_HOST_USER
