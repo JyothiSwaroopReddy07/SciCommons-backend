@@ -44,6 +44,8 @@ class UserViewset(viewsets.ModelViewSet):
         'followers': FollowersSerializer,
         'following': FollowingSerializer,
         'myactivity': UserActivitySerializer,
+        'verifyrequest': ForgotPasswordSerializer,
+        'verifyemail': VerifySerializer,
     }
 
 
@@ -137,14 +139,44 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(self.get_authenticated_user())
         return Response(data={"success": serializer.data})
 
-    @action(methods=['post'], detail=False,permission_classes=[permissions.AllowAny,])
+    @action(methods=['post'],url_path="/verifyrequest", detail=False,permission_classes=[permissions.AllowAny,])
+    def verifyrequest(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        otp = random.randint(100000, 999999)
+        try:
+            user = User.objects.get(email=serializer.data['email'])
+            verify = EmailVerify(user=user, otp=otp)
+            email_from = settings.EMAIL_HOST_USER
+            email_subject = "Email Verification"
+            email_body = "Your OTP is " + str(otp)
+            send_mail(email_subject, email_body, email_from, [serializer.data['email']], fail_silently=False)
+            return Response(data={"success": "code sent to your email"})
+        except Exception as e:
+            messages.error(request, 'An error accured. Please try again.')
+            return Response(data={"error":"An error accured. Please try again."})
+    
+    @action(methods=['post'],url_path="/verify_email",detail=False,permission_classes=[permissions.AllowAny,])
+    def verifyemail(self,request):
+        otp = request.data.get('otp')
+        email = request.data.get('email')
+        user = User.objects.filter(email=email).first()
+        res = EmailVerify.objects.filter(otp=otp,user=user).first()
+        if res is None:
+            res1 = EmailVerify.objects.filter(user=user).first()
+            res1.delete()
+            return Response(data={"error": "Otp authentication failed.Please generate new Otp!!!"})
+        res.delete()
+        user.email_verified = True
+        user.save()
+        return Response(data={"success": "Email Verified Successfully!!!"})
+
+    @action(methods=['post'],url_path="forgot_password", detail=False,permission_classes=[permissions.AllowAny,])
     def forgot_password(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # generate a otp for user
         otp = random.randint(100000, 999999)
-
 
         try:
             user = User.objects.get(email=serializer.data['email'])

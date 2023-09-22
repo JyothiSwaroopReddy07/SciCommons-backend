@@ -122,8 +122,11 @@ class LoginSerializer(serializers.Serializer):
         member = User.objects.filter(username=username).first()
         if member is None:
             raise serializers.ValidationError(
-                detial={"error":"Account does not exist. \nPlease try registering to scicommons first"}
+                detail={"error":"Account does not exist. \nPlease try registering to scicommons first"}
             )
+        elif member.email_verified == False:
+            raise serializers.ValidationError(detail={"error": "Please Verify your Email!!!"})
+        
         user = authenticate(username=username, password=password)
 
         if user and not user.is_active:
@@ -160,6 +163,13 @@ class ResetPasswordSerializer(serializers.Serializer):
     
     class Meta:
         fields = ['otp', 'password', 'password2']
+
+class VerifySerializer(serializers.Serializer):
+    otp = serializers.IntegerField()
+    email = serializers.CharField()
+
+    class Meta:
+        fields = ['otp', 'email']
         
 
 '''

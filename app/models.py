@@ -48,6 +48,7 @@ class User(AbstractUser):
     google_scholar = models.CharField(max_length=255,null=True,blank=True)
     institute = models.CharField(max_length=255,null=True,blank=True)
     email_notify = models.BooleanField(default=True)
+    email_verified = models.BooleanField(default=False)
 
     objects = UserManager()
 
@@ -72,6 +73,17 @@ class UserActivity(models.Model):
     
     def __str__(self) -> str:
         return f"{self.user}-{self.action}"
+    
+class EmailVerify(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    otp = models.IntegerField(blank=True,null=True)
+    
+    class Meta:
+        db_table = 'email_verify'
+
+    def __str__(self) -> str:
+        return str(self.id)
     
 class ForgetPassword(models.Model):
     id = models.BigAutoField(primary_key=True)
