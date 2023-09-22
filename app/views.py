@@ -146,6 +146,8 @@ class UserViewset(viewsets.ModelViewSet):
         otp = random.randint(100000, 999999)
         try:
             user = User.objects.get(email=serializer.data['email'])
+            if user is None:
+                return Response(data={"error": "User not found"})
             verify = EmailVerify(user=user, otp=otp)
             email_from = settings.EMAIL_HOST_USER
             email_subject = "Email Verification"
@@ -180,6 +182,8 @@ class UserViewset(viewsets.ModelViewSet):
 
         try:
             user = User.objects.get(email=serializer.data['email'])
+            if user is None:
+                return Response(data={"error": "User not found"})
             forget = ForgetPassword(user=user, otp=otp)
             forget.save()
 
@@ -196,11 +200,17 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=['post'],url_path="reset_password", detail=False,permission_classes=[permissions.AllowAny,])
     def reset_password(self, request):
         otp = request.data.get('otp')
+        email = request.data.get('email')
         password = request.data.get('password')
         password2 = request.data.get('password2')
-
+        user = User.objects.filter(email=email).first()
+        if user is None:
+            return Response(data={"error": "User not found"})
         try:
-            forget = ForgetPassword.objects.get(otp=otp)
+            forget = ForgetPassword.objects.get(otp=otp, user=user)
+            if forget is None:
+                return Response(data={"error":"Invalid OTP."})
+                
             user = forget.user
             if password == password2:
                 user.set_password(password)
