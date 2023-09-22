@@ -200,25 +200,19 @@ class UserViewset(viewsets.ModelViewSet):
         user = User.objects.filter(email=email).first()
         if user is None:
             return Response(data={"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            forget = ForgetPassword.objects.get(otp=otp, user=user)
-            if forget is None:
-                return Response(data={"error":"Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+        forget = ForgetPassword.objects.get(otp=otp, user=user)
+        if forget is None:
+            return Response(data={"error":"Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
                 
-            user = forget.user
-            if password == password2:
-                user.set_password(password)
-                user.save()
-                forget.delete()
-                return Response(data={"success": "password reset successfully"})
-            else:
-                messages.error(request, 'Password not matching.')
-                return Response(data={"error": "Password not matching"}, status=status.HTTP_400_BAD_REQUEST)
-                # return redirect('resetPassword')
-        except Exception as e:
-            messages.error(request, 'Invalid OTP.')
-            return Response(data={"error":"Invalid OTP."})
-            # return redirect('resetPassword')
+        user = forget.user
+        if password == password2:
+            user.set_password(password)
+            user.save()
+            forget.delete()
+            return Response(data={"success": "password reset successfully"})
+        else:
+            messages.error(request, 'Password not matching.')
+            return Response(data={"error": "Password not matching"}, status=status.HTTP_400_BAD_REQUEST)
         
     @action(methods=['post'],url_path='follow', detail=False, permission_classes=[permissions.IsAuthenticated])
     def follow(self, request):
