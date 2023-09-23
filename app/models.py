@@ -170,6 +170,7 @@ class Article(models.Model):
     authors = models.ManyToManyField(User,through="Author",related_name="article_authors")
     community = models.ManyToManyField(Community, through="CommunityMeta")
     views = models.IntegerField(default=0)
+    doi = models.CharField(max_length=255, null=True, blank=True)
     
     reviewer = models.ManyToManyField("app.OfficialReviewer", through='ArticleReviewer', related_name='article_reviewers')
     moderator = models.ManyToManyField("app.Moderator", through='ArticleModerator', related_name='article_moderators')
