@@ -7,7 +7,7 @@ class UserPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         
-        if view.action in ['list']:
+        if view.action in ['list', 'retrieve', 'getUserArticles', 'getposts']:
             return request.user.is_authenticated
         
         if view.action in [
@@ -16,8 +16,8 @@ class UserPermission(permissions.BasePermission):
             ]:
             return True
         elif view.action in [
-            'retrieve', 'update', 'partial_update', 'destroy',
-            'change_password', 'getMyArticles','getMyArticle', 'getUserArticles','getMyCommunity'
+             'update', 'partial_update', 'destroy',
+            'change_password','getMyArticle', 'getMyArticles','getMyCommunity'
             ]:
             return request.user.is_authenticated and request.user == obj
         else:
@@ -38,7 +38,7 @@ class CommunityPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
 
-        if view.action in ['retrieve', 'list']:
+        if view.action in ['retrieve', 'list', 'getArticles']:
             return True
         
         elif view.action in ['update', 'getMembers', 'addPublishedInfo', 'destroy'
@@ -49,7 +49,7 @@ class CommunityPermission(permissions.BasePermission):
             else:
                 return False
         
-        elif view.action in ['create', 'subscribe','unsubscribe', 'join_request', 'getArticles']:
+        elif view.action in ['create', 'subscribe','unsubscribe', 'join_request']:
             return request.user.is_authenticated
         
         return obj.user == request.user
@@ -130,7 +130,7 @@ class SocialPostPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
 
-        if view.action in ['retrieve', 'list']:
+        if view.action in ['retrieve', 'list','getMyPosts']:
             return True
         
         elif view.action in ['create', 'like','unlike', 'bookmarks']:
