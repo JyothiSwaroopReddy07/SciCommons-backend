@@ -200,7 +200,7 @@ class UserViewset(viewsets.ModelViewSet):
         user = User.objects.filter(email=email).first()
         if user is None:
             return Response(data={"error": "Please enter valid email address"}, status=status.HTTP_400_BAD_REQUEST)
-        forget = ForgetPassword.objects.get(otp=otp, user=user)
+        forget = ForgetPassword.objects.filter(otp=otp, user=user).first()
         if forget is None:
             return Response(data={"error":"Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
                 
