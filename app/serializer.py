@@ -546,7 +546,9 @@ class ArticlelistSerializer(serializers.ModelSerializer):
         return favourites
     
     def get_isFavourite(self, obj):
-        if (Favourite.objects.filter(article=obj.id,user=self.context['request'].user).count() > 0):
+        if self.context['request'].user.is_authenticated is False:
+            return False
+        elif (Favourite.objects.filter(article=obj.id,user=self.context['request'].user).count() > 0):
             return True 
         else:
             return False
