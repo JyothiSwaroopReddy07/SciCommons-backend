@@ -477,7 +477,7 @@ class ArticleViewset(viewsets.ModelViewSet):
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = ArticleSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter,filters.OrderingFilter]
-    # filterset_class = ArticleFilter
+    filterset_class = ArticleFilter
     http_method_names = ['post', 'get', 'put', 'delete']
     search_fields = ['article_name', 'keywords', 'authorstring']
     
@@ -738,6 +738,8 @@ class CommentViewset(viewsets.ModelViewSet):
     permission_classes = [CommentPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = CommentSerializer
+    # filter_backends = [DjangoFilterBackend,filters.OrderingFilter]
+    # filterset_class = CommentFilter
     http_method_names = ['post', 'get', 'put', 'delete']
     
     action_serializer = {
@@ -946,7 +948,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
     permission_classes = [SocialPostPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = SocialPostSerializer
-    filter_backends=[DjangoFilterBackend]
+    # filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     # filterset_class = PostFilters
     http_method_names = ['get', 'post', 'delete', 'put']
     
@@ -1060,8 +1062,6 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
     permission_classes = [SocialPostCommentPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = SocialPostCommentSerializer
-    filter_backends=[DjangoFilterBackend]
-    # filterset_class= CommentFilter
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
