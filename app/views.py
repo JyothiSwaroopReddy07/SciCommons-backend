@@ -180,7 +180,7 @@ class UserViewset(viewsets.ModelViewSet):
 
         user = User.objects.filter(email=serializer.data['email']).first()
         if user is None:
-            return Response(data={"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"error": "Please enter a valid email address"}, status=status.HTTP_400_BAD_REQUEST)
         forget = ForgetPassword.objects.create(user=user, otp=otp)
         forget.save()
 
@@ -199,7 +199,7 @@ class UserViewset(viewsets.ModelViewSet):
         password2 = request.data.get('password2')
         user = User.objects.filter(email=email).first()
         if user is None:
-            return Response(data={"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"error": "Please enter valid email address"}, status=status.HTTP_400_BAD_REQUEST)
         forget = ForgetPassword.objects.get(otp=otp, user=user)
         if forget is None:
             return Response(data={"error":"Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
