@@ -132,7 +132,13 @@ class CommunityMember(models.Model):
     def __str__(self) -> str:
         return f"{self.user} - {self.community}"
 
+class UnregisteredUser(models.Model):
+    article = models.ForeignKey("app.Article", on_delete=models.CASCADE)
+    fullName = models.CharField(max_length=255, null=False)
+    email = models.EmailField(max_length=255, null=False)
 
+    class Meta:
+        db_table = 'unregistered_user'
 
 class OfficialReviewer(models.Model):
     User = models.ForeignKey(User, on_delete=models.CASCADE)

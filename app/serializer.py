@@ -73,6 +73,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
         instance = self.Meta.model.objects.create(**validated_data)
         instance.set_password(password)
         instance.save()
+        unregistered = UnregisteredUser.objects.filter(email=instance.email)
+        if unregistered is not None:
+            for user in unregistered:
+                with transaction.atomic():
+                    Author.objects.create(User=instance, article=user.article)
+                    user.delete()
+    
         rank = Rank.objects.create(rank=0, user_id=instance.id)
         rank.save()
         send_mail("Welcome to Scicommons", "Welcome to Scicommons.We hope you will have a great time", settings.EMAIL_HOST_USER, [instance.email], fail_silently=False)
@@ -532,10 +539,11 @@ class ArticlelistSerializer(serializers.ModelSerializer):
     isFavourite = serializers.SerializerMethodField()
     favourites = serializers.SerializerMethodField()
     authors = serializers.SerializerMethodField()
+    unregistered_authors = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
-        fields = ['id', 'article_name', 'Public_date','views', 'authors','rating', 'isFavourite', 'keywords', 'favourites']
+        fields = ['id', 'article_name', 'Public_date','views', 'authors','rating', 'isFavourite', 'keywords', 'favourites', 'unregistered_authors']
     
     def get_rating(self, obj):
         rating = CommentBase.objects.filter(article_id=obj.id,Type='review').aggregate(Avg('rating'))['rating__avg']
@@ -556,6 +564,11 @@ class ArticlelistSerializer(serializers.ModelSerializer):
     def get_authors(self, obj):
         authors = [user.username for user in obj.authors.all()]
         return authors
+    
+    def get_unregistered_authors(self,obj):
+        unregistered = UnregisteredUser.objects.filter(article=obj.id)
+        authors = [user.fullName for user in unregistered]
+        return authors
 
         
 
@@ -569,6 +582,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     userrating = serializers.SerializerMethodField()
     commentcount = serializers.SerializerMethodField()
     authors = serializers.SerializerMethodField()
+    unregistered_authors = serializers.SerializerMethodField()
     article_file_url = serializers.ReadOnlyField()
     favourites = serializers.SerializerMethodField()
 
@@ -576,7 +590,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
         model = Article
         fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video',
                     'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status',
-                    'isFavourite', 'userrating','commentcount', 'favourites','license','published_date', 'published' ]
+                    'isFavourite', 'userrating','commentcount', 'favourites','license','published_date', 'published','unregistered_authors' ]
     
     def get_versions(self, obj):
         
@@ -645,6 +659,11 @@ class ArticleGetSerializer(serializers.ModelSerializer):
         authors = [user.username for user in obj.authors.all()]
         return authors
 
+    def get_unregistered_authors(self,obj):
+        unregistered = UnregisteredUser.objects.filter(article=obj.id)
+        authors = [user.fullName for user in unregistered]
+        return authors
+
 class ArticleBlockUserSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True)
     class Meta:
@@ -679,15 +698,19 @@ class ArticleUpdateSerializer(serializers.ModelSerializer):
 class ArticleCreateSerializer(serializers.ModelSerializer):
     authors = serializers.ListField(child=serializers.IntegerField(), write_only=True)
     communities = serializers.ListField(child=serializers.IntegerField(), write_only=True)
+    unregistered_authors = serializers.ListField(child=serializers.CharField(), write_only=True)
+
     class Meta:
         model = Article
-        fields = ['id', 'article_name','keywords', 'article_file', 'Code', 'Abstract', 'authors','video','link', 'parent_article', 'communities']
+        fields = ['id', 'article_name','keywords', 'article_file', 'Code', 'Abstract', 'authors','video','link', 'parent_article', 'communities','unregistered_authors']
         read_only_fields = ['id']
+
     def create(self, validated_data):
         parent_article = validated_data.pop('parent_article', None)
         if parent_article is None:
             authors = validated_data.pop("authors", [])
             communities = validated_data.pop("communities", [])
+            unregistered_authors = validated_data.pop("unregistered_authors", [])
             communities.pop(0)
             authors.pop(0)
             name = validated_data.pop('article_name')
@@ -698,6 +721,16 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             instance = self.Meta.model.objects.create(**validated_data,id=uuid.uuid4().hex)
             Author.objects.create(User=self.context['request'].user, article=instance)
             authorstr = ""
+            if len(unregistered_authors)!=0:
+                with transaction.atomic():
+                    for author in unregistered_authors:
+                        user = User.objects.filter(email=author.email).first()
+                        if user is not None:
+                            Author.objects.create(User=user, article=instance)
+                        else:
+                            UnregisteredUser.objects.create(email=author.email,article = instance, fullName=author.fullName)
+                        send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.email], fail_silently=False)
+        
             if len(authors)!=0:
                 with transaction.atomic():
                     for author in authors:
@@ -724,6 +757,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         else:
             parentinstance = Article.objects.get(id=parent_article)
             authors = validated_data.pop("authors", [])
+            unregistered_authors = validated_data.pop("unregistered_authors", [])
             authors.pop(0)
             name = validated_data.pop('article_name')
             keywords = validated_data.pop('keywords')
@@ -733,6 +767,12 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             instance = self.Meta.model.objects.create(**validated_data,id=uuid.uuid4().hex)
             Author.objects.create(User=self.context['request'].user, article=instance)
             authorstr = ""
+            if len(unregistered_authors)!=0:
+                with transaction.atomic():
+                    for author in unregistered_authors:
+                        UnregisteredUser.objects.create(email=author.email,article = instance, fullName=author.fullName)
+                        send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.email], fail_silently=False)
+
             if len(authors)!=0:
                 with transaction.atomic():
                     for author in authors:
