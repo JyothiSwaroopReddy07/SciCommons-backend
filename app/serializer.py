@@ -714,6 +714,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             unregistered_authors = validated_data.pop("unregistered_authors", [])
             communities.pop(0)
             authors.pop(0)
+            unregistered_authors.pop(0);
             name = validated_data.pop('article_name')
             keywords = validated_data.pop('keywords')
             keywords.replace(' ','_')
@@ -761,6 +762,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             authors = validated_data.pop("authors", [])
             unregistered_authors = validated_data.pop("unregistered_authors", [])
             authors.pop(0)
+            unregistered_authors.pop(0)
             name = validated_data.pop('article_name')
             keywords = validated_data.pop('keywords')
             keywords.replace(' ','_')
