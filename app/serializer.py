@@ -9,6 +9,7 @@ from faker import Faker
 from django.core.mail import send_mail
 from django.db.models import Avg, Sum
 from django.conf import settings
+import json
 
 
 
@@ -724,11 +725,12 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             if len(unregistered_authors)!=0:
                 with transaction.atomic():
                     for author in unregistered_authors:
-                        user = User.objects.filter(email=author.email).first()
+                        data = json.loads(author)
+                        user = User.objects.filter(email=author["email"]).first()
                         if user is not None:
                             Author.objects.create(User=user, article=instance)
                         else:
-                            UnregisteredUser.objects.create(email=author.email,article = instance, fullName=author.fullName)
+                            UnregisteredUser.objects.create(email=author["email"],article = instance, fullName=author["fullName"])
                         send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.email], fail_silently=False)
         
             if len(authors)!=0:
@@ -770,11 +772,12 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
             if len(unregistered_authors)!=0:
                 with transaction.atomic():
                     for author in unregistered_authors:
-                        user = User.objects.filter(email=author.email).first()
+                        data = json.loads(author)
+                        user = User.objects.filter(email=author["email"]).first()
                         if user is not None:
                             Author.objects.create(User=user, article=instance)
                         else:
-                            UnregisteredUser.objects.create(email=author.email,article = instance, fullName=author.fullName)
+                            UnregisteredUser.objects.create(email=author["email"],article = instance, fullName=author["fullName"])
                         send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.email], fail_silently=False)
 
             if len(authors)!=0:
