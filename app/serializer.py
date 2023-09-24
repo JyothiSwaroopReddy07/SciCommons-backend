@@ -567,7 +567,7 @@ class ArticlelistSerializer(serializers.ModelSerializer):
     
     def get_unregistered_authors(self,obj):
         unregistered = UnregisteredUser.objects.filter(article=obj.id)
-        authors = [user.fullName for user in unregistered]
+        authors = [{'fullName':user.fullName, 'email':user.email} for user in unregistered]
         return authors
 
         
@@ -661,7 +661,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
 
     def get_unregistered_authors(self,obj):
         unregistered = UnregisteredUser.objects.filter(article=obj.id)
-        authors = [user.fullName for user in unregistered]
+        authors = [{'fullName':user.fullName, 'email':user.email} for user in unregistered]
         return authors
 
 class ArticleBlockUserSerializer(serializers.ModelSerializer):
