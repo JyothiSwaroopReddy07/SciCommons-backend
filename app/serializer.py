@@ -727,12 +727,12 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
                 with transaction.atomic():
                     for author in unregistered_authors:
                         data = json.loads(author)
-                        user = User.objects.filter(email=author["email"]).first()
+                        user = User.objects.filter(email=data["email"]).first()
                         if user is not None:
                             Author.objects.create(User=user, article=instance)
                         else:
-                            UnregisteredUser.objects.create(email=author["email"],article = instance, fullName=author["fullName"])
-                        send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.email], fail_silently=False)
+                            UnregisteredUser.objects.create(email=data["email"],article = instance, fullName=data["fullName"])
+                        send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [data["email"]], fail_silently=False)
         
             if len(authors)!=0:
                 with transaction.atomic():
@@ -775,12 +775,12 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
                 with transaction.atomic():
                     for author in unregistered_authors:
                         data = json.loads(author)
-                        user = User.objects.filter(email=author["email"]).first()
+                        user = User.objects.filter(email=data["email"]).first()
                         if user is not None:
                             Author.objects.create(User=user, article=instance)
                         else:
-                            UnregisteredUser.objects.create(email=author["email"],article = instance, fullName=author["fullName"])
-                        send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.email], fail_silently=False)
+                            UnregisteredUser.objects.create(email=data["email"],article = instance, fullName=data["fullName"])
+                        send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [data["email"]], fail_silently=False)
 
             if len(authors)!=0:
                 with transaction.atomic():
