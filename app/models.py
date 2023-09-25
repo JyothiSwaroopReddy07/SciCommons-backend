@@ -135,7 +135,7 @@ class CommunityMember(models.Model):
 class UnregisteredUser(models.Model):
     article = models.ForeignKey("app.Article", on_delete=models.CASCADE)
     fullName = models.CharField(max_length=255, null=False)
-    email = models.EmailField(max_length=255, null=False)
+    email = models.EmailField(max_length=255, null=True,blank=True)
 
     class Meta:
         db_table = 'unregistered_user'
