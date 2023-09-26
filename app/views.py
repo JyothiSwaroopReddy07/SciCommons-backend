@@ -969,7 +969,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
     
     def get_queryset(self):
-        if self.request.user is None:
+        if self.request.user.is_authenticated is False:
             qs = self.queryset.order_by('-created_at')
             return qs
         qs = self.queryset.order_by('-created_at').exclude(user=self.request.user)
