@@ -192,6 +192,10 @@ class Article(models.Model):
     
     @property
     def article_file_url(self):
+        if self.article_file is None:
+            return (
+                f"https://res.cloudinary.com/dapuxfgic/None"
+            )
         return (
             f"https://res.cloudinary.com/dapuxfgic/{self.article_file}"
         )
