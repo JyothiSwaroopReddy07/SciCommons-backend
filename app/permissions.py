@@ -8,7 +8,7 @@ class UserPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         
         if view.action in ['list', 'retrieve', 'getUserArticles', 'getposts']:
-            return request.user.is_authenticated
+            return True
         
         if view.action in [
             'create', 'login', 'refresh_token',
