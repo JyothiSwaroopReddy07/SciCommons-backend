@@ -46,6 +46,8 @@ class UserSerializer(serializers.ModelSerializer):
         return following
 
     def get_isFollowing(self, obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
         if (Follow.objects.filter(user=self.context['request'].user, followed_user=obj.id).count() > 0):
             return True 
         else:
