@@ -7,7 +7,7 @@ class UserPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         
-        if view.action in ['list', 'retrieve', 'getUserArticles', 'getposts']:
+        if view.action in ['list', 'retrieve', 'getUserArticles', 'getposts','followers', 'following']:
             return True
         
         if view.action in [
@@ -151,7 +151,7 @@ class SocialPostCommentPermission(permissions.BasePermission):
         
         elif view.action in [ 'destroy', 'update']:
             return obj.user == request.user
-
+        
 class FollowPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):

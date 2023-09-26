@@ -113,7 +113,7 @@ class UserViewset(viewsets.ModelViewSet):
 
         return Response(data={"success": article_serializer.data})
     
-    @action(methods=['get'], detail=False, url_path="(?P<username>.+)/posts", permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['get'], detail=False, url_path="(?P<username>.+)/posts", permission_classes=[UserPermission])
     def getposts(self, request, username):
         instance = User.objects.filter(username=username).first()
         queryset = SocialPost.objects.filter(user_id=instance.id)
@@ -122,7 +122,7 @@ class UserViewset(viewsets.ModelViewSet):
         posts = serializer.data
         return Response(data={"success": posts})
     
-    @action(methods=['get'], detail=False, url_path="(?P<username>.+)/articles", permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['get'], detail=False, url_path="(?P<username>.+)/articles", permission_classes=[UserPermission])
     def getUserArticles(self, request, username):
         user = User.objects.filter(username=username).first()
         queryset = Author.objects.filter(User_id=user.id)
@@ -239,14 +239,14 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = UserActivitySerializer(activities,many=True)
         return Response(data={"success":serializer.data})
         
-    @action(methods=['get'],url_path="followers", detail=False,permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['get'],url_path="followers", detail=False,permission_classes=[UserPermission])
     def followers(self,request):
         instance = User.objects.filter(username=request.query_params.get("username")).first()
         member = Follow.objects.filter(followed_user=instance)
         serializer = FollowersSerializer(member,many=True,context={'request':request})
         return Response(data={"success": serializer.data})
 
-    @action(methods=['get'],url_path="following", detail=False,permission_classes=[permissions.IsAuthenticated])
+    @action(methods=['get'],url_path="following", detail=False,permission_classes=[UserPermission])
     def following(self,request):
         instance = User.objects.filter(username=request.query_params.get("username")).first()
         member = Follow.objects.filter(user=instance)
