@@ -66,7 +66,7 @@ class UserViewset(viewsets.ModelViewSet):
     def retrieve(self, request, pk):
 
         response = super(UserViewset, self).retrieve(request,pk=pk)
-
+        print(response.data)
         return Response(data={"success": response.data})
 
     def create(self, request):
