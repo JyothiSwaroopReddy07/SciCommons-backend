@@ -46,6 +46,7 @@ class UserViewset(viewsets.ModelViewSet):
         'myactivity': UserActivitySerializer,
         'verifyrequest': ForgotPasswordSerializer,
         'verifyemail': VerifySerializer,
+        'messages': MessageListSerializer,
     }
 
 
@@ -251,6 +252,13 @@ class UserViewset(viewsets.ModelViewSet):
         instance = User.objects.filter(username=request.query_params.get("username")).first()
         member = Follow.objects.filter(user=instance)
         serializer = FollowingSerializer(member,many=True,context={'request':request})
+        return Response(data={"success": serializer.data})
+    
+    @action(methods=['get'],url_path="messages", detail=False,permission_classes=[UserPermission])
+    def messages(self,request):
+        # retrieve most recent message and number of unread messages of each user that has messaged the current user and order it by the most recent message
+        messages = PersonalMessage.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('-created_at').distinct('sender','receiver')
+        serializer = MessageListSerializer(messages,many=True,context={'request':request})
         return Response(data={"success": serializer.data})
 
 class CommunityViewset(viewsets.ModelViewSet):

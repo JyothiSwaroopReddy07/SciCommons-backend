@@ -1618,7 +1618,7 @@ class MessageSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = PersonalMessage
-        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar"]
+        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar", 'unread_count']
 
     def get_sender(self, obj):
         user = User.objects.filter(id=obj.sender.id).first()
@@ -1630,6 +1630,10 @@ class MessageSerializer(serializers.ModelSerializer):
     
     def get_avatar(self,obj):
         return obj.sender.profile_pic_url()
+    
+    def get_unread_count(self,obj):
+        count = PersonalMessage.objects.filter(sender=obj.receiver, receiver=obj.sender, is_read=False).count()
+        return count
 
 
 class MessageUpdateSerializer(serializers.ModelSerializer):
