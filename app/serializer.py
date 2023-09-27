@@ -1617,7 +1617,7 @@ Message Serailizer
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonalMessage
-        fields = ["id", "sender", "receiver", "media", "body", "created_at"]
+        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar"]
 
     def get_sender(self, obj):
         user = User.objects.filter(id=obj.sender.id).first()
@@ -1626,6 +1626,9 @@ class MessageSerializer(serializers.ModelSerializer):
     def get_receiver(self, obj):
         user = User.objects.filter(id=obj.receiver.id).first()
         return f"{user.username}"
+    
+    def get_avatar(self,obj):
+        return obj.sender.profile_pic_url()
 
 
 class MessageUpdateSerializer(serializers.ModelSerializer):
@@ -1669,5 +1672,23 @@ class MessageCreateSerializer(serializers.ModelSerializer):
         )
 
         return instance
+    
+class MessageListSerializer(serializers.ModelSerializer):
+    sender = serializers.SerializerMethodField(read_only=True)
+    receiver = serializers.SerializerMethodField(read_only=True)
+    avatar = serializers.SerializerMethodField(read_only=True)
 
+    class Meta:
+        model = PersonalMessage
+        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar"]
 
+    def get_sender(self, obj):
+        user = User.objects.filter(id=obj.sender.id).first()
+        return f"{user.username}"
+
+    def get_receiver(self, obj):
+        user = User.objects.filter(id=obj.receiver.id).first()
+        return f"{user.username}"
+    
+    def get_avatar(self,obj):
+        return obj.sender.profile_pic_url()
