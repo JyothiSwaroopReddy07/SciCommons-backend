@@ -1615,6 +1615,7 @@ Message Serailizer
 '''
     
 class MessageSerializer(serializers.ModelSerializer):
+    avatar = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = PersonalMessage
         fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar"]
