@@ -1644,7 +1644,10 @@ class MessageCreateSerializer(serializers.ModelSerializer):
         from asgiref.sync import async_to_sync
 
         receiver = validated_data("receiver", None)
-        channel = f"chat_{self.context['request'].user}_{receiver}"
+
+        temp = [f"{self.context['request'].user}",f"{receiver}"]
+        temp.sort()
+        channel = f"chat_{temp[0]}_{temp[1]}"
 
         instance = self.Meta.model.objects.create(
             **validated_data, channel=channel, sender=self.context["request"].user

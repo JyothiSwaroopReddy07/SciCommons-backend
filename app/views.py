@@ -1259,6 +1259,3 @@ class PersonalMessageViewset(viewsets.ModelViewSet):
         super(PersonalMessageViewset, self).destroy(request, pk)
 
         return Response(data={"success": "Message Successfuly removed!!!"})
-
-
-    

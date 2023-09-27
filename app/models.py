@@ -447,11 +447,22 @@ class BookMark(models.Model):
 def message_media(self, instance, filename):
     if filename:
         return f"message_media/{instance.id}/{filename}"
+    
+    
+class BlockPersonalMessage(models.Model):
+    sender = models.ForeignKey(User, related_name="sender_message", on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name="reciever_message", on_delete=models.CASCADE)
+    
+    class Meta:
+        db_table = "block_personal_message"
+        
+    def __str__(self) -> str:
+        return f"{self.sender} - {self.receiver}"
 
 class PersonalMessage(models.Model):
-    sender = models.ForeignKey(User, related_name="sent_messages", on_delete=models.CASCADE)
+    sender = models.ForeignKey(User,related_name="block_sender_message", on_delete=models.CASCADE)
     channel = models.CharField(max_length=255)
-    receiver = models.ForeignKey(User, related_name="received_messages",null=True,blank=True, on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name="block_reciever_message", null=True,blank=True, on_delete=models.CASCADE)
     body = models.TextField(null=True)
     media = CloudinaryField(message_media, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
