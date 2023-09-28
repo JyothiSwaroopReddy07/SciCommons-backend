@@ -76,7 +76,7 @@ class CommentFilter(django_filters.FilterSet):
     def filter_by_ordering(self, queryset, name, value):
         if 'most_recent' in value:
             queryset = queryset.order_by('-Comment_date')
-        if 'oldest' in value:
+        if 'least_recent' in value:
             queryset = queryset.order_by('Comment_date')
         if 'most_rated' in value:
             query = Q(comment_type='review') | Q(comment_type='decision')
@@ -97,7 +97,7 @@ class PostFilters(django_filters.FilterSet):
     order = django_filters.MultipleChoiceFilter(
         choices=[
             ('most_recent', 'Most Recent'),
-            ('oldest', 'Oldest'),
+            ('least_recent', 'Least Recent'),
             ('most_commented','Most Commented'),
             ('most_liked','Most Liked'),
             ('most_bookmarked','Most Bookmarked'),
@@ -112,7 +112,7 @@ class PostFilters(django_filters.FilterSet):
     def filter_by_ordering(self, queryset, name, value):
         if 'most_recent' in value:
             queryset = queryset.order_by('-created_at')
-        if 'oldest' in value:
+        if 'least_recent' in value:
             queryset = queryset.order_by('created_at')
         if 'most_commented' in value:
             queryset = queryset.annotate(comment_count=Count('comments')).order_by('-comment_count')
