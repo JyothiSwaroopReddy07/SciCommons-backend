@@ -819,7 +819,12 @@ class CommentViewset(viewsets.ModelViewSet):
                 if self.queryset.filter(article=request.data["article"],User=request.user,Type="decision").first():
                     return Response(data={"error": "You have already made decision!!!"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
+                    decision = request.data["decision"]
+                    request.data.pop("decision")
                     response = super(CommentViewset, self).create(request)
+                    communityName = request.data["Type"]
+                    member = CommunityMeta.objects.filter(article=request.data["article"],community__Community_name=communityName).first()
+                    member.status = decision
                     member = CommentBase.objects.filter(id=response.data.get("id")).first()
                     created = CommentSerializer(instance=member, context={'request': request})
                     return Response(data={"success":"Decision successfully added", "comment": created.data})
