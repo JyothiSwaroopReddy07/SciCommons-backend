@@ -1615,20 +1615,26 @@ Message Serailizer
 '''
     
 class MessageSerializer(serializers.ModelSerializer):
+    receiver = serializers.SerializerMethodField(read_only=True)
+    sender = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
+    unread_count = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = PersonalMessage
-        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar", "unread_count", "channel"]
-
-    def get_sender(self, obj):
-        user = User.objects.filter(id=obj.sender.id).first()
-        return f"{user.username}"
+        fields = ["id","sender", "receiver", "media", "body", "created_at", "avatar", "unread_count", "channel"]
 
     def get_receiver(self, obj):
+
         user = User.objects.filter(id=obj.receiver.id).first()
         return f"{user.username}"
     
+    def get_sender(self,obj):
+        user = User.objects.filter(id=obj.sender.id).first()
+        return f"{user.username}"
+    
     def get_avatar(self,obj):
+        if obj.sender == self.context['request'].user:
+            return obj.receiver.profile_pic_url()
         return obj.sender.profile_pic_url()
     
     def get_unread_count(self,obj):
@@ -1679,21 +1685,27 @@ class MessageCreateSerializer(serializers.ModelSerializer):
         return instance
     
 class MessageListSerializer(serializers.ModelSerializer):
-    sender = serializers.SerializerMethodField(read_only=True)
     receiver = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
-
+    unread_count = serializers.SerializerMethodField(read_only=True)
+    
     class Meta:
         model = PersonalMessage
-        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar","channel"]
-
-    def get_sender(self, obj):
-        user = User.objects.filter(id=obj.sender.id).first()
-        return f"{user.username}"
+        fields = ["id", "receiver", "media", "body", "created_at", "avatar","channel", "unread_count"]
 
     def get_receiver(self, obj):
-        user = User.objects.filter(id=obj.receiver.id).first()
+        if obj.sender == self.context['request'].user:
+            user = User.objects.filter(id=obj.receiver.id).first()
+            return f"{user.username}"
+        user = User.objects.filter(id=obj.sender.id).first()
         return f"{user.username}"
     
     def get_avatar(self,obj):
+        if obj.sender == self.context['request'].user:
+            return obj.receiver.profile_pic_url()
         return obj.sender.profile_pic_url()
+
+    def get_unread_count(self,obj):
+        count = PersonalMessage.objects.filter(sender=obj.receiver, receiver=obj.sender, is_read=False).count()
+        return count
+
