@@ -821,10 +821,12 @@ class CommentViewset(viewsets.ModelViewSet):
                 else:
                     decision = request.data["decision"]
                     request.data.pop("decision")
-                    response = super(CommentViewset, self).create(request)
-                    communityName = request.data["Type"]
-                    member = CommunityMeta.objects.filter(article=request.data["article"],community__Community_name=communityName).first()
+                    communityName = request.data["tag"]
+                    community = Community.objects.filter(Community_name=communityName).first()
+                    member = CommunityMeta.objects.filter(article=request.data["article"],community_id=community.id).first()
                     member.status = decision
+                    member.save()
+                    response = super(CommentViewset, self).create(request)
                     member = CommentBase.objects.filter(id=response.data.get("id")).first()
                     created = CommentSerializer(instance=member, context={'request': request})
                     return Response(data={"success":"Decision successfully added", "comment": created.data})
