@@ -7,8 +7,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError, transaction
 from faker import Faker
 from django.core.mail import send_mail
-from django.db.models import Avg, Sum
+from django.db.models import Avg, Sum , Q
 from django.conf import settings
+
 import json
 
 
@@ -1621,7 +1622,7 @@ class MessageSerializer(serializers.ModelSerializer):
     unread_count = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = PersonalMessage
-        fields = ["id","sender", "receiver", "media", "body", "created_at", "avatar", "unread_count", "channel"]
+        fields = ["id","sender", "receiver", "media", "body", "created_at", "avatar","channel"]
 
     def get_receiver(self, obj):
 
@@ -1636,10 +1637,7 @@ class MessageSerializer(serializers.ModelSerializer):
         if obj.sender == self.context['request'].user:
             return obj.receiver.profile_pic_url()
         return obj.sender.profile_pic_url()
-    
-    def get_unread_count(self,obj):
-        count = PersonalMessage.objects.filter(sender=obj.receiver, receiver=obj.sender, is_read=False).count()
-        return count
+
 
 
 class MessageUpdateSerializer(serializers.ModelSerializer):
@@ -1688,7 +1686,7 @@ class MessageListSerializer(serializers.ModelSerializer):
     receiver = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
     unread_count = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = PersonalMessage
         fields = ["id", "receiver", "media", "body", "created_at", "avatar","channel", "unread_count"]
@@ -1706,6 +1704,6 @@ class MessageListSerializer(serializers.ModelSerializer):
         return obj.sender.profile_pic_url()
 
     def get_unread_count(self,obj):
-        count = PersonalMessage.objects.filter(sender=obj.receiver, receiver=obj.sender, is_read=False).count()
+        count = PersonalMessage.objects.filter(Q(sender=self.context['request'].user) | Q(receiver=self.context['request'].user), is_read=False).count()
         return count
 
