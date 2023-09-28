@@ -28,11 +28,12 @@ class UserSerializer(serializers.ModelSerializer):
     isFollowing = serializers.SerializerMethodField()
     posts = serializers.SerializerMethodField()
     profile_pic_url = serializers.ReadOnlyField()
+    personal = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['id', 'username','profile_pic_url', 'first_name', 'last_name', 'email', 'rank', 'followers',
-                  'google_scholar','pubmed','institute', 'following', 'isFollowing', 'posts']
+                  'google_scholar','pubmed','institute', 'following', 'isFollowing', 'posts', 'personal']
         
     def get_rank(self, obj):
         rank = Rank.objects.get(user_id=obj.id)
@@ -57,6 +58,12 @@ class UserSerializer(serializers.ModelSerializer):
     def get_posts(self, obj):
         posts = SocialPost.objects.filter(user=obj.id).count()
         return posts
+    
+    def get_personal(self,obj):
+        if(obj == self.context['request'].user):
+            return True
+        else:
+            return False
     
 
 class UserCreateSerializer(serializers.ModelSerializer):
