@@ -33,9 +33,9 @@ class ArticleFilter(django_filters.FilterSet):
         if 'oldest' in value:
             queryset = queryset.order_by('Public_date')
         if 'most_favourite' in value:
-            queryset = queryset.order_by('-favourite')
-        if 'least_favourite' in value:
             queryset = queryset.order_by('favourite')
+        if 'least_favourite' in value:
+            queryset = queryset.order_by('-favourite')
         if 'most_commented' in value:
             review_comment_counts = CommentBase.objects.filter(comment_type='review')
             review_comment_counts = review_comment_counts.values('article').annotate(review_count=Count('article')).values('review_count')
@@ -119,5 +119,5 @@ class PostFilters(django_filters.FilterSet):
         if 'most_liked' in value:
             queryset = queryset.annotate(like_count=Count('likes')).order_by('-like_count')
         if 'most_bookmarked' in value:
-            queryset = queryset.annotate(bookmark_count=Count('bookmarks')).order_by('-bookmark_count')
+            queryset = queryset.annotate(bookmark_count=Count('bookmark')).order_by('-bookmark_count')
         return queryset

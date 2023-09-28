@@ -956,8 +956,8 @@ class SocialPostViewset(viewsets.ModelViewSet):
     permission_classes = [SocialPostPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = SocialPostSerializer
-    # filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    # filterset_class = PostFilters
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = PostFilters
     http_method_names = ['get', 'post', 'delete', 'put']
     
     action_serializers = {
