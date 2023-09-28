@@ -1618,7 +1618,7 @@ class MessageSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = PersonalMessage
-        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar", 'unread_count']
+        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar", "unread_count", "channel"]
 
     def get_sender(self, obj):
         user = User.objects.filter(id=obj.sender.id).first()
@@ -1685,7 +1685,7 @@ class MessageListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PersonalMessage
-        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar"]
+        fields = ["id", "sender", "receiver", "media", "body", "created_at", "avatar","channel"]
 
     def get_sender(self, obj):
         user = User.objects.filter(id=obj.sender.id).first()
