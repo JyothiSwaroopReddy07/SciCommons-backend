@@ -30,7 +30,7 @@ class ArticleFilter(django_filters.FilterSet):
             queryset = queryset.order_by('views')
         if 'most_recent' in value:
             queryset = queryset.order_by('-Public_date')
-        if 'oldest' in value:
+        if 'least_recent' in value:
             queryset = queryset.order_by('Public_date')
         if 'most_favourite' in value:
             queryset = queryset.order_by('favourite')
