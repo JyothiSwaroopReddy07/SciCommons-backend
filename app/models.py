@@ -454,7 +454,7 @@ class BlockPersonalMessage(models.Model):
     receiver = models.ForeignKey(User, related_name="reciever_message", on_delete=models.CASCADE)
     
     class Meta:
-        db_table = "block_personal_message"
+        db_table = "block_chat_message"
         
     def __str__(self) -> str:
         return f"{self.sender} - {self.receiver}"
@@ -469,7 +469,7 @@ class PersonalMessage(models.Model):
     is_read = models.BooleanField(default=False)
 
     class Meta:
-        db_table = "personal_message"
+        db_table = "personalmessage"
 
     def __str__(self) -> str:
         return self.body

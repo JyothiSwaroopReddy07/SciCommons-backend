@@ -1619,7 +1619,7 @@ class MessageSerializer(serializers.ModelSerializer):
     receiver = serializers.SerializerMethodField(read_only=True)
     sender = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
-    unread_count = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = PersonalMessage
         fields = ["id","sender", "receiver", "media", "body", "created_at", "avatar","channel"]

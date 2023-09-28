@@ -257,7 +257,7 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=['get'],url_path="messages", detail=False,permission_classes=[UserPermission])
     def messages(self,request):
         # retrieve most recent message and number of unread messages of each user that has messaged the current user and order it by the most recent message
-        messages = PersonalMessage.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('-created_at').distinct('sender','receiver')
+        messages = PersonalMessage.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).distinct('sender','receiver').order_by('sender','receiver','-created_at')
         serializer = MessageListSerializer(messages,many=True,context={'request':request})
         return Response(data={"success": serializer.data})
 
