@@ -529,7 +529,7 @@ class ArticlePublishSelectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ['id', 'published']
+        fields = ['id', 'published','status']
 
 class ArticlePostPublishSerializer(serializers.ModelSerializer):
 

@@ -619,6 +619,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         if meta[0]['status'] == 'accepted':
             data['Community_name'] = data['published']
             data['id'] = pk
+            response.status = data['status']
             serializer = ArticlePublishSelectionSerializer(data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()

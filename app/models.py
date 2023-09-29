@@ -346,6 +346,7 @@ class CommunityMeta(models.Model):
         ('in review', 'in review'),
         ('accepted', 'accepted'),
         ('published', 'published'),
+        ('rejected by user', 'rejected by user'),
         ('rejected', 'rejected')
     }
     status = models.CharField(max_length=255, choices=ARTICLE_STATUS)
