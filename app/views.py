@@ -613,17 +613,11 @@ class ArticleViewset(viewsets.ModelViewSet):
         response = CommunityMeta.objects.filter(article_id=pk,community__Community_name=data["published"]).first()
         if response is None:
             return Response(data={"error": f'Article is not submitted to {data["published"]}'}) 
-        serializer = CommunityMetaSerializer(data=response, many=True)
-        serializer.is_valid()
-        meta = serializer.data
-        if meta[0]['status'] == 'accepted':
+        if response.status == 'accepted':
             data['Community_name'] = data['published']
             data['id'] = pk
             response.status = data['status']
-            serializer = ArticlePublishSelectionSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
+            response.save()
             return Response(data={"success": f"You have chosen {data['Community_name']} to publish your article"})
         else:
             return Response(data={"error": "Article is still not approved by community"})        
