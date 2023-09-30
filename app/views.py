@@ -499,7 +499,6 @@ class ArticleViewset(viewsets.ModelViewSet):
         "submit_article":SubmitArticleSerializer,
         "update": ArticleUpdateSerializer,
         "getIsapproved": CommunityMetaApproveSerializer,
-        "setPublisherDetails": ArticlePublisherSerializer,
         "getPublished": ArticlePublishSelectionSerializer,
         "status": StatusSerializer,
         "updateViews": ArticleViewsSerializer,
@@ -585,22 +584,6 @@ class ArticleViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data={"success":"review process started successfully"})
-
-    @action(methods=['post'], detail=False, url_path='(?P<pk>.+)/publish_article', permission_classes=[ArticlePermission])
-    def setPublisherDetails(self, request, pk):
-        '''
-       get published information of article
-        '''
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = Article.objects.filter(id=pk)
-        serializer = ArticlePublisherSerializer(data=response, many=True)
-        serializer.is_valid()
-        publisher = serializer.data
-        if publisher[0]["published"] is not None:
-            return Response(data={"success": publisher[0]})
-        else:
-            return Response(data={"error": "This article is still not published in any community"})
     
     @action(methods=['post'], detail=False, url_path='(?P<pk>.+)/publish', permission_classes=[ArticlePermission])
     def getPublished(self, request, pk):
