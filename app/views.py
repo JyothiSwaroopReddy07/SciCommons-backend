@@ -363,9 +363,10 @@ class CommunityViewset(viewsets.ModelViewSet):
             return Response(data={"error": "This action can't be performed"})
         else:
             data = request.data
-            serializer = ArticlePostPublishSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            article.license = data["license"]
+            article.published_article_file = data["published_article_file"]
+            article.doi = data["doi"]
+            article.save()
             return Response(data={"success": "You added the license,Article file to the published Article"})
     
     @action(methods=['GET'],detail=False,url_path='(?P<Community_name>.+)/members',permission_classes=[CommunityPermission])

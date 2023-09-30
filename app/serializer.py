@@ -537,12 +537,6 @@ class ArticlePostPublishSerializer(serializers.ModelSerializer):
         model = Article
         fields = ["license","published_article_file", "published_date", "doi"]
 
-class ArticlePublisherSerializer(serializers.ModelSerializer):
-    published_article_file_url = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Article
-        fields = ["id", "license", "published_article_file", "published", "published_article_file_url"]
 
 class ArticlelistSerializer(serializers.ModelSerializer):
 
