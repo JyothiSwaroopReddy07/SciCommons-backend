@@ -366,6 +366,7 @@ class CommunityViewset(viewsets.ModelViewSet):
             article.license = data["license"]
             article.published_article_file = data["published_article_file"]
             article.doi = data["doi"]
+            article.published_date = datetime.datetime.now()
             article.save()
             return Response(data={"success": "You added the license,Article file to the published Article"})
     
