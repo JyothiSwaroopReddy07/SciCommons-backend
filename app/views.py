@@ -358,7 +358,7 @@ class CommunityViewset(viewsets.ModelViewSet):
     def addPublishedInfo(self, request, Community_name, article_id):
         obj = self.get_object()
         self.check_object_permissions(request,obj)
-        article = Article.objects.filter(article_id=article_id).first()
+        article = Article.objects.filter(id=article_id).first()
         if(article["published"] != Community_name):
             return Response(data={"error": "This action can't be performed"})
         else:
