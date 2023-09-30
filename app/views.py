@@ -586,7 +586,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         serializer.save()
         return Response(data={"success":"review process started successfully"})
 
-    @action(methods=['get'], detail=False, url_path='(?P<pk>.+)/publisher', permission_classes=[ArticlePermission])
+    @action(methods=['post'], detail=False, url_path='(?P<pk>.+)/publisher', permission_classes=[ArticlePermission])
     def getPublisherDetails(self, request, pk):
         '''
        get published information of article

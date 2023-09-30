@@ -71,7 +71,7 @@ class ArticlePermission(permissions.BasePermission):
             else:
                 return True
         
-        elif view.action in ['approve_review','reject_article']:
+        elif view.action in ['approve_review','reject_article','getPublisherDetails']:
             admin = CommunityMember.objects.filter(user=request.user, community=request.data['community']).first()
             return admin.is_admin
 
@@ -86,7 +86,6 @@ class ArticlePermission(permissions.BasePermission):
                 return True
             else:
                 return False
-
 
 
 class CommentPermission(permissions.BasePermission):
