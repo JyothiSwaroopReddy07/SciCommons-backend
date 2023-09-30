@@ -593,7 +593,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video',
+        fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video','doi',
                     'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status',
                     'isFavourite', 'userrating','commentcount', 'favourites','license','published_date', 'published','unregistered_authors' ]
     
