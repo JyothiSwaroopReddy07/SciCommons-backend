@@ -499,7 +499,7 @@ class ArticleViewset(viewsets.ModelViewSet):
         "submit_article":SubmitArticleSerializer,
         "update": ArticleUpdateSerializer,
         "getIsapproved": CommunityMetaApproveSerializer,
-        "getPublisherDetails": ArticlePublisherSerializer,
+        "setPublisherDetails": ArticlePublisherSerializer,
         "getPublished": ArticlePublishSelectionSerializer,
         "status": StatusSerializer,
         "updateViews": ArticleViewsSerializer,
@@ -586,8 +586,8 @@ class ArticleViewset(viewsets.ModelViewSet):
         serializer.save()
         return Response(data={"success":"review process started successfully"})
 
-    @action(methods=['post'], detail=False, url_path='(?P<pk>.+)/publisher', permission_classes=[ArticlePermission])
-    def getPublisherDetails(self, request, pk):
+    @action(methods=['post'], detail=False, url_path='(?P<pk>.+)/publish_article', permission_classes=[ArticlePermission])
+    def setPublisherDetails(self, request, pk):
         '''
        get published information of article
         '''
@@ -614,8 +614,9 @@ class ArticleViewset(viewsets.ModelViewSet):
         if response is None:
             return Response(data={"error": f'Article is not submitted to {data["published"]}'}) 
         if response.status == 'accepted':
-            data['Community_name'] = data['published']
-            data['id'] = pk
+            article = Article.objects.filter(id=pk).first() 
+            article.published = data['published']
+            article.save()
             response.status = data['status']
             response.save()
             return Response(data={"success": f"You have chosen {data['Community_name']} to publish your article"})

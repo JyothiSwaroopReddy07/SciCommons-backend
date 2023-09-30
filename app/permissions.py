@@ -58,7 +58,7 @@ class ArticlePermission(permissions.BasePermission):
     
     def has_object_permission(self, request, view, obj):
 
-        if view.action in ['retrieve', 'list', 'getPublisherDetails','updateViews']:
+        if view.action in ['retrieve', 'list', 'updateViews']:
             return True
         
         elif view.action in ['create', 'submit_article','favourite','unfavourite', 'favourites']:
@@ -71,7 +71,7 @@ class ArticlePermission(permissions.BasePermission):
             else:
                 return True
         
-        elif view.action in ['approve_review','reject_article','getPublisherDetails']:
+        elif view.action in ['approve_review','reject_article','setPublisherDetails']:
             admin = CommunityMember.objects.filter(user=request.user, community=request.data['community']).first()
             return admin.is_admin
 
