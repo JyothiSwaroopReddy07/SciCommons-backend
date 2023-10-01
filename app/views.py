@@ -47,6 +47,7 @@ class UserViewset(viewsets.ModelViewSet):
         'verifyrequest': ForgotPasswordSerializer,
         'verifyemail': VerifySerializer,
         'messages': MessageListSerializer,
+        "getmyposts": SocialPostSerializer,
     }
 
 
@@ -117,6 +118,15 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False, url_path="(?P<username>.+)/posts", permission_classes=[UserPermission])
     def getposts(self, request, username):
         instance = User.objects.filter(username=username).first()
+        queryset = SocialPost.objects.filter(user_id=instance.id)
+        serializer = SocialPostListSerializer(data=queryset, many=True, context={'request': request})
+        serializer.is_valid()
+        posts = serializer.data
+        return Response(data={"success": posts})
+    
+    @action(methods=['get'], detail=False, url_path="myposts", permission_classes=[UserPermission])
+    def getmyposts(self, request):
+        instance = User.objects.filter(id=request.user).first()
         queryset = SocialPost.objects.filter(user_id=instance.id)
         serializer = SocialPostListSerializer(data=queryset, many=True, context={'request': request})
         serializer.is_valid()
