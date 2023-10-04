@@ -250,14 +250,14 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = UserActivitySerializer(activities,many=True)
         return Response(data={"success":serializer.data})
         
-    @action(methods=['get'],url_path="followers", detail=False,permission_classes=[permissions.AllowAny])
+    @action(methods=['get'],url_path="followers", detail=False,permission_classes=[UserPermission])
     def followers(self,request):
         instance = User.objects.filter(username=request.query_params.get("username")).first()
         member = Follow.objects.filter(followed_user=instance)
         serializer = FollowersSerializer(member,many=True,context={'request':request})
         return Response(data={"success": serializer.data})
 
-    @action(methods=['get'],url_path="following", detail=False,permission_classes=[permissions.AllowAny])
+    @action(methods=['get'],url_path="following", detail=False,permission_classes=[UserPermission])
     def following(self,request):
         instance = User.objects.filter(username=request.query_params.get("username")).first()
         member = Follow.objects.filter(user=instance)
