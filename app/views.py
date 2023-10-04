@@ -260,7 +260,7 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=['get'],url_path="following", detail=False,permission_classes=[UserPermission])
     def following(self,request):
         instance = User.objects.filter(username=request.query_params.get("username")).first()
-        member = Follow.objects.filter(user=instance)
+        member = Follow.objects.filter(user=instance.id)
         serializer = FollowingSerializer(member,many=True,context={'request':request})
         return Response(data={"success": serializer.data})
     
