@@ -194,6 +194,10 @@ class UserViewset(viewsets.ModelViewSet):
         user = User.objects.filter(email=serializer.data['email']).first()
         if user is None:
             return Response(data={"error": "Please enter a valid email address"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user.email_verified == False:
+            return Response(data={"error": "Please verify your email address"}, status=status.HTTP_400_BAD_REQUEST)
+        
         forget = ForgetPassword.objects.create(user=user, otp=otp)
         forget.save()
 
