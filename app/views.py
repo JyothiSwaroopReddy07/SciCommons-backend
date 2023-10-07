@@ -158,6 +158,8 @@ class UserViewset(viewsets.ModelViewSet):
         user = User.objects.filter(email=serializer.data['email']).first()
         if user is None:
             return Response(data={"error": "Please Enter valid email address!!!"}, status=status.HTTP_400_BAD_REQUEST)
+        if user.email_verified == True:
+            return Response(data={"error": "Email already verified!!!"}, status=status.HTTP_400_BAD_REQUEST)
         verify = EmailVerify.objects.create(user=user, otp=otp)
         email_from = settings.EMAIL_HOST_USER
         email_subject = "Email Verification"
