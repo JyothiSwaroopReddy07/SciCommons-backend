@@ -1290,6 +1290,8 @@ class SocialPostSerializer(serializers.ModelSerializer):
         read_only_fields = ['user','id','created_at', 'image']
 
 class SocialPostUpdateSerializer(serializers.ModelSerializer):
+    body = serializers.CharField(required=False)
+    image = serializers.ImageField(required=False)
 
     class Meta:
         model = SocialPost

@@ -1001,17 +1001,19 @@ class SocialPostViewset(viewsets.ModelViewSet):
         return Response(data={"success":"Post Successfully added!!!"})
     
     def update(self, request, pk):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        member = SocialPost.objects.filter(id=pk).first()
+        if member is None:
+            return Response(data={"error":"Post not found!!!"})
+        serializer = SocialPostUpdateSerializer(member, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(data={"success":serializer.data})
     
     def destroy(self, request, pk):
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        response = super(SocialPostViewset, self).destroy(request, pk)
-    
+        response = SocialPost.objects.filter(id=pk).first()
+        if response is None:
+            return Response(data={"error":"Post not found!!!"})
+        response.delete()
         return Response(data={"success":"Post Successfuly removed!!!"})
     
     @action(methods=['get'],detail=False,url_path="timeline", permission_classes=[SocialPostPermission])
