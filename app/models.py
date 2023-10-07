@@ -380,7 +380,7 @@ class CommunityRequests(models.Model):
 
 class SocialPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    body = models.TextField(max_length=500)
+    body = models.TextField(max_length=2000)
     image = CloudinaryField('social_post_images', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
