@@ -1,7 +1,9 @@
 import django_filters
 from app.models import *
-from django.db.models import Count, Q, Subquery
+from django.db.models import Count, Q, Subquery, Sum, OuterRef, Avg, Value
 import django_filters 
+from django.db.models import F
+from django.db.models.functions import Coalesce
 
 class ArticleFilter(django_filters.FilterSet):
     order = django_filters.MultipleChoiceFilter(
@@ -24,6 +26,11 @@ class ArticleFilter(django_filters.FilterSet):
         fields = []
 
     def filter_by_ordering(self, queryset, name, value):
+
+        if 'most_rated' in value:
+            queryset = (queryset.annotate(avg_rating=Coalesce(Avg('commentbase__rating', filter=Q(commentbase__Type='review')), Value(0.0))).order_by('-avg_rating'))
+        if 'least_rated' in value:
+            queryset = (queryset.annotate(avg_rating=Coalesce(Avg('commentbase__rating', filter=Q(commentbase__Type='review')), Value(0.0))).order_by('avg_rating'))
         if 'most_viewed' in value:
             queryset = queryset.order_by('-views')
         if 'least_viewed' in value:
@@ -36,19 +43,7 @@ class ArticleFilter(django_filters.FilterSet):
             queryset = queryset.order_by('favourite')
         if 'least_favourite' in value:
             queryset = queryset.order_by('-favourite')
-        if 'most_rated' in value:
-            ratings_counts = CommentBase.objects.filter(comment_type='review', rating__isnull=False)
-            ratings_counts = ratings_counts.values('article').annotate(rating_count=Count('rating')).values('rating_count')
-
-            queryset = queryset.annotate(rating_count=Subquery(ratings_counts))
-            queryset = queryset.order_by('-rating_count')
-
-        if 'least_rated' in value:
-            ratings_counts = CommentBase.objects.filter(comment_type='review', rating__isnull=False)
-            ratings_counts = ratings_counts.values('article').annotate(rating_count=Count('rating')).values('rating_count')
-
-            queryset = queryset.annotate(rating_count=Subquery(ratings_counts))
-            queryset = queryset.order_by('rating_count')
+    
         return queryset
     
 class CommentFilter(django_filters.FilterSet):
