@@ -956,10 +956,11 @@ class CommentlistSerializer(serializers.ModelSerializer):
     replies = serializers.SerializerMethodField(read_only=True)
     versions = serializers.SerializerMethodField(read_only=True)
     role = serializers.SerializerMethodField(read_only=True)
+    blocked = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CommentBase
-        fields = ['id', 'article', 'Comment', 'Title','Type','rating','confidence', 'replies','role',
+        fields = ['id', 'article', 'Comment', 'Title','Type','rating','confidence', 'replies','role','blocked',
                         'tag','comment_type', 'user','Comment_date', 'commentrating', 'versions',
                     'parent_comment','rank','personal','userrating']
         
@@ -980,8 +981,6 @@ class CommentlistSerializer(serializers.ModelSerializer):
             return False
     
     def get_role(self,obj):
-        if self.context['request'].user.is_authenticated is False:
-            return "none"
         if obj.User_id in [author.User_id for author in Author.objects.filter(article=obj.article)]:
             return "author"
         elif obj.User_id in [reviewer.User_id for reviewer in ArticleReviewer.objects.filter(article=obj.article)]:
@@ -990,6 +989,12 @@ class CommentlistSerializer(serializers.ModelSerializer):
             return "moderator"
         else:
             return "none"
+    
+    def get_blocked(self,obj):
+        if obj.User_id in [user.user_id for user in ArticleBlockedUser.objects.filter(article=obj.article)]:
+            return True
+        else:
+            return False
     
     def get_replies(self,obj):
         member = CommentBase.objects.filter(parent_comment=obj).count()
@@ -1022,10 +1027,11 @@ class CommentSerializer(serializers.ModelSerializer):
     replies = serializers.SerializerMethodField(read_only=True)
     versions = serializers.SerializerMethodField(read_only=True)
     role = serializers.SerializerMethodField(read_only=True)
+    blocked = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CommentBase
-        fields = ['id', 'article', 'Comment', 'Title', 'Type', 'tag','comment_type', 'user','Comment_date', 'versions', 'role',
+        fields = ['id', 'article', 'Comment', 'Title', 'Type', 'tag','comment_type', 'user','Comment_date', 'versions', 'role', 'blocked',
                     'parent_comment','rank','personal', 'replies', 'rating','confidence','version','commentrating','userrating']
         
     def get_user(self, obj):
@@ -1040,6 +1046,12 @@ class CommentSerializer(serializers.ModelSerializer):
         if self.context['request'].user.is_authenticated is False:
             return False
         if obj.User == self.context['request'].user:
+            return True
+        else:
+            return False
+        
+    def get_blocked(self,obj):
+        if obj.User_id in [user.user_id for user in ArticleBlockedUser.objects.filter(article=obj.article)]:
             return True
         else:
             return False

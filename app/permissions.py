@@ -81,11 +81,11 @@ class ArticlePermission(permissions.BasePermission):
             else:
                 return False
         elif view.action in ['blockUser', 'unblockUser']:
-            member = Article.objects.filter(id=obj.pk).first()
-            if request.user in member["moderators"]:
-                return True
-            else:
+            member = ArticleModerator.objects.filter(article=obj.id,moderator__user=request.user).first()
+            if member is None:
                 return False
+            else:
+                return True
 
 
 class CommentPermission(permissions.BasePermission):

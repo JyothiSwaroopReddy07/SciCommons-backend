@@ -731,11 +731,24 @@ class ArticleViewset(viewsets.ModelViewSet):
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/block_user', permission_classes=[ArticlePermission])
     def block_user(self, request, pk):
         obj = self.get_object()
-
-        serialzer = self.get_serializer(obj, data=request.data, partial=True)
-        serialzer.is_valid(raise_execption=True)
-        serialzer.save()
+        self.check_object_permissions(request,obj)
+        member = ArticleBlockedUser.objects.filter(article=pk,user=request.data["user"]).first()
+        if member is not None:
+            return Response(data={"error":"User already blocked!!!"})
+        ArticleBlockedUser.objects.create(article=pk,user=request.data["user"])
         return Response(data={"success":f"user blocked successfully"})
+    
+    @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/unblock_user', permission_classes=[ArticlePermission])
+    def unblock_user(self, request, pk):
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        member = ArticleBlockedUser.objects.filter(article=pk,user=request.data["user"]).first()
+        if member is not None:
+            return Response(data={"error":"User is not blocked!!!"})
+        member.delete()
+        return Response(data={"success":f"user unblocked successfully"})
+    
+
       
 class CommentViewset(viewsets.ModelViewSet):
     queryset = CommentBase.objects.all()
@@ -807,6 +820,9 @@ class CommentViewset(viewsets.ModelViewSet):
         return Response(data={"success":response.data})
 
     def create(self, request):
+        member = ArticleBlockedUser.objects.filter(article=request.data["article"],user=request.user).first()
+        if member is not None:
+            return Response(data={"error": "You are blocked from commenting on this article by article moderator!!!"}, status=status.HTTP_400_BAD_REQUEST)
         if request.data["parent_comment"] or request.data["version"]:
             request.data["Type"] = "comment"
 
