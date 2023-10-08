@@ -11,7 +11,7 @@ class ArticleFilter(django_filters.FilterSet):
             ('most_viewed', 'Most Viewed'),
             ('least_viewed', 'Least Viewed'),
             ('most_recent', 'Most Recent'),
-            ('oldest', 'Oldest'),
+            ('least_recent', 'Least Recent'),
             ('most_favourite', 'Most Favourite'),
             ('least_favourite', 'Least Favourite'),
             ('most_rated','Most Rated'),
