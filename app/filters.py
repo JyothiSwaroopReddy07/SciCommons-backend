@@ -12,8 +12,8 @@ class ArticleFilter(django_filters.FilterSet):
             ('oldest', 'Oldest'),
             ('most_favourite', 'Most Favourite'),
             ('least_favourite', 'Least Favourite'),
-            ('most_commented','Most Commented'),
-            ('least_commented','Least Commented'),
+            ('most_rated','Most Rated'),
+            ('least_rated','Least Rated'),
 
         ],
         method='filter_by_ordering'
@@ -36,20 +36,19 @@ class ArticleFilter(django_filters.FilterSet):
             queryset = queryset.order_by('favourite')
         if 'least_favourite' in value:
             queryset = queryset.order_by('-favourite')
-        if 'most_commented' in value:
-            review_comment_counts = CommentBase.objects.filter(comment_type='review')
-            review_comment_counts = review_comment_counts.values('article').annotate(review_count=Count('article')).values('review_count')
+        if 'most_rated' in value:
+            ratings_counts = CommentBase.objects.filter(comment_type='review', rating__isnull=False)
+            ratings_counts = ratings_counts.values('article').annotate(rating_count=Count('rating')).values('rating_count')
 
-            queryset = queryset.annotate(review_comment_count=Subquery(review_comment_counts))
+            queryset = queryset.annotate(rating_count=Subquery(ratings_counts))
+            queryset = queryset.order_by('-rating_count')
 
-            queryset = queryset.order_by('-review_comment_count')
-        if 'least_commented' in value:
-            review_comment_counts = CommentBase.objects.filter(comment_type='review')
-            review_comment_counts = review_comment_counts.values('article').annotate(review_count=Count('article')).values('review_count')
+        if 'least_rated' in value:
+            ratings_counts = CommentBase.objects.filter(comment_type='review', rating__isnull=False)
+            ratings_counts = ratings_counts.values('article').annotate(rating_count=Count('rating')).values('rating_count')
 
-            queryset = queryset.annotate(review_comment_count=Subquery(review_comment_counts))
-
-            queryset = queryset.order_by('review_comment_count')
+            queryset = queryset.annotate(rating_count=Subquery(ratings_counts))
+            queryset = queryset.order_by('rating_count')
         return queryset
     
 class CommentFilter(django_filters.FilterSet):
