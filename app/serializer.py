@@ -983,9 +983,9 @@ class CommentlistSerializer(serializers.ModelSerializer):
     def get_role(self,obj):
         if obj.User_id in [author.User_id for author in Author.objects.filter(article=obj.article)]:
             return "author"
-        elif OfficialReviewer.objects.filter(User_id=obj.User_id).first().id in [reviewer.officialreviewer_id for reviewer in ArticleReviewer.objects.filter(article=obj.article)]:
+        elif (OfficialReviewer.objects.filter(User_id=obj.User_id).first() is not None) and (OfficialReviewer.objects.filter(User_id=obj.User_id).first().id in [reviewer.officialreviewer_id for reviewer in ArticleReviewer.objects.filter(article=obj.article)]):
             return "reviewer"
-        elif Moderator.objects.filter(user_id=obj.User_id).first().id in [member.moderator_id for member in ArticleModerator.objects.filter(article=obj.article)]:
+        elif (Moderator.objects.filter(user_id=obj.User_id).first() is not None) and (Moderator.objects.filter(user_id=obj.User_id).first().id in [member.moderator_id for member in ArticleModerator.objects.filter(article=obj.article)]):
             return "moderator"
         else:
             return "none"
@@ -1059,9 +1059,9 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_role(self,obj):
         if obj.User_id in [author.User_id for author in Author.objects.filter(article=obj.article)]:
             return "author"
-        elif OfficialReviewer.objects.filter(User_id=obj.User_id).first().id in [reviewer.officialreviewer_id for reviewer in ArticleReviewer.objects.filter(article=obj.article)]:
+        elif (OfficialReviewer.objects.filter(User_id=obj.User_id).first() is not None) and (OfficialReviewer.objects.filter(User_id=obj.User_id).first().id in [reviewer.officialreviewer_id for reviewer in ArticleReviewer.objects.filter(article=obj.article)]):
             return "reviewer"
-        elif Moderator.objects.filter(user_id=obj.User_id).first().id in [member.moderator_id for member in ArticleModerator.objects.filter(article=obj.article)]:
+        elif (Moderator.objects.filter(user_id=obj.User_id).first() is not None) and (Moderator.objects.filter(user_id=obj.User_id).first().id in [member.moderator_id for member in ArticleModerator.objects.filter(article=obj.article)]):
             return "moderator"
         else:
             return "none"
