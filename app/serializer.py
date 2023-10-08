@@ -955,10 +955,11 @@ class CommentlistSerializer(serializers.ModelSerializer):
     commentrating = serializers.SerializerMethodField(read_only=True)
     replies = serializers.SerializerMethodField(read_only=True)
     versions = serializers.SerializerMethodField(read_only=True)
+    role = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CommentBase
-        fields = ['id', 'article', 'Comment', 'Title','Type','rating','confidence', 'replies',
+        fields = ['id', 'article', 'Comment', 'Title','Type','rating','confidence', 'replies','role',
                         'tag','comment_type', 'user','Comment_date', 'commentrating', 'versions',
                     'parent_comment','rank','personal','userrating']
         
@@ -977,6 +978,18 @@ class CommentlistSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+    
+    def get_role(self,obj):
+        if self.context['request'].user.is_authenticated is False:
+            return "none"
+        if obj.User_id in [author.User_id for author in Author.objects.filter(article=obj.article)]:
+            return "author"
+        elif obj.User_id in [reviewer.User_id for reviewer in ArticleReviewer.objects.filter(article=obj.article)]:
+            return "reviewer"
+        elif obj.User_id in [moderator.user_id for moderator in ArticleModerator.objects.filter(article=obj.article)]:
+            return "moderator"
+        else:
+            return "none"
     
     def get_replies(self,obj):
         member = CommentBase.objects.filter(parent_comment=obj).count()
