@@ -104,11 +104,23 @@ class PostFilters(django_filters.FilterSet):
 
     def filter_by_ordering(self, queryset, name, value):
         if 'most_recent' in value:
-            queryset = queryset.order_by('-created_at')
+            if self.request.user.is_authenticated:
+                queryset = queryset.order_by('-created_at').exclude(user=self.request.user)
+            else:
+                queryset = queryset.order_by('-created_at')
         if 'most_commented' in value:
-            queryset = queryset.annotate(comment_count=Count('comments')).order_by('-comment_count')
+            if self.request.user.is_authenticated:
+                queryset = queryset.annotate(comment_count=Count('comments')).order_by('-comment_count').exclude(user=self.request.user)
+            else:
+                queryset = queryset.annotate(comment_count=Count('comments')).order_by('-comment_count')
         if 'most_liked' in value:
-            queryset = queryset.annotate(like_count=Count('likes')).order_by('-like_count')
+            if self.request.user.is_authenticated:
+                queryset = queryset.annotate(like_count=Count('likes')).order_by('-like_count').exclude(user=self.request.user)
+            else:
+                queryset = queryset.annotate(like_count=Count('likes')).order_by('-like_count')
         if 'most_bookmarked' in value:
-            queryset = queryset.annotate(bookmark_count=Count('bookmark')).order_by('-bookmark_count')
+            if self.request.user.is_authenticated:
+                queryset = queryset.annotate(bookmark_count=Count('bookmark')).order_by('-bookmark_count').exclude(user=self.request.user)
+            else:
+                queryset = queryset.annotate(bookmark_count=Count('bookmark')).order_by('-bookmark_count')
         return queryset
