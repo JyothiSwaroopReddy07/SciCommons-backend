@@ -983,9 +983,9 @@ class CommentlistSerializer(serializers.ModelSerializer):
     def get_role(self,obj):
         if obj.User_id in [author.User_id for author in Author.objects.filter(article=obj.article)]:
             return "author"
-        elif obj.User_id in [reviewer.User_id for reviewer in ArticleReviewer.objects.filter(article=obj.article)]:
+        elif OfficialReviewer.objects.filter(User_id=obj.User_id).first().id in [reviewer.officialreviewer_id for reviewer in ArticleReviewer.objects.filter(article=obj.article)]:
             return "reviewer"
-        elif obj.User_id in [moderator.user_id for moderator in ArticleModerator.objects.filter(article=obj.article)]:
+        elif Moderator.objects.filter(user_id=obj.User_id).first().id in [member.moderator_id for member in ArticleModerator.objects.filter(article=obj.article)]:
             return "moderator"
         else:
             return "none"
@@ -1057,13 +1057,11 @@ class CommentSerializer(serializers.ModelSerializer):
             return False
     
     def get_role(self,obj):
-        if self.context['request'].user.is_authenticated is False:
-            return "none"
-        if obj.User in [author.User for author in Author.objects.filter(article=obj.article)]:
+        if obj.User_id in [author.User_id for author in Author.objects.filter(article=obj.article)]:
             return "author"
-        elif obj.User in [reviewer.User for reviewer in ArticleReviewer.objects.filter(article=obj.article)]:
+        elif OfficialReviewer.objects.filter(User_id=obj.User_id).first().id in [reviewer.officialreviewer_id for reviewer in ArticleReviewer.objects.filter(article=obj.article)]:
             return "reviewer"
-        elif obj.User in [moderator.user for moderator in ArticleModerator.objects.filter(article=obj.article)]:
+        elif Moderator.objects.filter(user_id=obj.User_id).first().id in [member.moderator_id for member in ArticleModerator.objects.filter(article=obj.article)]:
             return "moderator"
         else:
             return "none"
