@@ -91,7 +91,6 @@ class PostFilters(django_filters.FilterSet):
     order = django_filters.MultipleChoiceFilter(
         choices=[
             ('most_recent', 'Most Recent'),
-            ('least_recent', 'Least Recent'),
             ('most_commented','Most Commented'),
             ('most_liked','Most Liked'),
             ('most_bookmarked','Most Bookmarked'),
@@ -106,8 +105,6 @@ class PostFilters(django_filters.FilterSet):
     def filter_by_ordering(self, queryset, name, value):
         if 'most_recent' in value:
             queryset = queryset.order_by('-created_at')
-        if 'least_recent' in value:
-            queryset = queryset.order_by('created_at')
         if 'most_commented' in value:
             queryset = queryset.annotate(comment_count=Count('comments')).order_by('-comment_count')
         if 'most_liked' in value:
