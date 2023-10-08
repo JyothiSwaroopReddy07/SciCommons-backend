@@ -360,8 +360,8 @@ class CommunityMeta(models.Model):
 
 
 class CommunityRequests(models.Model):
-    about = models.CharField(max_length=500, null=True)
-    summary = models.CharField(max_length=500, null=True)
+    about = models.CharField(max_length=5000, null=True)
+    summary = models.CharField(max_length=5000, null=True)
     user = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE)
     community = models.ForeignKey(Community, related_name='requests', on_delete=models.CASCADE)
     REQUEST_STATUS = {
