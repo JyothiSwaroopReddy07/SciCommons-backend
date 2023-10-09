@@ -60,7 +60,7 @@ class CommentFilter(django_filters.FilterSet):
     )
     type=django_filters.CharFilter(field_name='comment_type')
     tag=django_filters.CharFilter(field_name='tag')
-    article=django_filters.NumberFilter(field_name='article')
+    article=django_filters.CharFilter(field_name='article')
     parent=django_filters.NumberFilter(field_name='parent_comment')
     version=django_filters.NumberFilter(field_name='version')
     
