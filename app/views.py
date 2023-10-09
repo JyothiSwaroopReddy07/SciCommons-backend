@@ -756,8 +756,8 @@ class CommentViewset(viewsets.ModelViewSet):
     permission_classes = [CommentPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     serializer_class = CommentSerializer
-    # filter_backends = [DjangoFilterBackend,filters.OrderingFilter]
-    # filterset_class = CommentFilter
+    filter_backends = [DjangoFilterBackend,filters.OrderingFilter]
+    filterset_class = CommentFilter
     http_method_names = ['post', 'get', 'put', 'delete']
     
     action_serializer = {
@@ -803,7 +803,7 @@ class CommentViewset(viewsets.ModelViewSet):
                     else:
                         qs = self.queryset.filter(article_id=article,parent_comment=parent_comment,version=version)
         else:
-            qs = []
+            qs = CommentBase.objects.none()
             
         return qs
     
