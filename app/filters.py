@@ -77,15 +77,13 @@ class CommentFilter(django_filters.FilterSet):
         if 'most_rated' in value:
             query = Q(comment_type='review') | Q(comment_type='decision')
             comment_counts = CommentBase.objects.filter(query)
-            comment_counts = comment_counts.values('comment').annotate(review_count=Count('comment')).values('review_count')
-            queryset = queryset.annotate(comment_counts=Subquery(comment_counts))
-            queryset = queryset.order_by('-comment_counts')
+            comment_counts = comment_counts.annotate(likes_count=Count('posts__value', filter=Q(posts__value__isnull=False)))
+            queryset = queryset.filter(query).annotate(comment_counts=Subquery(comment_counts.values('likes_count'), output_field=models.IntegerField())).order_by('-comment_counts')
         if 'least_rated' in value:
             query = Q(comment_type='review') | Q(comment_type='decision')
             comment_counts = CommentBase.objects.filter(query)
-            comment_counts = comment_counts.values('comment').annotate(review_count=Count('comment')).values('review_count')
-            queryset = queryset.annotate(comment_counts=Subquery(comment_counts))
-            queryset = queryset.order_by('comment_counts')
+            comment_counts = comment_counts.annotate(likes_count=Count('posts__value', filter=Q(posts__value__isnull=False)))
+            queryset = queryset.filter(query).annotate(comment_counts=Subquery(comment_counts.values('likes_count'), output_field=models.IntegerField())).order_by('comment_counts')
         if 'least_reputed' in value:
             queryset = queryset.order_by("user_rank")
         if 'most_reputed' in value:
