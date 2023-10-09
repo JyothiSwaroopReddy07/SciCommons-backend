@@ -62,8 +62,8 @@ class CommentFilter(django_filters.FilterSet):
     comment_type=django_filters.CharFilter(field_name='comment_type')
     tag=django_filters.CharFilter(field_name='tag')
     article=django_filters.CharFilter(field_name='article')
-    parent=django_filters.NumberFilter(field_name='parent_comment')
-    version=django_filters.NumberFilter(field_name='version')
+    parent_comment=django_filters.CharFilter(field_name='parent_comment')
+    version=django_filters.CharFilter(field_name='version')
     
     class Meta:
         model = CommentBase
