@@ -50,9 +50,11 @@ class CommentFilter(django_filters.FilterSet):
     order = django_filters.MultipleChoiceFilter(
         choices=[
             ('most_recent', 'Most Recent'),
-            ('oldest', 'Oldest'),
+            ('least_recent', 'Least Recent'),
             ('most_rated','Most Rated'),
-            ('by_most_reputed', "By Most Reputed")
+            ('least_rated','Least Rated'),
+            ('most_reputed', "Most Reputed"),
+            ('least_reputed', "Least Reputed")
         ],
         method='filter_by_ordering'
     )
@@ -75,11 +77,17 @@ class CommentFilter(django_filters.FilterSet):
             query = Q(comment_type='review') | Q(comment_type='decision')
             comment_counts = CommentBase.objects.filter(query)
             comment_counts = comment_counts.values('comment').annotate(review_count=Count('comment')).values('review_count')
-
             queryset = queryset.annotate(comment_counts=Subquery(comment_counts))
-
             queryset = queryset.order_by('-comment_counts')
-        if 'by_most_reputed_user' in value:
+        if 'least_rated' in value:
+            query = Q(comment_type='review') | Q(comment_type='decision')
+            comment_counts = CommentBase.objects.filter(query)
+            comment_counts = comment_counts.values('comment').annotate(review_count=Count('comment')).values('review_count')
+            queryset = queryset.annotate(comment_counts=Subquery(comment_counts))
+            queryset = queryset.order_by('comment_counts')
+        if 'least_reputed' in value:
+            queryset = queryset.order_by("user_rank")
+        if 'most_reputed' in value:
             queryset = queryset.order_by("-user_rank")
 
         
