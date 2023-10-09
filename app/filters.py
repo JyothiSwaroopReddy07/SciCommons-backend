@@ -75,15 +75,15 @@ class CommentFilter(django_filters.FilterSet):
         if 'least_recent' in value:
             queryset = queryset.order_by('Comment_date')
         if 'most_rated' in value:
-            query = Q(comment_type='review') | Q(comment_type='decision')
+            query = Q(Type='review') | Q(Type='decision')
             queryset = CommentBase.objects.filter(query).annotate(likes_count=Count('posts__value', filter=Q(posts__value__isnull=False)))
             queryset = queryset.order_by('-likes_count')
 
         if 'least_rated' in value:
-            query = Q(comment_type='review') | Q(comment_type='decision')
+            query = Q(Type='review') | Q(Type='decision')
             queryset = CommentBase.objects.filter(query).annotate(likes_count=Count('posts__value', filter=Q(posts__value__isnull=False)))
             queryset = queryset.order_by('likes_count')
-            
+
         if 'least_reputed' in value:
             queryset = queryset.order_by("user_rank")
         if 'most_reputed' in value:
