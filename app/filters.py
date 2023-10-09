@@ -57,7 +57,6 @@ class CommentFilter(django_filters.FilterSet):
         method='filter_by_ordering'
     )
     type=django_filters.CharFilter(field_name='comment_type')
-    visibility=django_filters.CharFilter(field_name='visibility')
     tag=django_filters.CharFilter(field_name='tag')
     article=django_filters.NumberFilter(field_name='article')
     parent=django_filters.NumberFilter(field_name='parent_comment')
