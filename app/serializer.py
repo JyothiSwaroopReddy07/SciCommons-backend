@@ -9,6 +9,8 @@ from faker import Faker
 from django.core.mail import send_mail
 from django.db.models import Avg, Sum , Q
 from django.conf import settings
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 import json
 
@@ -1184,8 +1186,6 @@ class ArticleChatCreateSerializer(serializers.ModelSerializer):
         fields = ["body", "article"]
 
     def create(self, validated_data):
-        from channels.layers import get_channel_layer
-        from asgiref.sync import async_to_sync
 
         article = validated_data("article", None)
         validated_data.pop("article")
