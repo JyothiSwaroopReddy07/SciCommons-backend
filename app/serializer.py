@@ -1188,10 +1188,12 @@ class ArticleChatCreateSerializer(serializers.ModelSerializer):
         from asgiref.sync import async_to_sync
 
         article = validated_data("article", None)
-        channel = f"Article_{article}"
+        validated_data.pop("article")
+        article = Article.objects.filter(id=article).first()
+        channel = f"{article.id}"
 
         instance = self.Meta.model.objects.create(
-            **validated_data, channel=channel, sender=self.context["request"].user
+            **validated_data,article=article, channel=channel, sender=self.context["request"].user
         )
         instance.save()
 
