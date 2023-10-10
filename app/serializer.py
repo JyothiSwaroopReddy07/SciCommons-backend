@@ -1155,11 +1155,19 @@ class ArticleChatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArticleMessage
-        fields = ["id", "sender", "body", "media", "article", "created_at"]
+        fields = ["id", "sender", "body", "media", "article", "created_at", "personal"]
 
     def get_sender(self, obj):
         user = User.objects.filter(id=obj.sender.id).first()
         return f"{user.username}"
+
+    def get_personal(self,obj):
+        if self.context['request'].user.is_authenticated is False:
+            return False
+        if obj.sender == self.context['request'].user:
+            return True
+        else:
+            return False
 
 
 class ArticleChatUpdateSerializer(serializers.ModelSerializer):
