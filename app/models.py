@@ -486,7 +486,7 @@ class ArticleMessage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "article_message"
+        db_table = "article_chat_message"
 
     def __str__(self) -> str:
         return self.body
