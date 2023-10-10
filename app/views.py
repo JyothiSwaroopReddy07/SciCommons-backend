@@ -1061,7 +1061,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
         SocialPostLike.objects.create(post_id=request.data["post"], user=request.user)
         return Response(data={"success":"Liked!!!"})
 
-    @action(methods=['post'], detail=False,url_path="unlike", permission_classes=[SocialPostCommentPermission])
+    @action(methods=['post'], detail=False,url_path="unlike", permission_classes=[SocialPostPermission])
     def unlike(self, request):
 
         member = SocialPostLike.objects.filter(post_id=request.data["post"],user=request.user).first()
@@ -1196,9 +1196,9 @@ class ArticleChatViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         article = self.request.query_params.get("article", None)
         if article is not None:
-            qs = self.queryset.filter(article=article).order_by("-created_at")
+            qs = self.queryset.filter(article_id=article).order_by("created_at")
             return qs
-        return self.queryset
+        return self.queryset.objects.none()
 
     def list(self, request):
         response = super(ArticleChatViewset, self).list(request)
@@ -1214,7 +1214,7 @@ class ArticleChatViewset(viewsets.ModelViewSet):
 
     def create(self, request):
         response = super(ArticleChatViewset, self).create(request)
-
+        
         return Response(data={"success": response.data})
 
     def update(self, request, pk):

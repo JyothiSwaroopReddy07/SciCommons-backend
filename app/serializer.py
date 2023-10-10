@@ -1154,6 +1154,7 @@ Article Chat Serializers
 '''
 class ArticleChatSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField(read_only=True)
+    personal = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ArticleMessage
@@ -1183,26 +1184,20 @@ class ArticleChatUpdateSerializer(serializers.ModelSerializer):
 class ArticleChatCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArticleMessage
-        fields = ["body", "article"]
+        fields = ["id","body", "article"]
+        read_only_fields = ["id"]
 
     def create(self, validated_data):
-        article_id = validated_data.get("article")  # Use .get() method to access dictionary value
+        article_id = validated_data.get("article")
+        print(article_id)
         validated_data.pop("article")
-        article = Article.objects.filter(id=article_id).first()
+        article = Article.objects.filter(article_name=article_id).first()
         channel = f"{article.id}"
 
         instance = self.Meta.model.objects.create(
             **validated_data, article=article, channel=channel, sender=self.context["request"].user
         )
         instance.save()
-
-        message = {"article": instance.article, "body": instance.body, "media": instance.media.url}
-
-        # Send the message via websockets
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            channel, {"type": "chat_message", "message": message}
-        )
 
         return instance
 
