@@ -1181,7 +1181,7 @@ class ArticleChatUpdateSerializer(serializers.ModelSerializer):
 class ArticleChatCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArticleMessage
-        fields = ["body", "article", "media"]
+        fields = ["body", "article"]
 
     def create(self, validated_data):
         from channels.layers import get_channel_layer
