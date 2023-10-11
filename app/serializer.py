@@ -453,6 +453,9 @@ class PromoteSerializer(serializers.ModelSerializer):
             
             elif role == 'reviewer':
                 moderator = Moderator.objects.filter(user_id=user_id, community=instance)
+                article_moderator = ArticleModerator.objects.filter(moderator_id=moderator.id)
+                if article_moderator.exists():
+                    raise serializers.ValidationError(detail={"error": "user is moderator of some articles.Can not perform this operation!!!"})
                 if moderator.exists():
                     moderator.delete()
                 OfficialReviewer.objects.create(User_id=user_id, community=instance, Official_Reviewer_name=fake.name())
@@ -465,6 +468,9 @@ class PromoteSerializer(serializers.ModelSerializer):
                 
             elif role == 'moderator':
                 reviewer = OfficialReviewer.objects.filter(User_id=user_id, community=instance)
+                article_reviewer = ArticleReviewer.objects.filter(officialreviewer_id=reviewer.id)
+                if article_reviewer.exists():
+                    raise serializers.ValidationError(detail={"error": "user is reviewer of some articles.Can not perform this operation!!!"})
                 if reviewer.exists():
                     reviewer.delete()
                 Moderator.objects.create(user_id=user_id, community=instance)
@@ -827,6 +833,8 @@ class SubmitArticleSerializer(serializers.Serializer):
         
         if CommunityMeta.objects.filter(article=instance).first():
             raise serializers.ValidationError(detail={"error": "article already submitted"})
+
+        authors = Author.objects.filter(article=instance)
         
         meta_id = []
         if len(communities)==0:
@@ -837,6 +845,12 @@ class SubmitArticleSerializer(serializers.Serializer):
         
         with transaction.atomic():
             for community in communities:
+                admin_users = CommunityMember.objects.filter(community_id=community, is_admin=True).values_list('user_id', flat=True)
+                author_users = authors.values_list('User_id', flat=True)
+                intersection_users = set(admin_users) & set(author_users)
+                if len(intersection_users) > 0:
+                    raise serializers.ValidationError(detail={"error": "you can not submit article to community where you are admin!!!"})
+                
                 community_meta = CommunityMeta.objects.create(community_id=community, article=instance, status='submitted')
                 community_meta.save()
                 
