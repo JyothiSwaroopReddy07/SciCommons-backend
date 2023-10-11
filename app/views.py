@@ -110,7 +110,7 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False, url_path="articles/(?P<articleId>.+)", permission_classes=[permissions.IsAuthenticated,])
     def getMyArticle(self, request,articleId):
         authors = Author.objects.filter(User_id=request.user.id)
-        articles = Article.objects.filter(author__in=authors,id=articleId)
+        articles = Article.objects.filter(author__in=authors,id=articleId).order_by('-created_at')
         article_serializer = ArticleGetSerializer(articles, many=True, context={'request':request})
 
         return Response(data={"success": article_serializer.data})
@@ -127,7 +127,7 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False, url_path="myposts", permission_classes=[UserPermission])
     def getmyposts(self, request):
         instance = User.objects.filter(id=request.user).first()
-        queryset = SocialPost.objects.filter(user_id=instance.id)
+        queryset = SocialPost.objects.filter(user_id=instance.id).order_by('-created_at')
         serializer = SocialPostListSerializer(data=queryset, many=True, context={'request': request})
         serializer.is_valid()
         posts = serializer.data
@@ -137,7 +137,7 @@ class UserViewset(viewsets.ModelViewSet):
     def getUserArticles(self, request, username):
         user = User.objects.filter(username=username).first()
         queryset = Author.objects.filter(User_id=user.id)
-        articles = Article.objects.filter(author__in=queryset)
+        articles = Article.objects.filter(author__in=queryset).order_by('-created_at')
         serializer = ArticlelistSerializer(articles, many=True, context={'request':request})
         articles = serializer.data
         return Response(data={"success": articles})
