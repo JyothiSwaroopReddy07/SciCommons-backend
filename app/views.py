@@ -1198,7 +1198,7 @@ class ArticleChatViewset(viewsets.ModelViewSet):
         if article is not None:
             qs = self.queryset.filter(article_id=article).order_by("created_at")
             return qs
-        return self.queryset.objects.none()
+        return ArticleMessage.objects.none()
 
     def list(self, request):
         response = super(ArticleChatViewset, self).list(request)
