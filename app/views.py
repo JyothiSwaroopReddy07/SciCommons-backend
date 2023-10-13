@@ -138,7 +138,7 @@ class UserViewset(viewsets.ModelViewSet):
     def getUserArticles(self, request, username):
         user = User.objects.filter(username=username).first()
         queryset = Author.objects.filter(User_id=user.id)
-        articles = Article.objects.filter(author__in=queryset).order_by('-created_at')
+        articles = Article.objects.filter(author__in=queryset)
         serializer = ArticlelistSerializer(articles, many=True, context={'request':request})
         articles = serializer.data
         return Response(data={"success": articles})
