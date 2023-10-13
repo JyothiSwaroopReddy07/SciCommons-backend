@@ -5,6 +5,8 @@ import django_filters
 from django.db.models import F
 from django.db.models.functions import Coalesce
 
+# The ArticleFilter class is a Django filter that allows users to sort articles based on various
+# criteria such as views, rating, and publication date.
 class ArticleFilter(django_filters.FilterSet):
     order = django_filters.MultipleChoiceFilter(
         choices=[
@@ -46,6 +48,9 @@ class ArticleFilter(django_filters.FilterSet):
     
         return queryset
     
+# The CommentFilter class is a Django filter class that allows filtering and ordering of CommentBase
+# objects based on various criteria such as order, type, comment type, tag, article, parent comment,
+# and version.
 class CommentFilter(django_filters.FilterSet):
     order = django_filters.MultipleChoiceFilter(
         choices=[
@@ -92,6 +97,8 @@ class CommentFilter(django_filters.FilterSet):
         
         return queryset
     
+# The `PostFilters` class is a Django filter class that allows filtering of `SocialPost` objects based
+# on different ordering options such as most recent, most commented, most liked, and most bookmarked.
 class PostFilters(django_filters.FilterSet):
 
     order = django_filters.MultipleChoiceFilter(

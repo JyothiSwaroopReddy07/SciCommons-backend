@@ -2,6 +2,8 @@ from django.contrib import admin
 from .models import *
 
 # Register your models here.
+# The code `admin.site.register(ModelName)` is used to register the models in the Django admin
+# interface.
 admin.site.register(User)
 admin.site.register(ForgetPassword)
 admin.site.register(Community)

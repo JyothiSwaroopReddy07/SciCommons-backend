@@ -19,6 +19,7 @@ from rest_framework import filters
 from django_filters import rest_framework as django_filters 
 
 class UserViewset(viewsets.ModelViewSet):
+    # The above code is defining a Django view for handling user-related operations.
     queryset = User.objects.all()
     permission_classes = [UserPermission]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
@@ -110,7 +111,7 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False, url_path="articles/(?P<articleId>.+)", permission_classes=[permissions.IsAuthenticated,])
     def getMyArticle(self, request,articleId):
         authors = Author.objects.filter(User_id=request.user.id)
-        articles = Article.objects.filter(author__in=authors,id=articleId).order_by('-created_at')
+        articles = Article.objects.filter(author__in=authors,id=articleId)
         article_serializer = ArticleGetSerializer(articles, many=True, context={'request':request})
 
         return Response(data={"success": article_serializer.data})
@@ -152,6 +153,15 @@ class UserViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'],url_path="verifyrequest", detail=False,permission_classes=[permissions.AllowAny,])
     def verifyrequest(self, request):
+        """
+        The above function is a Django view that verifies a user's email address by sending an OTP
+        (One-Time Password) to their email.
+        
+        :param request: The request object contains information about the HTTP request made to the API,
+        such as the request method (POST in this case) and the data sent in the request body
+        :return: The code is returning a response with a success message "code sent to your email" if
+        the email verification request is successful.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         otp = random.randint(100000, 999999)
@@ -169,6 +179,16 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'],url_path="verify_email",detail=False,permission_classes=[permissions.AllowAny,])
     def verifyemail(self,request):
+        """
+        The above function verifies the email address of a user by checking the OTP (One-Time Password)
+        provided and updates the user's email_verified field to True if the verification is successful.
+        
+        :param request: The request object contains information about the HTTP request made to the
+        server, including the data sent in the request body
+        :return: The code is returning a response in JSON format. If the user is not found or the OTP
+        authentication fails, it returns an error message with a status code of 400 (Bad Request). If
+        the email verification is successful, it returns a success message with a status code of 200.
+        """
         otp = request.data.get('otp')
         email = request.data.get('email')
         user = User.objects.filter(email=email).first()
@@ -186,6 +206,15 @@ class UserViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'],url_path="forgot_password", detail=False,permission_classes=[permissions.AllowAny,])
     def forgot_password(self, request):
+        """
+        The above function is a Django view that handles the forgot password functionality by generating
+        a random OTP, saving it in the database, and sending it to the user's email address.
+        
+        :param request: The request object contains information about the HTTP request made to the API,
+        such as the request method (POST in this case) and the data sent in the request body
+        :return: The code is returning a response with a success message indicating that the OTP
+        (One-Time Password) has been sent to the user's email address.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
@@ -210,6 +239,14 @@ class UserViewset(viewsets.ModelViewSet):
         
     @action(methods=['post'],url_path="reset_password", detail=False,permission_classes=[permissions.AllowAny,])
     def reset_password(self, request):
+        """
+        The above function is a Django view that handles the password reset functionality by verifying the
+        OTP and updating the user's password.
+        
+        :param request: The request object contains information about the HTTP request being made, such as
+        the headers, body, and method
+        :return: The code is returning a response object with the following data:
+        """
         otp = request.data.get('otp')
         email = request.data.get('email')
         password = request.data.get('password')
@@ -233,6 +270,18 @@ class UserViewset(viewsets.ModelViewSet):
         
     @action(methods=['post'],url_path='follow', detail=False, permission_classes=[permissions.IsAuthenticated])
     def follow(self, request):
+        """
+        This function allows a user to follow another user by creating a new entry in the Follow model.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by the
+        client. It contains information such as the request method (e.g., GET, POST), headers, user
+        authentication details, and the request data (e.g., form data, JSON payload). In this case, the `
+        :return: The code is returning a Response object with either an error message or a success message.
+        If the member is not None, indicating that the user is already following the specified user, it will
+        return a Response object with an error message: {"error":"Already following!!!"}. Otherwise, it will
+        create a new Follow object and return a Response object with a success message:
+        {"success":"followed!!!"
+        """
         instance = User.objects.filter(id=request.data["followed_user"]).first()
         member = Follow.objects.filter(followed_user=instance, user=request.user).first()
         if member is not None:
