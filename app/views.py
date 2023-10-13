@@ -1185,7 +1185,8 @@ class CommentViewset(viewsets.ModelViewSet):
         "update":CommentUpdateSerializer,
         "retrieve": CommentSerializer,
         "destroy": CommentSerializer,
-        "like":LikeSerializer
+        "like":LikeSerializer,
+        "block_user": ArticleBlockUserSerializer,
     }
     
     def get_serializer_class(self):
@@ -1396,33 +1397,11 @@ class CommentViewset(viewsets.ModelViewSet):
         comment = CommentBase.objects.filter(id=pk).first()
         member = ArticleBlockedUser.objects.filter(article=comment.article,user=comment.User).first()
         if member is not None:
-            return Response(data={"error":"User already blocked!!!"})
-        ArticleBlockedUser.objects.create(article=pk,user=request.data["user"])
-        return Response(data={"success":f"user blocked successfully"})
-    
-    @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/unblock_user', permission_classes=[CommentPermission])
-    def unblock_user(self, request, pk):
-        """
-        The above function is a Django view that unblocks a user from an article if they are blocked.
-        
-        :param request: The request object contains information about the current HTTP request, such as
-        the headers, body, and user authentication details
-        :param pk: The "pk" parameter in the above code refers to the primary key of the article object.
-        It is used to identify the specific article that the user wants to unblock a user from
-        :return: The code is returning a response in JSON format. If the member is not found (member is
-        None), it returns a response with an error message: {"error": "User is not blocked!!!"}. If the
-        member is found and deleted successfully, it returns a response with a success message:
-        {"success": "user unblocked successfully"}.
-        """
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        comment = CommentBase.objects.filter(id=pk).first()
-        member = ArticleBlockedUser.objects.filter(article=comment.article,user=comment.User).first()
-        if member is not None:
-            return Response(data={"error":"User is not blocked!!!"})
-        member.delete()
-        return Response(data={"success":f"user unblocked successfully"})
-            
+            member.delete()
+            return Response(data={"success":"User is unblocked successfully!!!"})
+        ArticleBlockedUser.objects.create(article=comment.article,user=request.data["user"])
+        return Response(data={"success":f"user blocked successfully!!!"})
+ 
     
 
 class NotificationViewset(viewsets.ModelViewSet):
