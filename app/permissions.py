@@ -88,12 +88,6 @@ class ArticlePermission(permissions.BasePermission):
                 return True
             else:
                 return False
-        elif view.action in ['blockUser', 'unblockUser']:
-            member = ArticleModerator.objects.filter(article=obj.id,moderator__user=request.user).first()
-            if member is None:
-                return False
-            else:
-                return True
 
 
 # The CommentPermission class defines the permissions for different actions on a comment object, such
@@ -110,6 +104,13 @@ class CommentPermission(permissions.BasePermission):
         
         elif view.action in ['update', 'destroy']:
             return obj.User == request.user
+        
+        elif view.action in ['blockUser', 'unblockUser']:
+            member = ArticleModerator.objects.filter(article=obj.id,moderator__user=request.user).first()
+            if member is None:
+                return False
+            else:
+                return True
 
 
 # The `NotificationPermission` class is a custom permission class in Django that checks if a user has
@@ -169,6 +170,7 @@ class SocialPostCommentPermission(permissions.BasePermission):
         
         elif view.action in [ 'destroy', 'update']:
             return obj.user == request.user
+        
         
 # The `FollowPermission` class defines the permissions for different actions in a view, allowing users
 # to retrieve and list objects, create and like objects if authenticated, and destroy objects if they

@@ -1163,50 +1163,6 @@ class ArticleViewset(viewsets.ModelViewSet):
         except Exception as e:
             return Response(data={"error":e}, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/block_user', permission_classes=[ArticlePermission])
-    def block_user(self, request, pk):
-        """
-        The above function blocks a user from accessing an article.
-        
-        :param request: The request object contains information about the current HTTP request, such as
-        the headers, body, and user authentication details
-        :param pk: The "pk" parameter in the above code refers to the primary key of the article object.
-        It is used to identify the specific article that the user wants to block a user from
-        :return: The code is returning a response in JSON format. If the user is already blocked, it
-        will return a response with an error message: {"error": "User already blocked!!!"}. If the user
-        is successfully blocked, it will return a response with a success message: {"success": "user
-        blocked successfully"}.
-        """
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        member = ArticleBlockedUser.objects.filter(article=pk,user=request.data["user"]).first()
-        if member is not None:
-            return Response(data={"error":"User already blocked!!!"})
-        ArticleBlockedUser.objects.create(article=pk,user=request.data["user"])
-        return Response(data={"success":f"user blocked successfully"})
-    
-    @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/unblock_user', permission_classes=[ArticlePermission])
-    def unblock_user(self, request, pk):
-        """
-        The above function is a Django view that unblocks a user from an article if they are blocked.
-        
-        :param request: The request object contains information about the current HTTP request, such as
-        the headers, body, and user authentication details
-        :param pk: The "pk" parameter in the above code refers to the primary key of the article object.
-        It is used to identify the specific article that the user wants to unblock a user from
-        :return: The code is returning a response in JSON format. If the member is not found (member is
-        None), it returns a response with an error message: {"error": "User is not blocked!!!"}. If the
-        member is found and deleted successfully, it returns a response with a success message:
-        {"success": "user unblocked successfully"}.
-        """
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
-        member = ArticleBlockedUser.objects.filter(article=pk,user=request.data["user"]).first()
-        if member is not None:
-            return Response(data={"error":"User is not blocked!!!"})
-        member.delete()
-        return Response(data={"success":f"user unblocked successfully"})
-    
 
       
 class CommentViewset(viewsets.ModelViewSet):
@@ -1420,6 +1376,52 @@ class CommentViewset(viewsets.ModelViewSet):
                 rank.save()
             
             return Response({'success': 'Comment rated successfully.'})
+    
+    @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/block_user', permission_classes=[CommentPermission])
+    def block_user(self, request, pk):
+        """
+        The above function blocks a user from accessing an article.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the headers, body, and user authentication details
+        :param pk: The "pk" parameter in the above code refers to the primary key of the article object.
+        It is used to identify the specific article that the user wants to block a user from
+        :return: The code is returning a response in JSON format. If the user is already blocked, it
+        will return a response with an error message: {"error": "User already blocked!!!"}. If the user
+        is successfully blocked, it will return a response with a success message: {"success": "user
+        blocked successfully"}.
+        """
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        comment = CommentBase.objects.filter(id=pk).first()
+        member = ArticleBlockedUser.objects.filter(article=comment.article,user=comment.User).first()
+        if member is not None:
+            return Response(data={"error":"User already blocked!!!"})
+        ArticleBlockedUser.objects.create(article=pk,user=request.data["user"])
+        return Response(data={"success":f"user blocked successfully"})
+    
+    @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/unblock_user', permission_classes=[CommentPermission])
+    def unblock_user(self, request, pk):
+        """
+        The above function is a Django view that unblocks a user from an article if they are blocked.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the headers, body, and user authentication details
+        :param pk: The "pk" parameter in the above code refers to the primary key of the article object.
+        It is used to identify the specific article that the user wants to unblock a user from
+        :return: The code is returning a response in JSON format. If the member is not found (member is
+        None), it returns a response with an error message: {"error": "User is not blocked!!!"}. If the
+        member is found and deleted successfully, it returns a response with a success message:
+        {"success": "user unblocked successfully"}.
+        """
+        obj = self.get_object()
+        self.check_object_permissions(request,obj)
+        comment = CommentBase.objects.filter(id=pk).first()
+        member = ArticleBlockedUser.objects.filter(article=comment.article,user=comment.User).first()
+        if member is not None:
+            return Response(data={"error":"User is not blocked!!!"})
+        member.delete()
+        return Response(data={"success":f"user unblocked successfully"})
             
     
 
