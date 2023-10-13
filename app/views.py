@@ -1049,7 +1049,7 @@ class SocialPostViewset(viewsets.ModelViewSet):
         if self.request.user.is_authenticated is False:
             qs = self.queryset.order_by('-created_at')
             return qs
-        qs = self.queryset.order_by('-created_at').exclude(user=self.request.user)
+        qs = self.queryset.order_by('-created_at')
         return qs
     
     def list(self, request):
