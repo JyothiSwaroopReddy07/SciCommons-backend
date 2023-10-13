@@ -96,12 +96,36 @@ class UserViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False, permission_classes=[permissions.AllowAny,])
     def login(self, request, pk=None):
+        """
+        The above function is a login function that accepts a POST request, validates the data using a
+        serializer, and returns a success response with the serialized data.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, query
+        parameters, and the request body
+        :param pk: The `pk` parameter is used to identify a specific object in the API. It stands for
+        "primary key" and is typically used when performing CRUD operations (Create, Read, Update,
+        Delete) on a specific object. In this case, since `detail=False`, the `pk` parameter is
+        :return: The code is returning a Response object with the data {"success": serializer.data}.
+        """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             return Response(data={"success":serializer.data})
 
     @action(methods=['get'], detail=False, url_path="articles", permission_classes=[permissions.IsAuthenticated,])
     def getMyArticles(self, request):
+        """
+        This function retrieves all articles written by the authenticated user.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the user making the request, the HTTP method used
+        (GET, POST, etc.), and any data or parameters sent with the request. In this case, the `request`
+        object is
+        :return: The code is returning a response with a JSON object containing the serialized data of
+        the articles that belong to the authenticated user. The serialized data is obtained using the
+        ArticlelistSerializer class and is passed the articles queryset as well as the request context.
+        The JSON object is wrapped in a "success" key.
+        """
         authors = Author.objects.filter(User_id=request.user.id)
         articles = Article.objects.filter(author__in=authors)
         article_serializer = ArticlelistSerializer(articles, many=True, context={'request':request})
@@ -110,6 +134,18 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'], detail=False, url_path="articles/(?P<articleId>.+)", permission_classes=[permissions.IsAuthenticated,])
     def getMyArticle(self, request,articleId):
+        """
+        This function retrieves a specific article belonging to the authenticated user.
+        
+        :param request: The `request` parameter is the HTTP request object that contains information
+        about the current request, such as the user making the request, the request method (GET, POST,
+        etc.), and any data or parameters included in the request
+        :param articleId: The `articleId` parameter is a variable that represents the ID of the article
+        that the user wants to retrieve. It is extracted from the URL path using regular expression
+        matching
+        :return: The response will contain a JSON object with the key "success" and the value will be
+        the serialized data of the article(s) matching the given articleId.
+        """
         authors = Author.objects.filter(User_id=request.user.id)
         articles = Article.objects.filter(author__in=authors,id=articleId)
         article_serializer = ArticleGetSerializer(articles, many=True, context={'request':request})
@@ -118,6 +154,18 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'], detail=False, url_path="(?P<username>.+)/posts", permission_classes=[UserPermission])
     def getposts(self, request, username):
+        """
+        This function retrieves all social posts for a given user.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (GET, POST, etc.), headers, query
+        parameters, and the body of the request
+        :param username: The `username` parameter is a string that represents the username of a user. It
+        is used to filter the `User` objects and retrieve the user with the specified username
+        :return: The code is returning a response with the serialized data of the social posts belonging
+        to the user specified by the username parameter. The response data is a dictionary with a
+        "success" key, and the value is the serialized data of the posts.
+        """
         instance = User.objects.filter(username=username).first()
         queryset = SocialPost.objects.filter(user_id=instance.id)
         serializer = SocialPostListSerializer(data=queryset, many=True, context={'request': request})
@@ -127,6 +175,17 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'], detail=False, url_path="myposts", permission_classes=[UserPermission])
     def getmyposts(self, request):
+        """
+        This function retrieves all social posts created by a specific user and returns them in
+        descending order of creation.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (GET, POST, etc.), headers, user
+        authentication details, and query parameters
+        :return: The code is returning a response with the data of the user's posts. The data being
+        returned is a dictionary with a key "success" and the value being the serialized data of the
+        user's posts.
+        """
         instance = User.objects.filter(id=request.user).first()
         queryset = SocialPost.objects.filter(user_id=instance.id).order_by('-created_at')
         serializer = SocialPostListSerializer(data=queryset, many=True, context={'request': request})
@@ -136,6 +195,17 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'], detail=False, url_path="(?P<username>.+)/articles", permission_classes=[UserPermission])
     def getUserArticles(self, request, username):
+        """
+        This function retrieves all articles written by a specific user and returns them as a response.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (GET, POST, etc.), headers, query
+        parameters, and the body of the request
+        :param username: The `username` parameter is a string that represents the username of a user. It
+        is used to filter the `User` objects based on the provided username
+        :return: The response will contain a JSON object with a "success" key and the value will be a
+        list of serialized article objects.
+        """
         user = User.objects.filter(username=username).first()
         queryset = Author.objects.filter(User_id=user.id)
         articles = Article.objects.filter(author__in=queryset)
@@ -291,6 +361,17 @@ class UserViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'],url_path='unfollow', detail=False, permission_classes=[permissions.IsAuthenticated])
     def unfollow(self, request):
+        """
+        This function allows a user to unfollow another user.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, body,
+        and user authentication details. In this case, it is used to retrieve the data sent in the
+        request body,
+        :return: The code is returning a response in JSON format. If the member exists and is
+        successfully deleted, it will return a success message: {"success":"UnFollowed!!!"}. If the
+        member does not exist, it will return an error message: {"error":"Did not Follow!!!"}.
+        """
         instance = User.objects.filter(id=request.data["followed_user"]).first()
         member = Follow.objects.filter(followed_user=instance,user=request.user).first()
         if member is not None:
@@ -301,12 +382,32 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'],url_path='myactivity',detail=False,permission_classes=[permissions.IsAuthenticated])
     def myactivity(self,request):
+        """
+        The `myactivity` function retrieves the activities of the authenticated user and returns them as
+        a serialized response.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (GET, POST, etc.), headers, query
+        parameters, and the user making the request (if authenticated)
+        :return: The response will contain a JSON object with a "success" key and the serialized data of
+        the user's activities as the value.
+        """
         activities = UserActivity.objects.filter(user_id=request.user)
         serializer = UserActivitySerializer(activities,many=True)
         return Response(data={"success":serializer.data})
         
     @action(methods=['get'],url_path="followers", detail=False,permission_classes=[UserPermission])
     def followers(self,request):
+        """
+        This function retrieves the followers of a user and returns a serialized response.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (GET, POST, etc.), headers, query
+        parameters, and body
+        :return: The code is returning a response with the serialized data of the followers of a user
+        specified by the "username" query parameter. The response data is in the format of a dictionary
+        with a key "success" and the value being the serialized data of the followers.
+        """
         instance = User.objects.filter(username=request.query_params.get("username")).first()
         member = Follow.objects.filter(followed_user=instance)
         serializer = FollowersSerializer(member,many=True,context={'request':request})
@@ -314,6 +415,18 @@ class UserViewset(viewsets.ModelViewSet):
 
     @action(methods=['get'],url_path="following", detail=False,permission_classes=[UserPermission])
     def following(self,request):
+        """
+        The above function retrieves the list of users that a given user is following and returns it as
+        a serialized response.
+        
+        :param request: The `request` parameter is the HTTP request object that contains information
+        about the current request, such as the user making the request, the requested URL, and any query
+        parameters or data sent with the request. It is passed to the view function or method as an
+        argument
+        :return: The code is returning a response with a JSON object containing the serialized data of
+        the following members of a user. The JSON object has a "success" key with the value being the
+        serialized data of the following members.
+        """
         instance = User.objects.filter(username=request.query_params.get("username")).first()
         member = Follow.objects.filter(user=instance.id)
         serializer = FollowingSerializer(member,many=True,context={'request':request})
@@ -321,12 +434,29 @@ class UserViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'],url_path="messages", detail=False,permission_classes=[UserPermission])
     def messages(self,request):
+        """
+        This function retrieves the most recent message and number of unread messages for each user that
+        has messaged the current user, and orders it by the most recent message.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the user making the request, the HTTP method used
+        (GET, POST, etc.), and any data or parameters sent with the request. In this case, it is used to
+        identify the
+        :return: The response will be a JSON object with a "success" key and the serialized data of the
+        messages as its value.
+        """
         # retrieve most recent message and number of unread messages of each user that has messaged the current user and order it by the most recent message
         messages = PersonalMessage.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).distinct('sender','receiver').order_by('sender','receiver','-created_at')
         serializer = MessageListSerializer(messages,many=True,context={'request':request})
         return Response(data={"success": serializer.data})
 
 class CommunityViewset(viewsets.ModelViewSet):
+    # The above code is defining a view for a Django REST Framework API endpoint for the `Community`
+    # model. It retrieves all instances of the `Community` model from the database using the
+    # `Community.objects.all()` method and assigns it to the `queryset` variable. It also retrieves
+    # all instances of the `CommunityMeta` model and assigns it to the `queryset2` variable, and
+    # retrieves all instances of the `CommunityMember` model and assigns it to the `queryset3`
+    # variable.
     queryset = Community.objects.all()
     queryset2 = CommunityMeta.objects.all()
     queryset3 = CommunityMember.objects.all()
@@ -339,6 +469,11 @@ class CommunityViewset(viewsets.ModelViewSet):
 
     search_fields = ['Community_name']
     
+    # The above code defines a dictionary called `action_serializers` which maps different actions to
+    # their respective serializers. Each key in the dictionary represents an action, such as "create",
+    # "update", "promote_member", etc., and the corresponding value is the serializer class associated
+    # with that action. These serializers are used to serialize and deserialize data when performing
+    # different actions on a community object.
     action_serializers = {
         "create":CommunityCreateSerializer,
         "update":CommunityUpdateSerializer,
@@ -402,6 +537,17 @@ class CommunityViewset(viewsets.ModelViewSet):
 
     @action(methods=['GET'], detail=False, url_path='(?P<Community_name>.+)/articles', permission_classes=[CommunityPermission])
     def getArticles(self, request, Community_name):
+        """
+        This function retrieves articles belonging to a specific community and returns them as a
+        response.
+        
+        :param request: The request object represents the HTTP request made by the client. It contains
+        information such as the request method (GET, POST, etc.), headers, and query parameters
+        :param Community_name: The `Community_name` parameter is a string that represents the name of a
+        community. It is used to filter the articles based on the community name
+        :return: The response being returned is a JSON object with the key "success" and the value being
+        the serialized data of the articles related to the specified community.
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         response = self.queryset2.filter(community__Community_name=Community_name)
@@ -412,6 +558,17 @@ class CommunityViewset(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path="mycommunity", permission_classes=[permissions.IsAuthenticated,])
     def getMyCommunity(self, request):
+        """
+        This function retrieves the community that the authenticated user is an admin of.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (GET, POST, etc.), headers, query
+        parameters, and the user making the request. In this case, it is used to identify the user
+        making the request
+        :return: The code is returning a response with the data of the first community that the
+        authenticated user is an admin of. The data is returned as a dictionary with a key "success" and
+        the value being the community information.
+        """
         member = CommunityMember.objects.filter(user=request.user,is_admin=True).first()
         instance = Community.objects.filter(id=member.community.id)
         serializer = CommunitySerializer(data=instance, many=True)
@@ -421,6 +578,22 @@ class CommunityViewset(viewsets.ModelViewSet):
     
     @action(methods=['POST'], detail=False, url_path='(?P<Community_name>.+)/article/(?P<article_id>.+)/publish',permission_classes=[CommunityPermission])
     def addPublishedInfo(self, request, Community_name, article_id):
+        """
+        This function adds license, article file, DOI, and published date to a published article in a
+        community.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the headers, body, and user authentication details
+        :param Community_name: The Community_name parameter is a string that represents the name of a
+        community. It is used to filter the articles based on the community they belong to
+        :param article_id: The `article_id` parameter is the unique identifier of the article that you
+        want to add published information to. It is used to retrieve the specific article from the
+        database
+        :return: The code is returning a response with data indicating whether the action was successful
+        or not. If the condition `article.published != Community_name` is true, it will return a
+        response with an error message. Otherwise, it will update the article object with the provided
+        data and return a response with a success message.
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         article = Article.objects.filter(id=article_id).first()
@@ -437,6 +610,18 @@ class CommunityViewset(viewsets.ModelViewSet):
     
     @action(methods=['GET'],detail=False,url_path='(?P<Community_name>.+)/members',permission_classes=[CommunityPermission])
     def getMembers(self, request, Community_name):
+        """
+        This function retrieves the members of a community and returns a response with the list of
+        users.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the headers, method, and body
+        :param Community_name: The `Community_name` parameter is a variable that captures the name of
+        the community for which you want to retrieve the members. It is extracted from the URL path
+        using regular expression matching
+        :return: The response being returned is a JSON object with the key "success" and the value being
+        the list of members in the specified community.
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         response = self.queryset3.filter(community=obj)
@@ -447,6 +632,20 @@ class CommunityViewset(viewsets.ModelViewSet):
     
     @action(methods=['POST'],detail=False, url_path='(?P<Community_name>.+)/promote_member',permission_classes=[CommunityPermission]) 
     def promote_member(self, request, Community_name):
+        """
+        This function promotes a member of a community by updating their user_id in the serializer.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, query
+        parameters, and request body
+        :param Community_name: The `Community_name` parameter is a variable that captures the name of
+        the community in the URL path. It is used to identify the specific community for which the
+        member is being promoted
+        :return: The code is returning a Response object with the data and status specified in the code.
+        If the member is not found, it returns a Response with an error message and a status of 404 (Not
+        Found). If the member is already an admin, it also returns a Response with an error message and
+        a status of 404 (Not Found). If the request is successful, it saves the updated data
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         member = User.objects.filter(username=request.data["username"]).first()
@@ -464,7 +663,17 @@ class CommunityViewset(viewsets.ModelViewSet):
     
     @action(methods=['DELETE'],detail=False, url_path='(?P<Community_name>.+)/remove_member/(?P<user_id>.+)',permission_classes=[CommunityPermission]) 
     def remove_member(self, request, Community_name, user_id):
+        """
+        This function removes a member from a community and sends them an email notification.
         
+        :param request: The HTTP request object that contains information about the request made by the
+        client
+        :param Community_name: The name of the community from which the member will be removed
+        :param user_id: The `user_id` parameter is the unique identifier of the user that you want to
+        remove from the community
+        :return: The code is returning a JSON response with the data "success": "member removed
+        successfully" if the member is successfully removed from the community.
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
 
@@ -490,7 +699,17 @@ class CommunityViewset(viewsets.ModelViewSet):
     
     @action(methods=['POST'],detail=False, url_path='(?P<Community_name>.+)/join_request',permission_classes=[CommunityPermission])
     def join_request(self, request, Community_name):
-
+        """
+        This function handles a POST request to join a community and saves the join request in the
+        database.
+        
+        :param request: The `request` parameter is the HTTP request object that contains information
+        about the request made by the client, such as the request method, headers, and body
+        :param Community_name: The `Community_name` parameter is a named capture group in the URL
+        pattern. It captures the name of the community that the user wants to send a join request to
+        :return: The code is returning a response with a JSON object containing the data from the
+        serializer, wrapped in a "success" key.
+        """
         obj = self.get_object()
         data = request.data
         data["community"] = obj.id
@@ -503,7 +722,20 @@ class CommunityViewset(viewsets.ModelViewSet):
 
     @action(methods=['GET'],detail=False, url_path='(?P<Community_name>.+)/get_requests',permission_classes=[CommunityPermission])
     def get_requests(self, request, Community_name):
-
+        """
+        This function retrieves all requests related to a specific community and returns them in a
+        serialized format.
+        
+        :param request: The `request` parameter is the HTTP request object that contains information
+        about the current request, such as the request method, headers, and query parameters. It is
+        provided by the Django REST Framework
+        :param Community_name: The `Community_name` parameter is a variable that captures the name of
+        the community for which you want to retrieve requests. It is specified in the URL pattern as
+        `(?P<Community_name>.+)`, which means that any string can be captured and assigned to the
+        `Community_name` variable
+        :return: The response being returned is a JSON object with the key "success" and the value being
+        the serialized data of the CommunityRequests objects.
+        """
         obj = self.get_object()
         requests = CommunityRequests.objects.filter(community=obj)
         serializer = self.get_serializer(requests, many=True)
@@ -512,7 +744,19 @@ class CommunityViewset(viewsets.ModelViewSet):
 
     @action(methods=['POST'],detail=False, url_path='(?P<Community_name>.+)/approve_request',permission_classes=[CommunityPermission])
     def approve_request(self, request, Community_name):
-
+        """
+        This function approves a join request for a community and adds the user to the community's
+        members list.
+        
+        :param request: The `request` parameter is the HTTP request object that contains information
+        about the request made by the client. It includes details such as the request method (e.g., GET,
+        POST), headers, body, and user authentication
+        :param Community_name: The `Community_name` parameter is a named capture group in the URL
+        pattern. It captures the name of the community from the URL. For example, if the URL is
+        `/communities/my-community/approve_request`, then `Community_name` will be set to
+        `"my-community"`
+        :return: The code is returning a Response object with the data {"success": serializer.data}.
+        """
         obj = self.get_object()
         joinrequest = CommunityRequests.objects.get(community=obj)
 
@@ -529,6 +773,19 @@ class CommunityViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'], detail=False,url_path='(?P<Community_name>.+)/subscribe', permission_classes=[permissions.IsAuthenticated])
     def subscribe(self, request, Community_name):
+        """
+        This function allows a user to subscribe to a community if they are not already subscribed.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, user
+        authentication details, and the request body
+        :param Community_name: The Community_name parameter is a string that represents the name of the
+        community that the user wants to subscribe to
+        :return: The code is returning a response in JSON format. If the user is already subscribed to
+        the community, it will return a response with an error message "Already Subscribed!!!". If the
+        user is not already subscribed, it will create a new subscription and return a response with a
+        success message "Subscribed!!!".
+        """
         member = Subscribe.objects.filter(community__Community_name=Community_name, user=request.user).first()
         if member is not None:
             return Response(data={"error":"Already Subscribed!!!"})
@@ -538,6 +795,19 @@ class CommunityViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False,url_path='(?P<Community_name>.+)/unsubscribe', permission_classes=[permissions.IsAuthenticated])
     def unsubscribe(self, request,Community_name):
+        """
+        This function allows a user to unsubscribe from a community by deleting their subscription
+        entry.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the user making the request, the HTTP method used (e.g., GET, POST), and any data sent with the
+        request
+        :param Community_name: The Community_name parameter is a string that represents the name of the
+        community that the user wants to unsubscribe from
+        :return: The code is returning a response in JSON format. If the member is found and
+        successfully deleted, it will return a success message: {"success":"Unsubscribed!!!"}. If the
+        member is not found, it will return an error message: {"error":"Did not Subscribe!!!"}.
+        """
         member = Subscribe.objects.filter(community__Community_name=Community_name,user=request.user).first()
         if member is not None:
             member.delete()
@@ -547,6 +817,13 @@ class CommunityViewset(viewsets.ModelViewSet):
 
     
 class ArticleViewset(viewsets.ModelViewSet):
+    # The above code is defining a Django view for handling CRUD operations on the Article model. It
+    # specifies the queryset to retrieve all Article objects, sets the permission classes to
+    # ArticlePermission, and defines the parser classes for handling JSON, multipart, and form data.
+    # It also specifies the serializer class to use for serializing and deserializing Article objects,
+    # and sets the filter backends to DjangoFilterBackend, SearchFilter, and OrderingFilter for
+    # filtering, searching, and ordering the queryset. The filterset_class is set to ArticleFilter for
+    # more advanced filtering options. The allowed HTTP methods are specified as post, get
     queryset = Article.objects.all()
     permission_classes = [ArticlePermission]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
@@ -628,9 +905,18 @@ class ArticleViewset(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='(?P<pk>.+)/isapproved', permission_classes=[ArticlePermission])
     def getIsapproved(self, request, pk):
-        '''
-        retrieve the status of article in different communities with accepted status
-        '''
+        """
+        This function retrieves the status of an article in different communities with an accepted
+        status.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the user making the request, the headers, and the request method
+        :param pk: The `pk` parameter in the `getIsapproved` method represents the primary key of the
+        article for which you want to retrieve the status in different communities with an accepted
+        status
+        :return: The response is a JSON object containing the success status and the communities where
+        the article has been approved.
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         response = CommunityMeta.objects.filter(article_id=pk)
@@ -641,9 +927,17 @@ class ArticleViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/approve_for_review', permission_classes=[ArticlePermission])
     def approve_review(self, request, pk):
-        '''
-            article approved for review process
-        '''
+        """
+        This function approves an article for the review process.
+        
+        :param request: The request object contains information about the HTTP request made to the API,
+        such as the request method (POST in this case), headers, and body
+        :param pk: The "pk" parameter in the URL pattern is used to capture the primary key of the
+        article that needs to be approved for review. It is a placeholder that will be replaced with the
+        actual primary key value when the URL is accessed
+        :return: The code is returning a response with a success message indicating that the review
+        process has started successfully.
+        """
         member = Community.objects.filter(Community_name=request.data["community"]).first()
         request.data["community"] = member.id
         obj = self.get_object()
@@ -654,9 +948,17 @@ class ArticleViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'], detail=False, url_path='(?P<pk>.+)/publish', permission_classes=[ArticlePermission])
     def getPublished(self, request, pk):
-        '''
-        select a community for publication
-        '''
+        """
+        This function selects a community for publication and updates the status of the article
+        accordingly.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the headers, body, and user authentication details
+        :param pk: The `pk` parameter is a placeholder for the primary key of the article. It is used to
+        identify the specific article that is being published
+        :return: The code is returning a response in the form of a JSON object. The specific content of
+        the response depends on the conditions met in the code.
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         data = request.data
@@ -675,6 +977,17 @@ class ArticleViewset(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='favourites', permission_classes=[ArticlePermission])
     def favourites(self, request):
+        """
+        The above function retrieves a list of articles that have been marked as favorites by the user
+        and returns them in a serialized format.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the user making the request, the HTTP method used
+        (GET, POST, etc.), and any data or parameters sent with the request
+        :return: The code is returning a response with a JSON object containing the serialized data of
+        the articles that are marked as favourites by the authenticated user. The serialized data
+        includes the details of the articles such as title, content, author, etc.
+        """
         favourites = Favourite.objects.filter(user=request.user).values_list('article', flat=True)
         posts = Article.objects.filter(id__in=favourites.all(),status="public")
         serializer = ArticlelistSerializer(posts, many=True, context={"request":request})
@@ -683,9 +996,17 @@ class ArticleViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/submit_article', permission_classes=[ArticlePermission])
     def submit_article(self, request, pk):
-        '''
-        submit article to different communities
-        '''
+        """
+        This function submits an article to different communities for reviewal process.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the request method, headers, and data
+        :param pk: The `pk` parameter in the `submit_article` method represents the primary key of the
+        object that the article is being submitted to. It is used to retrieve the object from the
+        database and perform permission checks on it
+        :return: The code is returning a response with a JSON object containing the key "success" and
+        the value "Article submitted successfully for reviewal process!!!".
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         data = request.data
@@ -698,6 +1019,19 @@ class ArticleViewset(viewsets.ModelViewSet):
 
     @action(methods=['put'], detail=False, url_path='(?P<pk>.+)/updateviews',permission_classes=[ArticlePermission])
     def updateViews(self, request, pk):
+        """
+        This function updates the number of views for an article.
+        
+        :param request: The `request` parameter is the HTTP request object that contains information
+        about the current request, such as the headers, body, and user authentication details. It is
+        passed to the view function or method when a request is made to the corresponding URL
+        :param pk: The "pk" parameter in the above code refers to the primary key of the article object
+        that needs to be updated. It is used to identify the specific article that needs to have its
+        views incremented
+        :return: The code is returning a response with a success message if the serializer is valid and
+        the view count is successfully updated. If the serializer is not valid, it returns a response
+        with the serializer errors and a status of HTTP 400 Bad Request.
+        """
         obj = self.get_object()
         self.check_object_permissions(request, obj)
         response = self.queryset.get(id=pk)
@@ -713,9 +1047,17 @@ class ArticleViewset(viewsets.ModelViewSet):
         
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/approve_article', permission_classes=[ArticlePermission])    
     def approve_article(self, request, pk):
-        '''
-        admin approve article and select reviewers and moderators
-        '''
+        """
+        This function is used by an admin to approve an article and select reviewers and moderators for
+        a community.
+        
+        :param request: The request object contains information about the HTTP request made by the
+        client, such as the headers, body, and method
+        :param pk: The "pk" parameter is a regular expression pattern that matches any string of
+        characters. It is used to capture the primary key (pk) of the article that needs to be approved
+        :return: The response being returned is a JSON object with a "success" key and the value
+        "article approved".
+        """
         member = Community.objects.filter(Community_name=request.data["community"]).first()
         request.data["community"] = member.id
         obj = self.get_object()
@@ -728,6 +1070,18 @@ class ArticleViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'], detail=False,url_path="favourite", permission_classes=[FavouritePermission])
     def favourite(self, request):
+        """
+        This function adds an article to a user's list of favorites if it is not already added.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, body,
+        and user authentication details. In this code snippet, the `request` object is used to access
+        the data sent
+        :return: The code is returning a Response object with data indicating whether the favourite was
+        successfully added or if it was already added to favourites. If the favourite was already added,
+        the response will contain an error message. If the favourite was successfully added, the
+        response will contain a success message.
+        """
         post = Favourite.objects.filter(article_id=request.data["article"], user=request.user).first()
         if post is not None:
             return Response(data={"error":"Already added to Favourites!!!"})
@@ -736,6 +1090,16 @@ class ArticleViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False,url_path="unfavourite", permission_classes=[FavouritePermission])
     def unfavourite(self, request):
+        """
+        The above function is a Django view that allows a user to unfavourite an article.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, body,
+        and user authentication details. In this case, it is used to retrieve the data from the request
+        body, specifically
+        :return: The code is returning a Response object with either a success message ("Favourite
+        Removed!!!") or an error message ("Favourite not found!!!").
+        """
         member = Favourite.objects.filter(article_id=request.data["article"],user=request.user).first()
         if member is not None:
             member.delete()
@@ -745,9 +1109,17 @@ class ArticleViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/reject_article', permission_classes=[ArticlePermission])    
     def reject_article(self, request, pk):
-        '''
-        reject the article
-        '''
+        """
+        This function rejects an article by updating its status and returning a success message.
+        
+        :param request: The request object contains information about the HTTP request made by the
+        client, such as the headers, body, and method
+        :param pk: The `pk` parameter in the `reject_article` method represents the primary key of the
+        article that is being rejected. It is used to identify the specific article that needs to be
+        rejected
+        :return: The response being returned is a JSON object with the key "success" and the value
+        "article rejected".
+        """
         member = Community.objects.filter(Community_name=request.data["community"]).first()
         request.data["community"] = member.id
         obj = self.get_object()
@@ -760,6 +1132,20 @@ class ArticleViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/status', permission_classes=[ArticlePermission])
     def status(self, request, pk):
+        """
+        This function updates the status of an article based on the provided status value.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, query
+        parameters, and the request body
+        :param pk: The "pk" parameter in the above code refers to the primary key of the article object.
+        It is used to identify a specific article in the database
+        :return: The code is returning a response object with the data and status code. If the "status"
+        parameter is not provided in the request data, it will return a response with an error message
+        and status code 400 (Bad Request). If the article with the given ID does not exist, it will
+        return a response with an error message and status code 404 (Not Found). If the article status
+        is
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         try:
@@ -779,6 +1165,18 @@ class ArticleViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/block_user', permission_classes=[ArticlePermission])
     def block_user(self, request, pk):
+        """
+        The above function blocks a user from accessing an article.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the headers, body, and user authentication details
+        :param pk: The "pk" parameter in the above code refers to the primary key of the article object.
+        It is used to identify the specific article that the user wants to block a user from
+        :return: The code is returning a response in JSON format. If the user is already blocked, it
+        will return a response with an error message: {"error": "User already blocked!!!"}. If the user
+        is successfully blocked, it will return a response with a success message: {"success": "user
+        blocked successfully"}.
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         member = ArticleBlockedUser.objects.filter(article=pk,user=request.data["user"]).first()
@@ -789,6 +1187,18 @@ class ArticleViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'],detail=False, url_path='(?P<pk>.+)/unblock_user', permission_classes=[ArticlePermission])
     def unblock_user(self, request, pk):
+        """
+        The above function is a Django view that unblocks a user from an article if they are blocked.
+        
+        :param request: The request object contains information about the current HTTP request, such as
+        the headers, body, and user authentication details
+        :param pk: The "pk" parameter in the above code refers to the primary key of the article object.
+        It is used to identify the specific article that the user wants to unblock a user from
+        :return: The code is returning a response in JSON format. If the member is not found (member is
+        None), it returns a response with an error message: {"error": "User is not blocked!!!"}. If the
+        member is found and deleted successfully, it returns a response with a success message:
+        {"success": "user unblocked successfully"}.
+        """
         obj = self.get_object()
         self.check_object_permissions(request,obj)
         member = ArticleBlockedUser.objects.filter(article=pk,user=request.data["user"]).first()
@@ -800,6 +1210,10 @@ class ArticleViewset(viewsets.ModelViewSet):
 
       
 class CommentViewset(viewsets.ModelViewSet):
+    # The above code is defining a Django view for handling comments. It retrieves all instances of
+    # the CommentBase model from the database using the `objects.all()` method and assigns it to the
+    # `queryset` variable. It also retrieves all instances of the LikeBase model and assigns it to the
+    # `queryset2` variable.
     queryset = CommentBase.objects.all()
     queryset2 = LikeBase.objects.all()
     permission_classes = [CommentPermission]    
@@ -822,6 +1236,12 @@ class CommentViewset(viewsets.ModelViewSet):
         return self.action_serializer.get(self.action, self.serializer_class)
     
     def get_queryset(self):
+        """
+        The `get_queryset` function filters the queryset based on various query parameters.
+        :return: a queryset based on the provided query parameters. If the "article" parameter is not
+        provided, an empty queryset is returned. Otherwise, the queryset is filtered based on the provided
+        parameters (article, tag, Type, comment_type, parent_comment, and version).
+        """
         article = self.request.query_params.get("article", None)
         tag = self.request.query_params.get("Community_name",None)
         Type = self.request.query_params.get("Type",None)
@@ -869,6 +1289,17 @@ class CommentViewset(viewsets.ModelViewSet):
         return Response(data={"success":response.data})
 
     def create(self, request):
+        """
+        The `create` function checks various conditions and creates a comment, decision, or review based on
+        the request data.
+        
+        :param request: The `request` parameter is an object that contains information about the HTTP
+        request made by the client. It includes details such as the request method (GET, POST, etc.),
+        headers, body, and user information. In this code snippet, the `request` object is used to access
+        data sent in
+        :return: The code returns a response object with different data depending on the conditions in the
+        code. The possible responses are:
+        """
         member = ArticleBlockedUser.objects.filter(article=request.data["article"],user=request.user).first()
         if member is not None:
             return Response(data={"error": "You are blocked from commenting on this article by article moderator!!!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -942,7 +1373,19 @@ class CommentViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'], detail=False, permission_classes=[permissions.IsAuthenticated])
     def like(self, request):
+        """
+        This function allows authenticated users to like or rate a comment, updating the rank of the
+        comment's user and the overall rank of the comment.
         
+        :param request: The `request` parameter is an object that represents the HTTP request made by the
+        client. It contains information such as the request method (e.g., POST), headers, user
+        authentication details, and the data sent in the request body. In this code snippet, the `request`
+        object is used to
+        :return: The code is returning a response in the form of a JSON object. If the condition `if member
+        is not None` is true, it returns a success message "Comment rated successfully." If the condition is
+        false, it creates a new `LikeBase` object, updates the rank of the comment's user, and returns the
+        success message "Comment rated successfully."
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         member = LikeBase.objects.filter(user=request.user, post=serializer.data['post']).first()
@@ -981,6 +1424,12 @@ class CommentViewset(viewsets.ModelViewSet):
     
 
 class NotificationViewset(viewsets.ModelViewSet):
+    # The above code is defining a Django view for handling notifications. It is using the
+    # `Notification` model to retrieve all notification objects from the database. The view has a
+    # permission class called `NotificationPermission` which controls access to the view. It also
+    # specifies the parser classes for handling different types of data formats (JSON, multipart, form
+    # data). The view uses the `NotificationSerializer` to serialize the notification objects and
+    # return them as a response. The allowed HTTP methods for this view are GET, PUT, and DELETE.
     queryset = Notification.objects.all()
     permission_classes = [NotificationPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
@@ -1021,6 +1470,12 @@ class NotificationViewset(viewsets.ModelViewSet):
 
 
 class SocialPostViewset(viewsets.ModelViewSet):
+    # The above code is defining a Django view for handling social posts. It is using the `SocialPost`
+    # model as the queryset, applying the `SocialPostPermission` class for permission checks, and
+    # using various parsers for handling different types of data (JSON, multipart, form). It is also
+    # using the `SocialPostSerializer` class for serialization, and applying the `PostFilters` class
+    # for filtering the queryset. The allowed HTTP methods for this view are GET, POST, DELETE, and
+    # PUT.
     queryset = SocialPost.objects.all()
     permission_classes = [SocialPostPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
@@ -1089,6 +1544,16 @@ class SocialPostViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'],detail=False,url_path="timeline", permission_classes=[SocialPostPermission])
     def timeline(self,request):
+        """
+        The above function retrieves the timeline of social posts for a user by filtering posts from
+        users they are following and returning the serialized data.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (GET, POST, etc.), headers, user
+        authentication details, and the request body
+        :return: The response will contain a JSON object with a "success" key and the serialized data of
+        the SocialPost objects in the "data" value.
+        """
         following = Follow.objects.filter(user=request.user).values_list('followed_user', flat=True)
         posts = SocialPost.objects.filter(user__in=following.all())
         serializer = SocialPostListSerializer(posts, many=True,context={"request":request})
@@ -1096,6 +1561,18 @@ class SocialPostViewset(viewsets.ModelViewSet):
     
     @action(methods=['get'],detail=False,url_path="bookmarks", permission_classes=[SocialPostPermission])
     def bookmarks(self,request):
+        """
+        This function retrieves the bookmarks of a user and returns the corresponding social posts.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the user making the request, the HTTP method used
+        (GET, POST, etc.), and any data or parameters sent with the request. In this case, the `request`
+        object is
+        :return: The code is returning a response with a JSON object containing the serialized data of
+        the SocialPost objects that are bookmarked by the current user. The serialized data is obtained
+        using the SocialPostListSerializer. The JSON object has a key "success" with the value being the
+        serialized data.
+        """
         bookmarks = BookMark.objects.filter(user=request.user).values_list('post', flat=True)
         posts = SocialPost.objects.filter(id__in=bookmarks.all())
         serializer = SocialPostListSerializer(posts, many=True, context={"request":request})
@@ -1103,7 +1580,19 @@ class SocialPostViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False,url_path="like", permission_classes=[SocialPostPermission])
     def like(self, request):
-
+        """
+        This function allows a user to like a social post and returns a success message if the like is
+        successful, or an error message if the user has already liked the post.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, body,
+        and user authentication details. In this case, it is used to retrieve the data sent in the
+        request body (`
+        :return: The code is returning a response in JSON format. If the post has already been liked by
+        the user, it will return a response with an error message "Already Liked!!!". If the post has
+        not been liked by the user, it will create a new SocialPostLike object and return a response
+        with a success message "Liked!!!".
+        """
         post = SocialPostLike.objects.filter(post_id=request.data["post"], user=request.user).first()
         if post is not None:
             return Response(data={"error":"Already Liked!!!"})
@@ -1112,7 +1601,18 @@ class SocialPostViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False,url_path="unlike", permission_classes=[SocialPostPermission])
     def unlike(self, request):
-
+        """
+        This function allows a user to unlike a social post by deleting their like entry from the
+        database.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, query
+        parameters, and the request body. In this case, it is used to access the data sent in the
+        request body
+        :return: The code is returning a response in JSON format. If the member is found and deleted
+        successfully, it returns a success message "DisLiked!!!". If the member is not found, it returns
+        an error message "Post not found!!!".
+        """
         member = SocialPostLike.objects.filter(post_id=request.data["post"],user=request.user).first()
         if member is not None:
             member.delete()
@@ -1122,6 +1622,18 @@ class SocialPostViewset(viewsets.ModelViewSet):
     
     @action(methods=['post'], detail=False,url_path="bookmark", permission_classes=[SocialPostPermission])
     def bookmark(self, request):
+        """
+        The above function allows a user to bookmark a post if it has not already been bookmarked.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, query
+        parameters, and the request body. In this case, it is used to access the data sent in the
+        request body
+        :return: The code is returning a Response object with either an error message or a success
+        message, depending on the outcome of the bookmarking operation. If the post has already been
+        bookmarked by the user, it will return an error message stating "Already Bookmarked!!!". If the
+        bookmarking operation is successful, it will return a success message stating "Bookmarked!!!".
+        """
         post = BookMark.objects.filter(post_id=request.data["post"], user=request.user).first()
         if post is not None:
             return Response(data={"error":"Already Bookmarked!!!"})
@@ -1130,6 +1642,16 @@ class SocialPostViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False,url_path="unbookmark", permission_classes=[SocialPostPermission])
     def unbookmark(self, request):
+        """
+        The above function is a Django view that allows a user to unbookmark a post.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, query
+        parameters, and the request body. In this case, it is used to access the data sent in the
+        request body
+        :return: The code is returning a Response object with either a success message
+        ("UnBookmarked!!!") or an error message ("BookMark not found!!!").
+        """
         member = BookMark.objects.filter(post_id=request.data["post"],user=request.user).first()
         if member is not None:
             member.delete()
@@ -1140,6 +1662,10 @@ class SocialPostViewset(viewsets.ModelViewSet):
 
 
 class SocialPostCommentViewset(viewsets.ModelViewSet):
+    # The above code is defining a Django view for handling social post comments. It is using the
+    # `SocialPostComment` model as the queryset for retrieving comments. The view has specified the
+    # `SocialPostCommentPermission` class as the permission class, which determines who can access the
+    # view. It is also using various parser classes to parse the incoming request data.
     queryset = SocialPostComment.objects.all()
     permission_classes = [SocialPostCommentPermission]    
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
@@ -1160,6 +1686,8 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
         return self.action_serializers.get(self.action, self.serializer_class)
     
     def get_queryset(self):
+        # The above code is a Python function that filters a queryset based on the values of the
+        # "post" and "comment" query parameters.
         post = self.request.query_params.get("post", None)
         comment = self.request.query_params.get("comment", None)
         if comment is not None:
@@ -1207,6 +1735,18 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False,url_path="like", permission_classes=[SocialPostCommentPermission])
     def like(self, request):
+        """
+        The above function allows a user to like a social post comment, but returns an error message if
+        the user has already liked the comment.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, body,
+        and user authentication details. In this case, it is used to retrieve the data sent in the
+        request body,
+        :return: The response being returned is a JSON object with either an "error" key and value if
+        the comment has already been liked, or a "success" key and value if the like is successfully
+        created.
+        """
         if SocialPostCommentLike.objects.filter(comment_id=request.data["comment"], user=request.user).first() is not None:
             return Response(data={"error":"Already Liked!!!"})
         SocialPostCommentLike.objects.create(comment_id=request.data["comment"], user=request.user)
@@ -1214,6 +1754,17 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False,url_path="unlike", permission_classes=[SocialPostCommentPermission])
     def unlike(self, request):
+        """
+        The above function allows a user to unlike a comment on a social post.
+        
+        :param request: The `request` parameter is an object that represents the HTTP request made by
+        the client. It contains information such as the request method (e.g., GET, POST), headers, user
+        authentication details, and the request data (e.g., form data, JSON payload). In this case, the
+        `
+        :return: The code is returning a response in JSON format. If the comment is found and
+        successfully deleted, it will return a success message: {"success": "DisLiked!!!"}. If the
+        comment is not found, it will return an error message: {"error": "Comment not found!!!"}.
+        """
         comment = SocialPostCommentLike.objects.filter(comment_id=request.data["comment"],user=request.user).first()
         if comment is not None:
             comment.delete()
@@ -1225,6 +1776,13 @@ class SocialPostCommentViewset(viewsets.ModelViewSet):
 
 
 class ArticleChatViewset(viewsets.ModelViewSet):
+    # The above code is defining a Django view for handling CRUD operations on ArticleMessage objects.
+    # It specifies the queryset to retrieve all ArticleMessage objects, sets the permission classes to
+    # ArticleChatPermissions, and sets the parser classes to JSONParser, MultiPartParser, and
+    # FormParser. The serializer_class is set to ArticleChatSerializer, which will be used to
+    # serialize and deserialize ArticleMessage objects. The http_method_names are set to allow POST,
+    # GET, PUT, and DELETE requests. The action_serializer dictionary maps different actions (create,
+    # retrieve, list, update, destroy) to different serializers for handling those actions.
     queryset = ArticleMessage.objects.all()
     permission_classes = [ArticleChatPermissions]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]

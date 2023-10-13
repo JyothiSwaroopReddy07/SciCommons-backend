@@ -3,6 +3,8 @@ from rest_framework import permissions
 from app.models import *
 from app.serializer import *
 
+# The UserPermission class defines the permissions for different actions in a Django REST framework
+# view, allowing certain actions for authenticated users and others for all users.
 class UserPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
@@ -24,6 +26,8 @@ class UserPermission(permissions.BasePermission):
             return False
         
 
+# The GeneralPermission class checks if a user has permission to perform certain actions in a view
+# based on their authentication status.
 class GeneralPermission(permissions.BasePermission):
     
     def has_permission(self, request, view):
@@ -34,6 +38,8 @@ class GeneralPermission(permissions.BasePermission):
         elif view.action in ['create', 'update', 'destroy']:
             return request.user.is_authenticated
         
+# The `CommunityPermission` class defines the permissions for different actions in a community,
+# allowing certain actions for admins and authenticated users.
 class CommunityPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
@@ -54,6 +60,8 @@ class CommunityPermission(permissions.BasePermission):
         
         return obj.user == request.user
        
+# The `ArticlePermission` class defines the permissions for various actions on an article object based
+# on the user's role and the action being performed.
 class ArticlePermission(permissions.BasePermission):
     
     def has_object_permission(self, request, view, obj):
@@ -88,6 +96,8 @@ class ArticlePermission(permissions.BasePermission):
                 return True
 
 
+# The CommentPermission class defines the permissions for different actions on a comment object, such
+# as retrieving, creating, updating, and deleting.
 class CommentPermission(permissions.BasePermission):
     
     def has_object_permission(self, request, view, obj):
@@ -102,6 +112,8 @@ class CommentPermission(permissions.BasePermission):
             return obj.User == request.user
 
 
+# The `NotificationPermission` class is a custom permission class in Django that checks if a user has
+# permission to perform certain actions on a notification object.
 class NotificationPermission(permissions.BasePermission):
     
     def has_object_permission(self, request, view, obj):
@@ -112,6 +124,8 @@ class NotificationPermission(permissions.BasePermission):
         if view.action in ['destroy']:
             return obj.user == request.user
         
+# The `FavouritePermission` class defines the permissions for different actions in a view, allowing
+# certain actions based on user authentication and ownership of the object.
 class FavouritePermission(permissions.BasePermission):
     
     def has_object_permission(self, request, view, obj):
@@ -125,6 +139,8 @@ class FavouritePermission(permissions.BasePermission):
         elif view.action == 'destroy':
             return obj.user == request.user
         
+# The `SocialPostPermission` class defines the permissions for different actions on social posts, such
+# as retrieving, creating, updating, and deleting.
 class SocialPostPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
@@ -138,6 +154,9 @@ class SocialPostPermission(permissions.BasePermission):
         elif view.action in ['destroy', 'update','bookmark','unbookmark']:
             return obj.user == request.user
 
+# The `SocialPostCommentPermission` class defines the permissions for different actions on social post
+# comments, allowing retrieval and listing for all users, creation and liking/unliking for
+# authenticated users, and deletion and updating only by the comment owner.
 class SocialPostCommentPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
@@ -151,6 +170,9 @@ class SocialPostCommentPermission(permissions.BasePermission):
         elif view.action in [ 'destroy', 'update']:
             return obj.user == request.user
         
+# The `FollowPermission` class defines the permissions for different actions in a view, allowing users
+# to retrieve and list objects, create and like objects if authenticated, and destroy objects if they
+# belong to the requesting user.
 class FollowPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
@@ -164,6 +186,8 @@ class FollowPermission(permissions.BasePermission):
         elif view.action in ['destroy']:
             return obj.user == request.user
 
+# The `MessagePermissions` class defines the permissions for different actions on a message object
+# based on the sender and receiver.
 class MessagePermissions(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if view.action in ["list", "retrive"]:
@@ -175,6 +199,8 @@ class MessagePermissions(permissions.BasePermission):
         elif view.action in ["destroy", "update"]:
             return obj.sender == request.user
 
+# The `ArticleChatPermissions` class defines the permissions for different actions on an article chat
+# object, including listing, retrieving, destroying, and updating.
 
 class ArticleChatPermissions(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):

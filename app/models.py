@@ -42,6 +42,9 @@ class UserManager(BaseUserManager):
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(username, email, password, **extra_fields)
 
+# The `User` class is a subclass of `AbstractUser` with additional fields for profile picture, PubMed
+# ID, Google Scholar ID, institute, email notification preference, and email verification status,
+# along with methods for retrieving the profile picture URL.
 class User(AbstractUser):
     profile_picture = CloudinaryField('profile_images', null=True)
     pubmed = models.CharField(max_length=255,null=True,blank=True)
@@ -64,6 +67,8 @@ class User(AbstractUser):
         )
 
 
+# The `UserActivity` class represents a user's activity with a foreign key to the `User` model and a
+# text field for the action.
 class UserActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     action = models.TextField(null=False)
@@ -74,6 +79,8 @@ class UserActivity(models.Model):
     def __str__(self) -> str:
         return f"{self.user}-{self.action}"
     
+# The `EmailVerify` class is a model in Django that represents an email verification entry, containing
+# fields for the user, OTP (one-time password), and an ID.
 class EmailVerify(models.Model):
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -85,6 +92,8 @@ class EmailVerify(models.Model):
     def __str__(self) -> str:
         return str(self.id)
     
+# The `ForgetPassword` class represents a model for storing information about forgotten passwords,
+# including the user, a one-time password (OTP), and an ID.
 class ForgetPassword(models.Model):
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -97,6 +106,8 @@ class ForgetPassword(models.Model):
         return str(self.id)
 
     
+# The Community class represents a community with various attributes such as title, subtitle,
+# description, location, date, github link, email, website, user, and members.
 class Community(models.Model):
     title = models.CharField(max_length=300, unique=True, name='Community_name')
     subtitle = models.CharField(max_length=300, null=True, blank=True)
@@ -115,6 +126,9 @@ class Community(models.Model):
     def __str__(self):
         return self.Community_name
     
+
+# The `CommunityMember` class represents a member of a community, with fields for the community they
+# belong to, the user they are associated with, and their roles within the community.
 class CommunityMember(models.Model):
     community = models.ForeignKey("app.Community", on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -132,6 +146,8 @@ class CommunityMember(models.Model):
     def __str__(self) -> str:
         return f"{self.user} - {self.community}"
 
+# The UnregisteredUser class represents a user who is not registered in the system and is associated
+# with an article, with attributes for full name and email.
 class UnregisteredUser(models.Model):
     article = models.ForeignKey("app.Article", on_delete=models.CASCADE)
     fullName = models.CharField(max_length=255, null=False)
@@ -140,6 +156,8 @@ class UnregisteredUser(models.Model):
     class Meta:
         db_table = 'unregistered_user'
 
+# The `OfficialReviewer` class represents an official reviewer in a community, with a user, official
+# reviewer name, and community as its attributes.
 class OfficialReviewer(models.Model):
     User = models.ForeignKey(User, on_delete=models.CASCADE)
     Official_Reviewer_name = models.CharField(max_length=100)
@@ -153,6 +171,10 @@ class OfficialReviewer(models.Model):
     def __str__(self) -> str:
         return self.User.username
 
+# The `Article` class represents an article model with various fields and properties, including
+# article name, file, publication date, visibility, keywords, author information, status, video, link,
+# license, published article file, published status, published date, code, abstract, authors,
+# community, views, DOI, reviewers, moderators, blocked users, and a parent article.
 class Article(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     article_name = models.CharField(max_length=300, unique=True)
@@ -208,6 +230,8 @@ class Article(models.Model):
 
     
                 
+# The `ArticleReviewer` class represents the relationship between an `Article` and an
+# `OfficialReviewer` in a database table called `article_reviewer`.
 class ArticleReviewer(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     officialreviewer = models.ForeignKey('app.OfficialReviewer', on_delete=models.CASCADE)
@@ -218,12 +242,16 @@ class ArticleReviewer(models.Model):
     def __str__(self) -> str:
         return self.article.article_name
 
+# The `ArticleBlockedUser` class represents a model for blocking users from accessing an article in a
+# database.
 class ArticleBlockedUser(models.Model):
     article = models.ForeignKey(Article,on_delete=models.CASCADE,related_name='Article')
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     class Meta:
         db_table = 'article_blocked_user'
     
+# The `ArticleModerator` class represents the relationship between an `Article` and a `Moderator` in a
+# database table called `article_moderator`.
 class ArticleModerator(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     moderator = models.ForeignKey('app.Moderator', on_delete=models.CASCADE)
@@ -234,6 +262,8 @@ class ArticleModerator(models.Model):
     def __str__(self) -> str:
         return self.article.article_name
 
+# The `Author` class represents the relationship between an `Article` and a `User` in a database, with
+# a unique constraint on the combination of `article` and `User`.
 class Author(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     User = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -245,6 +275,9 @@ class Author(models.Model):
     def __str__(self) -> str:
         return self.User.username
 
+# The CommentBase class is a model in a Python Django application that represents a comment on an
+# article, including various fields such as user, article, comment text, rating, confidence, title,
+# date, parent comment, tag, comment type, and version.
 class CommentBase(models.Model):
     User = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article,on_delete=models.CASCADE)
@@ -268,6 +301,8 @@ class CommentBase(models.Model):
     class Meta:
         db_table = "comment_base"
         
+# The `HandlersBase` class is a model that represents a base handler with a user, handle name, and
+# article.
 class HandlersBase(models.Model):
     User = models.ForeignKey(User, on_delete=models.CASCADE)
     handle_name = models.CharField(max_length=255, null=False, unique=True)
@@ -278,6 +313,8 @@ class HandlersBase(models.Model):
         unique_together = ['User', 'handle_name', 'article']
     
     
+# The `LikeBase` class represents a model for storing user likes on comment posts, with a value
+# ranging from 0 to 5.
 class LikeBase(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(CommentBase, on_delete=models.CASCADE, related_name="posts")
@@ -287,6 +324,7 @@ class LikeBase(models.Model):
     class Meta:
         db_table = 'like_base'
 
+# The Rank class is a model that represents a user's rank and is associated with a User model.
 class Rank(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     rank = models.IntegerField(default=0)
@@ -294,6 +332,8 @@ class Rank(models.Model):
     class Meta:
         db_table ='rank'
 
+# The `Notification` class represents a notification object with fields for user, message, date, read
+# status, and a link.
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.CharField(max_length=100)
@@ -307,6 +347,7 @@ class Notification(models.Model):
     def __str__(self):
         return self.message
 
+# The Subscribe class represents a subscription of a user to a community in a database.
 class Subscribe(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     community = models.ForeignKey(Community, on_delete=models.CASCADE)
@@ -317,6 +358,7 @@ class Subscribe(models.Model):
     def __str__(self):
         return self.user.username
     
+# The `Favourite` class represents a model for storing user's favorite articles in a database.
 class Favourite(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -327,6 +369,8 @@ class Favourite(models.Model):
     def __str__(self) -> str:
         return self.article.article_name
     
+# The Moderator class represents a moderator in a community, with a foreign key to the Community and
+# User models.
 class Moderator(models.Model):
     community = models.ForeignKey(Community, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -338,6 +382,8 @@ class Moderator(models.Model):
     def __str__(self) -> str:
         return self.user.username
     
+# The `CommunityMeta` class represents the metadata associated with an article in a community,
+# including its status.
 class CommunityMeta(models.Model):  
     community = models.ForeignKey(Community, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="article_meta")
@@ -359,6 +405,9 @@ class CommunityMeta(models.Model):
         return f"{self.community} - {self.article}"
 
 
+# The `CommunityRequests` class represents a model for community requests, including information about
+# the request, the user making the request, the community the request is for, and the status of the
+# request.
 class CommunityRequests(models.Model):
     about = models.CharField(max_length=5000, null=True)
     summary = models.CharField(max_length=5000, null=True)
@@ -378,6 +427,8 @@ class CommunityRequests(models.Model):
         return f"{self.community.Community_name}-{self.user.username}"
     
 
+# The `SocialPost` class represents a social media post with a user, body text, optional image, and
+# creation timestamp.
 class SocialPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     body = models.TextField(max_length=2000)
@@ -395,6 +446,8 @@ class SocialPost(models.Model):
             f"https://res.cloudinary.com/dapuxfgic/{self.image}"
         )
 
+# The `SocialPostComment` class represents a comment made by a user on a social post, with fields for
+# the user, post, comment text, creation timestamp, and optional parent comment.
 class SocialPostComment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(SocialPost, on_delete=models.CASCADE, related_name='comments')
@@ -408,6 +461,7 @@ class SocialPostComment(models.Model):
     def __str__(self):
         return self.comment
 
+# The `SocialPostLike` class represents a like on a social post by a user.
 class SocialPostLike(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(SocialPost, on_delete=models.CASCADE, related_name='likes')
@@ -418,6 +472,7 @@ class SocialPostLike(models.Model):
     def __str__(self):
         return self.value
 
+# The `SocialPostCommentLike` class represents a like on a social post comment made by a user.
 class SocialPostCommentLike(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.ForeignKey(SocialPostComment, on_delete=models.CASCADE, related_name='likes')
@@ -428,6 +483,7 @@ class SocialPostCommentLike(models.Model):
     def __str__(self):
         return self.value
 
+# The `Follow` class represents a model for tracking user followers and the users they are following.
 class Follow(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
     followed_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
@@ -439,6 +495,17 @@ class Follow(models.Model):
         return self.followed_user
 
 class BookMark(models.Model):
+    """
+    The function `message_media` returns the file path for saving media files associated with a message.
+    
+    :param instance: The `instance` parameter refers to the instance of the model that the file is being
+    uploaded for. In this case, it could be an instance of the `BookMark` model or any other model that
+    uses the `message_media` function as its `upload_to` parameter
+    :param filename: The filename parameter is a string that represents the name of the file being
+    uploaded
+    :return: The function `message_media` returns a string that represents the file path for a media
+    file. The file path is constructed using the `instance.id` and `filename` parameters.
+    """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(SocialPost, on_delete=models.CASCADE)
 
@@ -451,6 +518,8 @@ def message_media(self, instance, filename):
         return f"message_media/{instance.id}/{filename}"
     
     
+# The `BlockPersonalMessage` class represents a model for blocking personal messages between users in
+# a chat system.
 class BlockPersonalMessage(models.Model):
     sender = models.ForeignKey(User, related_name="sender_message", on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name="reciever_message", on_delete=models.CASCADE)
@@ -461,6 +530,8 @@ class BlockPersonalMessage(models.Model):
     def __str__(self) -> str:
         return f"{self.sender} - {self.receiver}"
 
+# The `PersonalMessage` class represents a model for storing personal messages between users,
+# including the sender, receiver, message body, media, creation timestamp, and read status.
 class PersonalMessage(models.Model):
     sender = models.ForeignKey(User,related_name="block_sender_message", on_delete=models.CASCADE)
     channel = models.CharField(max_length=255)
@@ -477,6 +548,8 @@ class PersonalMessage(models.Model):
         return self.body
 
 
+# The `ArticleMessage` class represents a message sent by a user in a chat channel related to an
+# article, with optional media and a timestamp.
 class ArticleMessage(models.Model):
     sender = models.ForeignKey(User, related_name="sent_article_messages", on_delete=models.CASCADE)
     channel = models.CharField(max_length=255)
