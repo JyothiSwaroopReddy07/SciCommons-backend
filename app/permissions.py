@@ -109,8 +109,7 @@ class CommentPermission(permissions.BasePermission):
             member = ArticleModerator.objects.filter(article=obj.id,moderator__user=request.user).first()
             if member is None:
                 return False
-            else:
-                return True
+            return True
 
 
 # The `NotificationPermission` class is a custom permission class in Django that checks if a user has

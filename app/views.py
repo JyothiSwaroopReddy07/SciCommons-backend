@@ -1323,9 +1323,10 @@ class CommentViewset(viewsets.ModelViewSet):
 
 
     def destroy(self, request, pk ):
-        
-        super(CommentViewset, self).destroy(request,pk=pk)
-
+        member = CommentBase.objects.filter(id=pk).first()
+        if member is None:
+            return Response(data={"error":"Comment not found!!!"}, status=status.HTTP_404_NOT_FOUND)
+        member.delete()
         return Response(data={"success":"Comment successfully deleted"})
     
     @action(methods=['post'], detail=False, permission_classes=[permissions.IsAuthenticated])
@@ -1392,14 +1393,12 @@ class CommentViewset(viewsets.ModelViewSet):
         is successfully blocked, it will return a response with a success message: {"success": "user
         blocked successfully"}.
         """
-        obj = self.get_object()
-        self.check_object_permissions(request,obj)
         comment = CommentBase.objects.filter(id=pk).first()
         member = ArticleBlockedUser.objects.filter(article=comment.article,user=comment.User).first()
         if member is not None:
             member.delete()
             return Response(data={"success":"User is unblocked successfully!!!"})
-        ArticleBlockedUser.objects.create(article=comment.article,user=request.data["user"])
+        ArticleBlockedUser.objects.create(article=comment.article,user=comment.User)
         return Response(data={"success":f"user blocked successfully!!!"})
  
     
