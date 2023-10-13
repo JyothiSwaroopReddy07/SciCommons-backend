@@ -102,10 +102,10 @@ class CommentPermission(permissions.BasePermission):
         elif view.action in ['create', 'like']:
             return request.user.is_authenticated
         
-        elif view.action in ['update', 'destroy']:
+        elif view.action in ['update']:
             return obj.User == request.user
         
-        elif view.action in ['block_user']:
+        elif view.action in ['block_user', 'destroy']:
             member = ArticleModerator.objects.filter(article=obj.id,moderator__user=request.user).first()
             if member is None:
                 return False
