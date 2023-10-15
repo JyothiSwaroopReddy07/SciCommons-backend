@@ -11,6 +11,8 @@ from django.db.models import Avg, Sum , Q
 from django.conf import settings
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from decouple import config
+from dj_database_url import parse
 
 import json
 
@@ -1094,7 +1096,7 @@ class ArticleGetSerializer(serializers.ModelSerializer):
         the author.
         """
         unregistered = UnregisteredUser.objects.filter(article=obj.id)
-        authors = [{'fullName':user.fullName, 'email':user.email} for user in unregistered]
+        authors = [{'fullName':user.fullName} for user in unregistered]
         return authors
 
 # The `ArticleBlockUserSerializer` class is a serializer that allows users to be added to the
@@ -1191,15 +1193,17 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
                         user = User.objects.filter(email=data["email"]).first()
                         if user is not None:
                             Author.objects.create(User=user, article=instance)
+                            authorstr += author.User.first_name + '_' + author.User.last_name + "_"+ author.username + "||"
                         else:
                             UnregisteredUser.objects.create(email=data["email"],article = instance, fullName=data["fullName"])
+                            authorstr += data["fullName"] + "||"
                         send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [data["email"]], fail_silently=False)
         
             if len(authors)!=0:
                 with transaction.atomic():
                     for author in authors:
                         author = Author.objects.create(User_id=author, article=instance)
-                        authorstr += author.User.first_name + '_' + author.User.last_name + "||"
+                        authorstr += author.User.first_name + '_' + author.User.last_name + "_"+ author.username + "||"
                         send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.User.email], fail_silently=False)
                         UserActivity.objects.create(user=self.context['request'].user, action=f'you added article {instance.article_name}')
             instance.authorstring = authorstr
@@ -1239,15 +1243,17 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
                         user = User.objects.filter(email=data["email"]).first()
                         if user is not None:
                             Author.objects.create(User=user, article=instance)
+                            authorstr += author.User.first_name + '_' + author.User.last_name + "_"+ author.username + "||"
                         else:
                             UnregisteredUser.objects.create(email=data["email"],article = instance, fullName=data["fullName"])
+                            authorstr += data["fullName"] + "||"
                         send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [data["email"]], fail_silently=False)
-
+        
             if len(authors)!=0:
                 with transaction.atomic():
                     for author in authors:
                         author = Author.objects.create(User_id=author, article=instance)
-                        authorstr += author.User.first_name + '_' + author.User.last_name + "||"
+                        authorstr += author.User.first_name + '_' + author.User.last_name + "_"+ author.username + "||"
                         send_mail("Article added",f"You have added an article {instance.article_name} to SciCommons", settings.EMAIL_HOST_USER, [author.User.email], fail_silently=False)
                         UserActivity.objects.create(user=self.context['request'].user, action=f'you added article {instance.article_name}')
             instance.authorstring = authorstr
@@ -1777,17 +1783,17 @@ class CommentCreateSerializer(serializers.ModelSerializer):
             member = CommentBase.objects.filter(id=validated_data['parent_comment'].id).first()
             notification = Notification.objects.create(user=member.User, message=f'{handler.handle_name} replied to your comment on {member.article.article_name} ', link=f'/article/{member.article.id}/{instance.id}')
             notification.save()
-            send_mail(f"somebody replied to your comment",f"{handler.handle_name} have made a replied to your comment", settings.EMAIL_HOST_USER,[member.User.email], fail_silently=False)
+            send_mail(f"somebody replied to your comment",f"{handler.handle_name} have made a replied to your comment.checkout this {parse(config('CLIENT_URL'))}/article/{member.article.id}/{instance.id}", settings.EMAIL_HOST_USER,[member.User.email], fail_silently=False)
 
         if validated_data["Type"] == "review" or validated_data["Type"] == "decision":
             emails = [author.User.email for author in authors ]
             for author in authors:
                 notification = Notification.objects.create(user=author.User, message=f'{handler.handle_name} has added a {validated_data["Type"]} to your article: {instance.article.article_name} ', link=f'/article/{member.article.id}/{instance.id}')
                 notification.save()
-            send_mail(f"A new {validated_data['Type']} is added ",f"{handler.handle_name} has added a {validated_data['Type']} to your article: {instance.article.article_name}", settings.EMAIL_HOST_USER,emails, fail_silently=False)
+            send_mail(f"A new {validated_data['Type']} is added ",f"{handler.handle_name} has added a {validated_data['Type']} to your article: {instance.article.article_name}. checkout this {parse(config('CLIENT_URL'))}/article/{member.article.id}/{instance.id}", settings.EMAIL_HOST_USER,emails, fail_silently=False)
 
             
-        send_mail(f"you have made {instance.Type}",f"You have made a {instance.Type} on {instance.article.article_name}", settings.EMAIL_HOST_USER,[instance.User.email], fail_silently=False)
+        send_mail(f"you have made {instance.Type}",f"You have made a {instance.Type} on {instance.article.article_name}. checkout this {parse(config('CLIENT_URL'))}/article/{member.article.id}/{instance.id}", settings.EMAIL_HOST_USER,[instance.User.email], fail_silently=False)
         UserActivity.objects.create(user=self.context['request'].user, action=f"You have made a {instance.Type} on {instance.article.article_name}")
 
         return instance    
@@ -2384,6 +2390,9 @@ class SocialPostCommentCreateSerializer(serializers.ModelSerializer):
         """
         instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
         instance.save()
+        if instance.parent_comment is None:
+            notification = Notification.objects.create(user=instance.User, message=f'someone replied to your post on {parse(config("CLIENT_URL"))} ', link=f'/article/{member.article.id}/{instance.id}')
+            notification.save()
         return instance
     
 class SocialPostCommentUpdateSerializer(serializers.ModelSerializer):
