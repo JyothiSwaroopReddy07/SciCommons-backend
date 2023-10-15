@@ -184,7 +184,7 @@ class Article(models.Model):
         ('public', 'Public'),
         ('private', 'Private'),
     )
-    keywords = models.CharField(max_length=255,null=False)
+    keywords = models.TextField(null=False)
     authorstring = models.TextField(null=False)
     status = models.CharField(max_length=10, choices=visibility, default='public')
     video = models.CharField(max_length=255, blank=True, null=True)
