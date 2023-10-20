@@ -243,7 +243,7 @@ class UserViewset(viewsets.ModelViewSet):
         verify = EmailVerify.objects.create(user=user, otp=otp)
         email_from = settings.EMAIL_HOST_USER
         email_subject = "Email Verification"
-        email_body = "Your OTP is " + str(otp)
+        email_body = "Your One Time Password is " + str(otp)
         send_mail(email_subject, email_body, email_from, [serializer.data['email']], fail_silently=False)
         return Response(data={"success": "code sent to your email"})
     
@@ -302,7 +302,7 @@ class UserViewset(viewsets.ModelViewSet):
 
         email_from = settings.EMAIL_HOST_USER
         email_subject = "Reset Password"
-        email_body = "You have forgot you account password. Your OTP is " + str(otp)
+        email_body = "You have forgot you account password. Your One Time Password is " + str(otp)
         send_mail(email_subject, email_body, email_from, [serializer.data['email']], fail_silently=False)
         return Response(data={"success": "code sent to your email"})
 
@@ -326,7 +326,7 @@ class UserViewset(viewsets.ModelViewSet):
             return Response(data={"error": "Please enter valid email address"}, status=status.HTTP_400_BAD_REQUEST)
         forget = ForgetPassword.objects.filter(otp=otp, user=user).first()
         if forget is None:
-            return Response(data={"error":"Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"error":"Invalid One Time Password."}, status=status.HTTP_400_BAD_REQUEST)
                 
         user = forget.user
         if password == password2:
