@@ -34,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
     following = serializers.SerializerMethodField()
     isFollowing = serializers.SerializerMethodField()
     posts = serializers.SerializerMethodField()
-    profile_pic_url = serializers.ReadOnlyField()
+    profile_pic_url = serializers.SerializerMethodField()
     personal = serializers.SerializerMethodField()
 
     class Meta:
@@ -62,6 +62,21 @@ class UserSerializer(serializers.ModelSerializer):
         """
         followers = Follow.objects.filter(followed_user=obj.id).count()
         return followers
+
+    def get_profile_pic_url(self, obj):
+        """
+        The function `get_profile_pic_url` returns the profile picture URL of a given object's user.
+        
+        :param obj: The `obj` parameter is an object that has a `user` attribute. The `user` attribute
+        is expected to have a `profile_pic_url` method that returns the URL of the user's profile
+        picture
+        :return: the profile picture URL of the user object.
+        """
+        if obj.profile_pic_url:
+            url = obj.profile_pic_url.url.split('?')[0]
+            return url
+
+        return 'https://scicommons.s3.amazonaws.com/None'
     
     def get_following(self, obj):
         """
@@ -124,7 +139,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['username', 'profile_picture', 'first_name', 'last_name', 'email', 'password']
+        fields = ['username', 'profile_pic_url', 'first_name', 'last_name', 'email', 'password']
         
     def create(self, validated_data):
         """
@@ -164,18 +179,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
 # The UserUpdateSerializer class is a serializer that represents the User model and includes fields
 # for updating user information, including a read-only field for the profile picture URL.
 class UserUpdateSerializer(serializers.ModelSerializer):
-    profile_pic_url = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = User
-        fields = ['id','email','first_name', 'last_name', 'profile_picture','profile_pic_url','google_scholar','pubmed','institute']
-        read_only_fields = ['id','email','profile_pic_url']
+        fields = ['id', 'email', 'first_name', 'last_name', 'profile_pic_url', 'google_scholar', 'pubmed', 'institute']
+        read_only_fields = ['id', 'email']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop("profile_picture")
-
-        return representation
         
 # The `LoginSerializer` class is a serializer used for validating and authenticating user login
 # credentials, and generating access and refresh tokens.
@@ -609,7 +618,10 @@ class CommunityRequestGetSerializer(serializers.ModelSerializer):
         picture
         :return: the profile picture URL of the user object.
         """
-        return obj.user.profile_pic_url()
+        if obj.user.profile_pic_url:
+            url = obj.user.profile_pic_url.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.amazonaws.com/None'
 
 
 # The `ApproverequestSerializer` class is a serializer for the `CommunityRequests` model that allows
@@ -935,12 +947,13 @@ class ArticleGetSerializer(serializers.ModelSerializer):
     commentcount = serializers.SerializerMethodField()
     authors = serializers.SerializerMethodField()
     unregistered_authors = serializers.SerializerMethodField()
-    article_file_url = serializers.ReadOnlyField()
+    article_file = serializers.SerializerMethodField()
     favourites = serializers.SerializerMethodField()
+    published_article_file = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
-        fields = ['id', 'article_name', 'article_file_url', 'Public_date', 'Code', 'Abstract','views','video','doi',
+        fields = ['id', 'article_name', 'article_file', 'Public_date', 'Code', 'Abstract','views','video','doi', 'published_article_file',
                     'link', 'authors','rating','versions','isArticleReviewer','isArticleModerator','isAuthor','status',
                     'isFavourite', 'userrating','commentcount', 'favourites','license','published_date', 'published','unregistered_authors' ]
     
@@ -963,6 +976,18 @@ class ArticleGetSerializer(serializers.ModelSerializer):
             child_articles = Article.objects.exclude(id=obj.id).filter(parent_article=obj.parent_article)
             serialized_child_articles  = ArticleGetSerializer(child_articles, many=True)
             return serialized_child_articles.data
+    
+    def get_article_file(self, obj):
+        if obj.article_file:
+            url = obj.article_file.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.amazonaws.com/None'
+    
+    def get_published_article_file(self,obj):
+        if obj.published_article_file:
+            url = obj.published_article_file.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.amazonaws.com/None'
     
     def get_commentcount(self, obj):
         """
@@ -2009,7 +2034,10 @@ class CommunityMemberSerializer(serializers.ModelSerializer):
         picture
         :return: the profile picture URL of the user object.
         """
-        return obj.user.profile_pic_url()
+        if obj.user.profile_pic_url:
+            url = obj.user.profile_pic_url.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.amazonaws.com/None'
     
     def get_user_id(self, obj):
         """
@@ -2051,11 +2079,18 @@ class ModeratorSerializer(serializers.ModelSerializer):
 
 
 class SocialPostSerializer(serializers.ModelSerializer):
-
+    image = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = SocialPost
         fields = ['id', 'user', 'body', 'created_at', 'image']
         read_only_fields = ['user','id','created_at', 'image']
+    
+    def get_image(self, obj):
+        if obj.image:
+            url = obj.image.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.amazonaws.com/None'
+
 
 class SocialPostUpdateSerializer(serializers.ModelSerializer):
     body = serializers.CharField(required=False)
@@ -2063,8 +2098,8 @@ class SocialPostUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SocialPost
-        fields = ['id', 'user', 'body', 'created_at','image', 'image_url']
-        read_only_fields = ['user','id','created_at', 'image_url']
+        fields = ['id', 'user', 'body', 'created_at','image']
+        read_only_fields = ['user','id','created_at']
 
     def update(self, instance, validated_data):
         """
@@ -2082,18 +2117,10 @@ class SocialPostUpdateSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop("image")
-
-        return representation
-
-
 class SocialPostCreateSerializer(serializers.ModelSerializer):
-    image_url = serializers.ReadOnlyField()
     class Meta:
         model = SocialPost
-        fields = ['id', 'user', 'body', 'created_at', 'image', 'image_url']
+        fields = ['id', 'user', 'body', 'created_at', 'image']
         read_only_fields = ['user','id','created_at']
 
     def create(self, validated_data):
@@ -2109,12 +2136,6 @@ class SocialPostCreateSerializer(serializers.ModelSerializer):
         instance = self.Meta.model.objects.create(**validated_data, user=self.context['request'].user)
         instance.save()
         return instance
-    
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop("image")
-
-        return representation
 
 class SocialPostListSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField(read_only=True)
@@ -2123,13 +2144,13 @@ class SocialPostListSerializer(serializers.ModelSerializer):
     bookmarks = serializers.SerializerMethodField(read_only=True)
     isbookmarked = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
-    image_url = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
     personal = serializers.SerializerMethodField(read_only=True)
+    image = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPost
-        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'bookmarks','avatar', 'isbookmarked', 'image_url','personal']
+        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'bookmarks','avatar', 'isbookmarked', 'image','personal']
 
     def get_username(self,obj):
         """
@@ -2148,7 +2169,16 @@ class SocialPostListSerializer(serializers.ModelSerializer):
         `profile_pic_url` method
         :return: the profile picture URL of the user.
         """
-        return obj.user.profile_pic_url()
+        if obj.user.profile_pic_url:
+            url = obj.user.profile_pic_url.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.awsamazon.com/None'
+
+    def get_image(self, obj):
+        if obj.image:
+            url = obj.image.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.awsamazon.com/None'
 
     def get_comments_count(self, obj):
         """
@@ -2202,14 +2232,6 @@ class SocialPostListSerializer(serializers.ModelSerializer):
         else:
             return False
     
-    def get_image_url(self,obj):
-        """
-        The function `get_image_url` returns the image URL of an object.
-        
-        :param obj: The `obj` parameter is an object that has a method called `image_url()`
-        :return: the image URL of the object.
-        """
-        return obj.image_url()
 
     def get_bookmarks(self,obj):
         """
@@ -2240,14 +2262,14 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
     liked = serializers.SerializerMethodField(read_only=True)
     bookmarks = serializers.SerializerMethodField(read_only=True)
     isbookmarked = serializers.SerializerMethodField(read_only=True)
-    image_url = serializers.SerializerMethodField(read_only=True)
     username = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
     personal = serializers.SerializerMethodField(read_only=True)
+    image = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SocialPost
-        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments', 'bookmarks','avatar', 'isbookmarked', 'image_url','personal']
+        fields = ['id', 'username', 'body', 'created_at', 'comments_count', 'likes', 'liked', 'comments', 'bookmarks','avatar', 'isbookmarked', 'image','personal']
 
     def get_username(self,obj):
         """
@@ -2266,7 +2288,16 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
         expected to have a `profile_pic_url` method that returns the URL of the user's profile picture
         :return: the profile picture URL of the user.
         """
-        return obj.user.profile_pic_url()
+        if obj.user.profile_pic_url:
+            url = obj.user.profile_pic_url.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.amazonaws.com/None'
+    
+    def get_image(self, obj):
+        if obj.image:
+            url = obj.image.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.amazonaws.com/None'
     
     def get_comments(self, obj):
         """
@@ -2333,15 +2364,6 @@ class SocialPostGetSerializer(serializers.ModelSerializer):
             return False
         liked = SocialPostLike.objects.filter(post_id=obj.id, user=self.context['request'].user).count()
         return liked
-    
-    def get_image_url(self,obj):
-        """
-        The function `get_image_url` returns the image URL of an object.
-        
-        :param obj: The `obj` parameter is an object that has a method called `image_url()`
-        :return: the image URL of the object.
-        """
-        return obj.image_url()
     
     def get_bookmarks(self,obj):
         """
@@ -2449,7 +2471,10 @@ class SocialPostCommentListSerializer(serializers.ModelSerializer):
         :param obj: The `obj` parameter is an object that represents a user
         :return: the profile picture URL of the user associated with the given object.
         """
-        return obj.user.profile_pic_url()
+        if obj.user.profile_pic_url:
+            url = obj.user.profile_pic_url.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.amazonaws.com/None'
 
     def get_commentlikes(self, obj):
         """
@@ -2553,7 +2578,10 @@ class FollowersSerializer(serializers.ModelSerializer):
         `profile_pic_url` method
         :return: the profile picture URL of the user object.
         """
-        return obj.user.profile_pic_url()
+        if obj.user.profile_pic_url:
+            url = obj.user.profile_pic_url.url.split('?')[0]
+            return url
+        return 'https://scicommons.s3.amazonaws.com/None'
     
     def get_isFollowing(self, obj):
         """
@@ -2600,7 +2628,11 @@ class FollowingSerializer(serializers.ModelSerializer):
         :param obj: The `obj` parameter is an object that represents a followed user
         :return: the profile picture URL of the followed user.
         """
-        return obj.followed_user.profile_pic_url()
+        if obj.followed_user.profile_pic_url:
+            url = obj.followed_user.profile_pic_url.url.split('?')[0]
+            return url
+    
+        return 'https://scicommons.s3.amazonaws.com/None'
     
     def get_isFollowing(self, obj):
         """
@@ -2713,8 +2745,15 @@ class MessageSerializer(serializers.ModelSerializer):
         sender is the current user or not.
         """
         if obj.sender == self.context['request'].user:
-            return obj.receiver.profile_pic_url()
-        return obj.sender.profile_pic_url()
+            if obj.receiver.profile_pic_url:
+                url = obj.receiver.profile_pic_url.url.split('?')[0]
+                return url
+            return 'https://scicommons.s3.amazonaws.com/None'
+        else:
+            if obj.sender.profile_pic_url:
+                url = obj.sender.profile_pic_url.url.split('?')[0]
+                return url
+            return 'https://scicommons.s3.amazonaws.com/None'
 
 
 
@@ -2804,8 +2843,15 @@ class MessageListSerializer(serializers.ModelSerializer):
         sender is the current user or not.
         """
         if obj.sender == self.context['request'].user:
-            return obj.receiver.profile_pic_url()
-        return obj.sender.profile_pic_url()
+            if obj.receiver.profile_pic_url:
+                url = obj.receiver.profile_pic_url.url.split('?')[0]
+                return url
+            return 'https://scicommons.s3.amazonaws.com/None'
+        else:
+            if obj.sender.profile_pic_url:
+                url = obj.sender.profile_pic_url.url.split('?')[0]
+                return url
+            return 'https://scicommons.s3.amazonaws.com/None'
 
     def get_unread_count(self,obj):
         """

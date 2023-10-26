@@ -15,4 +15,5 @@ python-decouple
 django-extensions
 django-filter
 Pillow
-cloudinary
+django-storages
+boto3

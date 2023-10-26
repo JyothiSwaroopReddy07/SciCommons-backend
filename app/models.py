@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
-from cloudinary.models import CloudinaryField
 
 # Create your models here.
 
@@ -46,7 +45,7 @@ class UserManager(BaseUserManager):
 # ID, Google Scholar ID, institute, email notification preference, and email verification status,
 # along with methods for retrieving the profile picture URL.
 class User(AbstractUser):
-    profile_picture = CloudinaryField('profile_images', null=True)
+    profile_pic_url = models.FileField(upload_to='profile_images/', null=True)
     pubmed = models.CharField(max_length=255,null=True,blank=True)
     google_scholar = models.CharField(max_length=255,null=True,blank=True)
     institute = models.CharField(max_length=255,null=True,blank=True)
@@ -60,11 +59,6 @@ class User(AbstractUser):
 
     def __int__(self) -> int:
         return self.id
-    
-    def profile_pic_url(self):
-        return (
-            f"https://res.cloudinary.com/dapuxfgic/{self.profile_picture}"
-        )
 
 
 # The `UserActivity` class represents a user's activity with a foreign key to the `User` model and a
@@ -178,7 +172,7 @@ class OfficialReviewer(models.Model):
 class Article(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     article_name = models.CharField(max_length=300, unique=True)
-    article_file = CloudinaryField('articles_file')
+    article_file = models.FileField(upload_to='articles_file/', null=True, blank=True, name='article_file')
     Public_date = models.DateTimeField(auto_now_add=True, null=True)
     visibility = models.options = (
         ('public', 'Public'),
@@ -190,7 +184,7 @@ class Article(models.Model):
     video = models.CharField(max_length=255, blank=True, null=True)
     link = models.CharField(max_length=255, blank=True, null=True)
     license = models.CharField(max_length=255,null=True)
-    published_article_file = CloudinaryField('published_article_file',blank=True)
+    published_article_file = models.FileField(upload_to='published_article_file/',null=True,blank=True,name='published_article_file')
     published = models.CharField(max_length=255, null=True)
     published_date = models.DateTimeField(null=True,blank=True)
     Code = models.CharField(max_length=100, null=True, blank=True)
@@ -211,22 +205,7 @@ class Article(models.Model):
 
     def __str__(self) -> str:
         return self.article_name
-    
-    @property
-    def article_file_url(self):
-        if self.keywords == 'pubmed':
-            return (
-                "https://res.cloudinary.com/dapuxfgic/None"
-            )
-        return (
-            f"https://res.cloudinary.com/dapuxfgic/{self.article_file}"
-        )
 
-    @property    
-    def published_article_file_url(self):
-        return (
-            f"https://res.cloudinary.com/dapuxfgic/{self.published_article_file}"
-        )
 
     
                 
@@ -432,7 +411,7 @@ class CommunityRequests(models.Model):
 class SocialPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     body = models.TextField(max_length=2000)
-    image = CloudinaryField('social_post_images', null=True)
+    image = models.FileField(upload_to='social_post_images/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -440,11 +419,7 @@ class SocialPost(models.Model):
         
     def __str__(self):
         return self.post
-    
-    def image_url(self):
-        return (
-            f"https://res.cloudinary.com/dapuxfgic/{self.image}"
-        )
+
 
 # The `SocialPostComment` class represents a comment made by a user on a social post, with fields for
 # the user, post, comment text, creation timestamp, and optional parent comment.
@@ -537,7 +512,7 @@ class PersonalMessage(models.Model):
     channel = models.CharField(max_length=255)
     receiver = models.ForeignKey(User, related_name="block_reciever_message", null=True,blank=True, on_delete=models.CASCADE)
     body = models.TextField(null=True)
-    media = CloudinaryField(message_media, null=True)
+    media = models.FileField(upload_to="message_media/", null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
@@ -554,7 +529,7 @@ class ArticleMessage(models.Model):
     sender = models.ForeignKey(User, related_name="sent_article_messages", on_delete=models.CASCADE)
     channel = models.CharField(max_length=255)
     article = models.ForeignKey(Article,related_name="article_group", on_delete=models.CASCADE)
-    media = CloudinaryField(message_media, null=True)
+    media = models.FileField(upload_to="message_media/", null=True,blank=True)
     body = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -164,15 +164,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-
-cloudinary.config(
-    cloud_name='dapuxfgic',
-    api_key='571177832797497',
-    api_secret='50fRZscu51IWtIaUMGuqHLbNeFc'
-)
 
 
 
@@ -249,3 +240,14 @@ EMAIL_HOST_PASSWORD = 'nyyxbpdnjhjryixz' #paste the key or password app here
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'bjyothiswaroop2002@gmail.com'# put you email here
+
+
+AWS_ACCESS_KEY_ID = 'AKIAQGRWV7KZEYPGBC2C'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'scicommons'
+AWS_S3_SIGNATURE_NAME = 's3v4',
+AWS_S3_REGION_NAME = 'us-east-1'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL =  None
+AWS_S3_VERITY = True
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
