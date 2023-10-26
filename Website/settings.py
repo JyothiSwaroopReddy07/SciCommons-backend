@@ -186,11 +186,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 
 
-# CORS_ORIGIN_WHITELIST = [
-#     'http://localhost:3000',
-#     'http://127.0.0.1:3000',
-#     'https://sci-commons-frontend.vercel.app'
-# ]
 CORS_ORIGIN_ALLOW_ALL=True
 
 
@@ -233,21 +228,21 @@ CHANNEL_LAYERS = {
     },
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'bjyothiswaroop2002@gmail.com' # put you email here
-EMAIL_HOST_PASSWORD = 'nyyxbpdnjhjryixz' #paste the key or password app here
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'bjyothiswaroop2002@gmail.com'# put you email here
+EMAIL_BACKEND = parse(config('EMAIL_BACKEND'))
+EMAIL_HOST = parse(config('EMAIL_HOST'))
+EMAIL_HOST_USER = parse(config('EMAIL_HOST_USER'))
+EMAIL_HOST_PASSWORD = parse(config('EMAIL_HOST_PASSWORD'))
+EMAIL_PORT = parse(config('EMAIL_PORT'))
+EMAIL_USE_TLS = parse(config('EMAIL_USE_TLS'))
+DEFAULT_FROM_EMAIL = parse(config('DEFAULT_FROM_EMAIL'))
 
 
-AWS_ACCESS_KEY_ID = 'AKIAQGRWV7KZEYPGBC2C'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'scicommons'
-AWS_S3_SIGNATURE_NAME = 's3v4',
-AWS_S3_REGION_NAME = 'us-east-1'
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL =  None
-AWS_S3_VERITY = True
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_ACCESS_KEY_ID = parse(config('AWS_ACCESS_KEY_ID'))
+AWS_SECRET_ACCESS_KEY = parse(config('AWS_SECRET_ACCESS_KEY'))
+AWS_STORAGE_BUCKET_NAME = parse(config('AWS_STORAGE_BUCKET_NAME'))
+AWS_S3_SIGNATURE_NAME = parse(config('AWS_S3_SIGNATURE_NAME'))
+AWS_S3_REGION_NAME = parse(config('AWS_S3_REGION_NAME'))
+AWS_S3_FILE_OVERWRITE = parse(config('AWS_S3_FILE_OVERWRITE'))
+AWS_DEFAULT_ACL = parse(config('AWS_DEFAULT_ACL'))
+AWS_S3_VERITY = parse(config('AWS_S3_VERITY'))
+DEFAULT_FILE_STORAGE = parse(config('DEFAULT_FILE_STORAGE'))
