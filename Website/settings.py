@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-$$n^0_i1iuqd91m+dc_=)kj8o)q$o#)3m5#hl+h3n=vt-#mkz)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["scicommons-backend.onrender.com","127.0.0.1"]
+ALLOWED_HOSTS = ["scicommons-backend-vkyc.onrender.com","127.0.0.1"]
 
 
 # Application definition
@@ -117,20 +117,20 @@ ASGI_APPLICATION = 'app.routing.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': config('DBNAME'),
-#         'USER': config('DBUSER'),
-#         'PASSWORD': config('DBPASSWORD'),
-#         'HOST': config('DBHOST'),
-#         'PORT': config('DBPORT'),
-#     }
-# }
-
 DATABASES = {
-    'default':parse(config('DATABASE_URL'))
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DBNAME'),
+        'USER': config('DBUSER'),
+        'PASSWORD': config('DBPASSWORD'),
+        'HOST': config('DBHOST'),
+        'PORT': config('DBPORT'),
+    }
 }
+
+# DATABASES = {
+#     'default':parse(config('DATABASE_URL'))
+# }
 
 
 # Password validation
@@ -228,21 +228,21 @@ CHANNEL_LAYERS = {
     },
 }
 
-EMAIL_BACKEND = parse(config('EMAIL_BACKEND'))
-EMAIL_HOST = parse(config('EMAIL_HOST'))
-EMAIL_HOST_USER = parse(config('EMAIL_HOST_USER'))
-EMAIL_HOST_PASSWORD = parse(config('EMAIL_HOST_PASSWORD'))
-EMAIL_PORT = parse(config('EMAIL_PORT'))
-EMAIL_USE_TLS = parse(config('EMAIL_USE_TLS'))
-DEFAULT_FROM_EMAIL = parse(config('DEFAULT_FROM_EMAIL'))
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
 
-AWS_ACCESS_KEY_ID = parse(config('AWS_ACCESS_KEY_ID'))
-AWS_SECRET_ACCESS_KEY = parse(config('AWS_SECRET_ACCESS_KEY'))
-AWS_STORAGE_BUCKET_NAME = parse(config('AWS_STORAGE_BUCKET_NAME'))
-AWS_S3_SIGNATURE_NAME = parse(config('AWS_S3_SIGNATURE_NAME'))
-AWS_S3_REGION_NAME = parse(config('AWS_S3_REGION_NAME'))
-AWS_S3_FILE_OVERWRITE = parse(config('AWS_S3_FILE_OVERWRITE'))
-AWS_DEFAULT_ACL = parse(config('AWS_DEFAULT_ACL'))
-AWS_S3_VERITY = parse(config('AWS_S3_VERITY'))
-DEFAULT_FILE_STORAGE = parse(config('DEFAULT_FILE_STORAGE'))
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_SIGNATURE_NAME = config('AWS_S3_SIGNATURE_NAME')
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
+AWS_S3_FILE_OVERWRITE = config('AWS_S3_FILE_OVERWRITE')
+AWS_DEFAULT_ACL = config('AWS_DEFAULT_ACL')
+AWS_S3_VERITY = config('AWS_S3_VERITY')
+DEFAULT_FILE_STORAGE = config('DEFAULT_FILE_STORAGE')
